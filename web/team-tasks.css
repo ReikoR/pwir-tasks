@@ -1,0 +1,127 @@
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+select, input {
+    font-size: 1em;
+    margin-left: 2px;
+    border: 1px solid #CCC;
+}
+
+select {
+    padding: 2px 2px 3px 2px;
+}
+
+input {
+    padding: 3px;
+}
+
+button {
+    height: 26px;
+}
+
+div[is^="tasks-table"] {
+
+}
+
+.team-task {
+    background-color: #eee;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+input.points {
+    width: 100px;
+}
+
+.changed {
+    border-left: 3px solid dodgerblue;
+    margin-left: 0;
+}
+
+.added {
+    border-left: 3px solid purple;
+    margin-left: 0;
+}
+
+.removed {
+    border-left: 3px solid slategray;
+    margin-left: 0;
+}
+
+.invalid {
+    border-left: 3px solid orangered;
+    margin-left: 0;
+}
+
+.team-task {
+    display: grid;
+    grid-template-columns: auto 80px;
+    grid-template-areas:
+        "title save-button"
+        "completion-time completion-time"
+        "points-available points-available"
+        "points-used points-used"
+        "participants participants";
+}
+
+.team-task .title {
+    grid-area: title;
+    margin-left: 2px;
+}
+
+.team-task .save-button {
+    grid-area: save-button;
+}
+
+.team-task .completion-time {
+    grid-area: completion-time;
+    margin-left: 2px;
+}
+
+.team-task .points-available {
+    grid-area: points-available;
+    margin-left: 2px;
+    margin-top: 2px;
+}
+
+.team-task .points-used {
+    grid-area: points-used;
+    margin-left: 2px;
+    margin-top: 2px;
+}
+
+.team-task .participants {
+    grid-area: participants;
+}
+
+.team-task .add-participant {
+    margin: 3px 2px;
+}
+
+.participant-row {
+    display: flex;
+    align-items: center;
+}
+
+.participant-row > * {
+    margin-right: 5px;
+}
+
+.participant-row + .participant-row {
+    margin-top: 5px;
+}
+
+option.team-member {
+    font-weight: bold;
+}

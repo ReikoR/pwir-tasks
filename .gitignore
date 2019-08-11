@@ -1,0 +1,4 @@
+.idea/
+server/conf/config_.js
+server/node_modules/
+server/sessions/
