@@ -21,4 +21,8 @@ app.get('/participants', (req, res) => {
     res.sendFile(path.join(webFolder, 'participants.html'));
 });
 
+app.get('/participant-tasks', (req, res) => {
+    res.sendFile(path.join(webFolder, 'participant-tasks.html'));
+});
+
 server.listen(config.port);

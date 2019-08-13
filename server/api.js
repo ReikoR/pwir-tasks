@@ -64,9 +64,10 @@ router.get('/teams', async (req, res) => {
     }
 });
 
-router.get('/participants', async (req, res) => {
+router.post('/participants', async (req, res) => {
     try {
-        const rows = await database.getParticipant();
+        const {roles} = req.body;
+        const rows = await database.getParticipants(roles);
         console.log(rows);
         res.send(rows);
     } catch (e) {
@@ -124,6 +125,18 @@ router.post('/get-participant-points-used', async (req, res) => {
     try {
         const {task_id, participant_id} = req.body;
         const result = await database.getPointsUsedByTaskParticipant(task_id, participant_id);
+        console.log(result);
+        res.send(result);
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
+router.post('/get-participant-task-points', async (req, res) => {
+    try {
+        const {participant_id} = req.body;
+        const result = await database.getParticipantTaskPoints(participant_id);
         console.log(result);
         res.send(result);
     } catch (e) {

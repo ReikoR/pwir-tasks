@@ -7,7 +7,7 @@ const knex = require('knex')({
 });
 
 function getTasks() {
-    return knex('task').select();
+    return knex('task').select().orderBy('deadline');
 }
 
 function getTeams() {
@@ -25,9 +25,9 @@ select
     ) as team_id
 from participant;
  */
-function getParticipant() {
+function getParticipants(roles) {
     return knex('participant')
-        .select('participant.participant_id', 'participant.name')
+        .select('participant.participant_id', 'participant.name', 'participant.role')
         .select(
             knex('team_member')
                 .select('team_id')
@@ -37,7 +37,8 @@ function getParticipant() {
                     this.whereNull('end_time').orWhere('end_time', '>', knex.fn.now());
                 })
                 .as('team_id')
-        );
+        )
+        .whereIn('participant.role', roles);
 }
 
 /*
@@ -197,13 +198,31 @@ async function getPointsUsedByTaskParticipant(task_id, participant_id) {
     throw 'Task not found';
 }
 
+async function getParticipantTaskPoints(participant_id) {
+    const queryString = `select
+            task.task_id,
+            task.name,
+            sum(ct.points) as points_used,
+            task.task_points_with_bonuses as total_task_points
+        from task
+        left join (select * from completed_task where completed_task.participant_id = ?) as ct 
+            on ct.task_id = task.task_id
+        group by task.task_id
+        order by task.task_id;`;
+
+    const result = await knex.raw(queryString, [participant_id]);
+
+    return result.rows;
+}
+
 module.exports = {
     getTasks,
     getTeams,
-    getParticipant,
+    getParticipants,
     setCompletedTask,
     getCompletedTask,
     getCompletedTasksOverview,
     getPointsUsedByTaskParticipant,
     getParticipantsAndPoints,
+    getParticipantTaskPoints,
 };

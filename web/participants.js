@@ -14,6 +14,11 @@ const mainElement = document.getElementById('main');
 
     render(mainElement, html`<div><table>
         <thead><tr>${columns.map(c => html`<th>${c}</th>`)}</tr></thead>
-        <tbody>${participantsAndPoints.map(p => html`<tr><td>${p.name}</td><td>${p.total_points}</td></tr>`)}</tbody>
+        <tbody>
+        ${participantsAndPoints.map(p => {
+            const link = `/participant-tasks?p=${p.participant_id}`;
+            return html`<tr><td><a href=${link}>${p.name}</a></td><td>${p.total_points}</td></tr>`;
+        })}
+        </tbody>
         </table></div>`);
 })();

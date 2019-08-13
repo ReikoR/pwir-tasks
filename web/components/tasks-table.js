@@ -80,7 +80,7 @@ class TasksTable extends HTMLDivElement {
     }
 
     async fetchParticipants() {
-        this.participants = await getParticipants();
+        this.participants = await getParticipants({roles: ['student']});
         deepFreeze(this.participants);
         this.render();
     }
@@ -177,6 +177,11 @@ class TasksTable extends HTMLDivElement {
         }
     }
 
+    handleCloseTeamTask(teamTask) {
+        teamTask.isOpen = false;
+        this.render();
+    }
+
     handleCompletionTime(teamTask, event) {
         teamTask.completion_time_input = event.currentTarget.value;
 
@@ -247,19 +252,33 @@ class TasksTable extends HTMLDivElement {
         console.log('renderBody');
         const columnCount = this.teams.length + 3;
 
-        return html`<tbody>${this.tasks.map(task => html`<tr>
+
+
+        return html`<tbody>${this.tasks.map(task => html`<tr class="task-row">
             <td>${task.name}</td>
             <td>${task.points}</td>
             <td>${formatTime(task.deadline)}</td>
-            ${this.teams.map(team => html`<td onclick=${this.handleTeamTask.bind(this, team, task)}>
-                ${this.isTeamTaskDone(team, task) ? 'Done' : 'Not done'}</td>`)}
+            ${this.teams.map(team => this.renderTeamTaskCell(team, task))}
             </tr>
-            <tr><td colspan="${columnCount}">
+            <tr class="team-tasks-row"><td colspan="${columnCount}">
             ${this.teams
             .filter(team => this.isTeamTaskOpen(team, task))
             .map(team => this.renderTeamTask(team, task))}
             </td></tr>
             `)}</tbody>`;
+    }
+
+    renderTeamTaskCell(team, task) {
+        const done = this.isTeamTaskDone(team, task);
+        const unavailable = !done && !task.allow_overdue && DateTime.fromISO(task.deadline) < DateTime.local();
+        const classValue = classNames({
+            'team-task-cell': true,
+            done,
+            unavailable
+        });
+
+        return html`<td class=${classValue} onclick=${this.handleTeamTask.bind(this, team, task)}>
+                ${done ? 'Done' : ''}</td>`
     }
 
     renderTeamTask(team, task) {
@@ -280,6 +299,7 @@ class TasksTable extends HTMLDivElement {
         return html`<div class="team-task">
             <div class="title"><span>Team:</span><strong>${team.name}</strong><span> Task:</span><strong>${task.name}</strong></div>
             <button class="save-button" onclick=${this.handleSaveTeamTask.bind(this, teamTask)}>Save</button>
+            <button class="close-button" onclick=${this.handleCloseTeamTask.bind(this, teamTask)}>Close</button>
             <div class="completion-time">
             <label>Completed at <input class=${timeClassValue} onkeyup=${this.handleCompletionTime.bind(this, teamTask)} type="text" value=${teamTask.completion_time_input}/></label>
             ${this.renderSavedCompletionTime(teamTask)}

@@ -53,8 +53,8 @@ export function getTeams() {
     return get('/api/teams');
 }
 
-export function getParticipants() {
-    return get('/api/participants');
+export function getParticipants(params) {
+    return post('/api/participants', params);
 }
 
 export function getParticipantsAndPoints() {
@@ -75,4 +75,8 @@ export function setCompletedTask(params) {
 
 export function getPointsUsedByTaskParticipant(params) {
     return post('/api/get-participant-points-used', params);
+}
+
+export function getParticipantTaskPoints(params) {
+    return post('/api/get-participant-task-points', params);
 }

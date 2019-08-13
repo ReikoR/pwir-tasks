@@ -30,14 +30,53 @@ button {
     height: 26px;
 }
 
-div[is^="tasks-table"] {
+div[is^="tasks-table"] table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
 
+table thead {
+    background-color: black;
+    color: white;
+}
+
+table tbody tr.task-row td:nth-child(-n+3) {
+    background-color: #eee;
+}
+
+tr.task-row td, th {
+    padding: 5px;
+}
+
+tr.team-tasks-row td {
+    padding: 0;
+}
+
+.team-task-cell {
+    text-align: center;
+}
+
+.team-task-cell.done {
+    background-color: palegreen;
+}
+
+.team-task-cell.available {
+    background-color: white;
+}
+
+.team-task-cell.unavailable {
+    background-color: #eee;
+}
+
+.team-task-cell:hover {
+    background-color: #ccc;
 }
 
 .team-task {
     background-color: #eee;
     padding: 10px;
-    margin-bottom: 5px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 input.points {
@@ -66,13 +105,15 @@ input.points {
 
 .team-task {
     display: grid;
-    grid-template-columns: auto 80px;
+    grid-template-columns: auto 80px 80px;
     grid-template-areas:
-        "title save-button"
-        "completion-time completion-time"
-        "points-available points-available"
-        "points-used points-used"
-        "participants participants";
+        "title save-button close-button"
+        "completion-time completion-time completion-time"
+        "points-available points-available points-available"
+        "points-used points-used points-used"
+        "participants participants participants";
+    width: 100vw;
+    grid-column-gap: 5px;
 }
 
 .team-task .title {
@@ -82,6 +123,10 @@ input.points {
 
 .team-task .save-button {
     grid-area: save-button;
+}
+
+.team-task .close-button {
+    grid-area: close-button;
 }
 
 .team-task .completion-time {
