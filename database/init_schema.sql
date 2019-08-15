@@ -21,7 +21,9 @@ create table task (
     deadline timestamptz not null,
     on_time_bonus boolean not null default true,
     week_before_bonus boolean not null default true,
-    allow_overdue boolean not null default true
+    allow_overdue boolean not null default true,
+    is_optional boolean not null default false,
+    is_progress boolean not null default false
 );
 
 create or replace function task_points_with_bonuses(t task) returns integer as $$
@@ -51,9 +53,21 @@ alter table team_member add constraint team_member_no_time_overlap
     exclude using gist (participant_id with =, team_id with =, tstzrange(start_time, end_time) with &&);
 
 create table completed_task (
-    participant_id integer not null references participant(participant_id),
     task_id integer not null references task(task_id),
     team_id integer not null references team(team_id),
-    points integer not null,
-    completion_time timestamptz not null
+    completion_time timestamptz not null,
+    blog_count integer,
+    primary key (task_id, team_id)
 );
+
+create table completed_task_participant (
+    task_id integer not null,
+    team_id integer not null,
+    participant_id integer not null references participant(participant_id),
+    points integer not null,
+    primary key (task_id, team_id, participant_id),
+    foreign key (task_id, team_id) references completed_task(task_id, team_id)
+);
+
+drop table completed_task cascade;
+drop table completed_task_participant cascade;

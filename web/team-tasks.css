@@ -79,7 +79,8 @@ tr.team-tasks-row td {
     margin-bottom: 2px;
 }
 
-input.points {
+input.points,
+.blog-count input {
     width: 100px;
 }
 
@@ -109,11 +110,13 @@ input.points {
     grid-template-areas:
         "title save-button close-button"
         "completion-time completion-time completion-time"
+        "blog-count blog-count blog-count"
         "points-available points-available points-available"
         "points-used points-used points-used"
         "participants participants participants";
     width: 100vw;
     grid-column-gap: 5px;
+    grid-row-gap: 5px;
 }
 
 .team-task .title {
@@ -131,6 +134,11 @@ input.points {
 
 .team-task .completion-time {
     grid-area: completion-time;
+    margin-left: 2px;
+}
+
+.team-task .blog-count {
+    grid-area: blog-count;
     margin-left: 2px;
 }
 

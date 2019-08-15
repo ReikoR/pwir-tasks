@@ -112,8 +112,8 @@ router.post('/get-completed-task', async (req, res) => {
 
 router.post('/set-completed-task', async (req, res) => {
     try {
-        const {task_id, team_id, completion_time, participants} = req.body;
-        await database.setCompletedTask(task_id, team_id, completion_time, participants);
+        const {task_id, team_id, completion_time, participants, blog_count} = req.body;
+        await database.setCompletedTask(task_id, team_id, completion_time, participants, blog_count);
         res.send('OK');
     } catch (e) {
         console.error(e);

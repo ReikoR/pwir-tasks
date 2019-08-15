@@ -129,7 +129,7 @@ class TasksTable extends HTMLDivElement {
     }
 
     calcTaskMaxPoints(task) {
-        return task.points * (1 + (task.week_before_bonus ? 0.2 : task.on_time.bonus ? 0.1 : 0))
+        return task.points * (1 + (task.week_before_bonus ? 0.2 : task.on_time_bonus ? 0.1 : 0))
     }
 
     async handleTeamTask(team, task) {
@@ -183,6 +183,10 @@ class TasksTable extends HTMLDivElement {
     }
 
     handleCompletionTime(teamTask, event) {
+        if (teamTask.completion_time_input === event.currentTarget.value) {
+            return;
+        }
+
         teamTask.completion_time_input = event.currentTarget.value;
 
         const dateTime = DateTime.fromSQL(teamTask.completion_time_input);
@@ -194,8 +198,25 @@ class TasksTable extends HTMLDivElement {
         this.render();
     }
 
+    handleBlogCount(teamTask, event) {
+        const newValue = parseInt(event.currentTarget.value, 10) || null;
+
+        if (teamTask.blog_count === newValue) {
+            return;
+        }
+
+        teamTask.blog_count = newValue;
+        this.render();
+    }
+
     handleTaskParticipantPoints(taskParticipant, event) {
-        taskParticipant.points = parseInt(event.currentTarget.value, 10) || null;
+        const newValue = parseInt(event.currentTarget.value, 10) || null;
+
+        if (taskParticipant.blog_count === newValue) {
+            return;
+        }
+
+        taskParticipant.points = newValue;
         this.render();
     }
 
@@ -222,6 +243,11 @@ class TasksTable extends HTMLDivElement {
 
     handleRevertCompletionTime(teamTask) {
         teamTask.revertCompletionTime();
+        this.render();
+    }
+
+    handleRevertBlogCount(teamTask) {
+        teamTask.revertBlogCount();
         this.render();
     }
 
@@ -294,7 +320,10 @@ class TasksTable extends HTMLDivElement {
         const completionTime = DateTime.fromSQL(teamTask.completion_time_input);
         const isCompletionTimeValid = completionTime.isValid;
         const isCompletionTimeChanged = teamTask.isCompletionTimeChanged();
-        const timeClassValue = classNames({invalid: !isCompletionTimeValid, changed: isCompletionTimeValid && !isNew && isCompletionTimeChanged});
+        const timeClassValue = classNames({
+            invalid: !isCompletionTimeValid,
+            changed: isCompletionTimeValid && !isNew && isCompletionTimeChanged
+        });
 
         return html`<div class="team-task">
             <div class="title"><span>Team:</span><strong>${team.name}</strong><span> Task:</span><strong>${task.name}</strong></div>
@@ -303,6 +332,10 @@ class TasksTable extends HTMLDivElement {
             <div class="completion-time">
             <label>Completed at <input class=${timeClassValue} onkeyup=${this.handleCompletionTime.bind(this, teamTask)} type="text" value=${teamTask.completion_time_input}/></label>
             ${this.renderSavedCompletionTime(teamTask)}
+            </div>
+            <div class="blog-count">
+            ${this.renderBlogsRow(task, teamTask)}
+            ${this.renderSavedBlogCount(teamTask)}
             </div>
             ${this.renderAvailablePoints(team, task)}
             ${this.renderUsedPoints(team, task)}
@@ -318,6 +351,36 @@ class TasksTable extends HTMLDivElement {
 
             return html`<del>${time.toSQL({includeOffset: false})}</del>
                 <button onclick=${this.handleRevertCompletionTime.bind(this, teamTask)}>Undo</button>`;
+        }
+
+        return null;
+    }
+
+    renderBlogsRow(task, teamTask) {
+        if (!task.is_progress) {
+            return null;
+        }
+
+        const isNew = teamTask.isNew();
+        const isChanged = teamTask.isBlogCountChanged();
+
+        const classValue = classNames({
+            changed: !isNew && isChanged
+        });
+
+        return html`<label>Blog count 
+            <input 
+                class=${classValue} 
+                onkeyup="${this.handleBlogCount.bind(this, teamTask)}" 
+                type="text" 
+                value=${teamTask.blog_count}/>
+            </label>`;
+    }
+
+    renderSavedBlogCount(teamTask) {
+        if (!teamTask.isNew() && teamTask.isBlogCountChanged()) {
+            return html`<del>${teamTask.blog_count}</del>
+                <button onclick=${this.handleRevertBlogCount.bind(this, teamTask)}>Undo</button>`;
         }
 
         return null;
@@ -339,6 +402,13 @@ class TasksTable extends HTMLDivElement {
             } else if (task.week_before_bonus && completionDateTime <= deadlineDateTime) {
                 isOnTime = true;
             }
+        }
+
+        const blogCount = teamTask.blog_count || 0;
+
+        if (task.is_progress) {
+            return html`<div class="points-available"><span>Points available: </span>
+            ${basePoints} &times; ${blogCount} = <strong>${basePoints * blogCount}</strong></div>`;
         }
 
         const bonusPoints = isWeekBefore ? basePoints * 0.2 : (isOnTime ? basePoints * 0.1 : 0);
@@ -417,13 +487,17 @@ class TasksTable extends HTMLDivElement {
     }
 
     renderParticipantPointsAvailable(teamTask, taskParticipant) {
+        const task = this.getTaskById(teamTask.task_id);
+
+        if (task.is_progress) {
+            return null;
+        }
+
         const used = this.getParticipantPointsUsed(teamTask.task_id, taskParticipant.participant_id);
 
         if (used === null) {
             return null;
         }
-
-        const task = this.getTaskById(teamTask.task_id);
         const maxPoints = this.calcTaskMaxPoints(task);
         const savedPoints = taskParticipant.getSavedPoints();
         const available = maxPoints - used + savedPoints;
@@ -464,6 +538,8 @@ class TeamTask {
         this.completion_time = null;
         this.completion_time_input = null;
         this.participants = [];
+        this.blog_count = null;
+
         this.isOpen = false;
 
         this.savedState = null;
@@ -474,6 +550,7 @@ class TeamTask {
         teamTask.savedState = cloneObject(savedState);
         teamTask.completion_time = savedState.completion_time;
         teamTask.completion_time_input = formatTime(savedState.completion_time);
+        teamTask.blog_count = savedState.blog_count;
         teamTask.participants = savedState.participants.map(p => TaskParticipant.fromSavedState(p));
 
         return teamTask;
@@ -489,6 +566,7 @@ class TeamTask {
             team_id: this.team_id,
             task_id: this.task_id,
             completion_time: this.completion_time,
+            blog_count: this.blog_count,
             participants: this.participants.filter(p => !p.isRemoved).map(p => p.getSaveInfo()),
         }
     }
@@ -543,6 +621,18 @@ class TeamTask {
     revertCompletionTime() {
         this.completion_time = this.getSavedCompletionTime();
         this.completion_time_input = formatTime(this.completion_time);
+    }
+
+    getSavedBlogCount() {
+        return this.savedState && this.savedState.blog_count;
+    }
+
+    isBlogCountChanged() {
+        return this.getSavedBlogCount() !== this.blog_count;
+    }
+
+    revertBlogCount() {
+        this.blog_count = this.getSavedBlogCount();
     }
 }
 
