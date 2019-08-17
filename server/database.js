@@ -6,6 +6,22 @@ const knex = require('knex')({
     debug: true
 });
 
+async function getParticipantByEmail(email) {
+    try {
+        return (await knex('participant').select().where({email}))[0];
+    } catch (e) {
+        return null;
+    }
+}
+
+async function getParticipantById(participant_id) {
+    try {
+        return (await knex('participant').select().where({participant_id}))[0];
+    } catch (e) {
+        return null;
+    }
+}
+
 function getTasks() {
     return knex('task').select().orderBy('deadline');
 }
@@ -102,37 +118,29 @@ async function setCompletedTask(task_id, team_id, completion_time, participantPo
     try {
         const currentState = (await getCompletedTask(task_id, team_id, trx))[0];
 
-        console.log({currentState});
-
         const {toAdd, toChange, toDelete} = diffCompletedTask(
             currentState && currentState.participants,
             participantPoints
         );
 
         if (currentState) {
-            const updateResult = await trx('completed_task')
+            await trx('completed_task')
                 .update({completion_time, blog_count})
                 .where({task_id, team_id});
-
-            console.log('changeResult', updateResult);
         } else {
-            const insertResult = await trx('completed_task')
+            await trx('completed_task')
                 .insert({task_id, team_id, completion_time, blog_count});
-
-            console.log('insertResult', insertResult);
         }
 
         if (toDelete.length > 0) {
-            const deleteResult = await trx('completed_task_participant')
+            await trx('completed_task_participant')
                 .delete()
                 .where({task_id, team_id})
                 .whereIn('participant_id', toDelete.map(p => p.participant_id));
-
-            console.log('deleteResult', deleteResult);
         }
 
         if (toAdd.length > 0) {
-            const addResult = await trx.batchInsert('completed_task_participant', toAdd.map(p => {
+            await trx.batchInsert('completed_task_participant', toAdd.map(p => {
                 return {
                     task_id,
                     team_id,
@@ -140,20 +148,13 @@ async function setCompletedTask(task_id, team_id, completion_time, participantPo
                     points: p.points
                 }
             }));
-
-            console.log('addResult', addResult);
         }
 
         if (toChange.length > 0) {
             for (const p of toChange) {
-                console.log({points: p.points, completion_time});
-                console.log({task_id, team_id, participant_id: p.participant_id});
-
                 const changeResult = await trx('completed_task_participant').update({
                     points: p.points
                 }).where({task_id, team_id, participant_id: p.participant_id});
-
-                console.log('changeResult', changeResult);
             }
         }
 
@@ -166,8 +167,6 @@ async function setCompletedTask(task_id, team_id, completion_time, participantPo
 }
 
 function diffCompletedTask(oldParticipants = [], newParticipants = []) {
-    console.log('diffCompletedTask', oldParticipants, newParticipants);
-
     const toAdd = newParticipants.slice();
     const toChange = [];
     const toDelete = [];
@@ -181,10 +180,6 @@ function diffCompletedTask(oldParticipants = [], newParticipants = []) {
             toDelete.push(oldParticipant);
         }
     }
-
-    console.log('toAdd', toAdd);
-    console.log('toChange', toChange);
-    console.log('toDelete', toDelete);
 
     return {toAdd, toChange, toDelete};
 }
@@ -223,6 +218,8 @@ async function getParticipantTaskPoints(participant_id) {
 }
 
 module.exports = {
+    getParticipantByEmail,
+    getParticipantById,
     getTasks,
     getTeams,
     getParticipants,

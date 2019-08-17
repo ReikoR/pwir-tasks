@@ -94,8 +94,6 @@ class TasksTable extends HTMLDivElement {
     async fetchTeamTask(team_id, task_id) {
         const savedTeamTasks = await getCompletedTask(task_id, team_id);
 
-        console.log({savedTeamTasks});
-
         const id = `${team_id}_${task_id}`;
         let existingTeamTask = this.teamTasks[id];
 
@@ -133,15 +131,11 @@ class TasksTable extends HTMLDivElement {
     }
 
     async handleTeamTask(team, task) {
-        console.log('handleTeamTask', team, task);
-
         const id = `${team.team_id}_${task.task_id}`;
         let teamTask = this.teamTasks[id];
 
         if (!teamTask) {
             const savedTeamTasks = await getCompletedTask(task.task_id, team.team_id);
-
-            console.log({savedTeamTasks});
 
             if (savedTeamTasks.length > 0) {
                 teamTask = TeamTask.fromSavedState(savedTeamTasks[0]);
@@ -275,10 +269,7 @@ class TasksTable extends HTMLDivElement {
     }
 
     renderBody() {
-        console.log('renderBody');
         const columnCount = this.teams.length + 3;
-
-
 
         return html`<tbody>${this.tasks.map(task => html`<tr class="task-row">
             <td>${task.name}</td>
@@ -295,24 +286,35 @@ class TasksTable extends HTMLDivElement {
     }
 
     renderTeamTaskCell(team, task) {
+        const mode = this.getAttribute('mode');
         const done = this.isTeamTaskDone(team, task);
+        const canOpen = mode === 'edit' || mode === 'inspect' && done;
         const unavailable = !done && !task.allow_overdue && DateTime.fromISO(task.deadline) < DateTime.local();
         const classValue = classNames({
             'team-task-cell': true,
+            'can-open': canOpen,
             done,
             unavailable
         });
+
+        if (!canOpen) {
+            return html`<td class=${classValue}>${done ? 'Done' : ''}</td>`
+        }
 
         return html`<td class=${classValue} onclick=${this.handleTeamTask.bind(this, team, task)}>
                 ${done ? 'Done' : ''}</td>`
     }
 
     renderTeamTask(team, task) {
-        console.log('renderTeamTask', team.team_id, task.task_id);
-
         if (!this.participants) {
             this.fetchParticipants();
             return html`<div class="team-task">Loading...</div>`;
+        }
+
+        const mode = this.getAttribute('mode');
+
+        if (!mode) {
+            return null;
         }
 
         const teamTask = this.getTeamTask(team, task);
@@ -326,11 +328,15 @@ class TasksTable extends HTMLDivElement {
         });
 
         return html`<div class="team-task">
+            <div class="team-task-header">
             <div class="title"><span>Team:</span><strong>${team.name}</strong><span> Task:</span><strong>${task.name}</strong></div>
-            <button class="save-button" onclick=${this.handleSaveTeamTask.bind(this, teamTask)}>Save</button>
+            <div>
+            ${this.renderSaveButton(teamTask)}
             <button class="close-button" onclick=${this.handleCloseTeamTask.bind(this, teamTask)}>Close</button>
+            </div>
+            </div>
             <div class="completion-time">
-            <label>Completed at <input class=${timeClassValue} onkeyup=${this.handleCompletionTime.bind(this, teamTask)} type="text" value=${teamTask.completion_time_input}/></label>
+            ${this.renderCompletedAtInput(teamTask)}
             ${this.renderSavedCompletionTime(teamTask)}
             </div>
             <div class="blog-count">
@@ -340,9 +346,39 @@ class TasksTable extends HTMLDivElement {
             ${this.renderAvailablePoints(team, task)}
             ${this.renderUsedPoints(team, task)}
             <div class="participants">
-            <button class="add-participant" onclick=${this.handleAddParticipant.bind(this, teamTask)}>Add participant</button>
+            ${this.renderAddParticipant(teamTask)}
             ${teamTask.participants.map(taskParticipant =>  this.renderParticipantRow(teamTask, taskParticipant))}
             </div></div>`;
+    }
+
+    renderSaveButton(teamTask) {
+        if (this.getAttribute('mode') !== 'edit') {
+            return null;
+        }
+
+        return html`<button class="save-button" onclick=${this.handleSaveTeamTask.bind(this, teamTask)}>Save</button>`;
+    }
+
+    renderCompletedAtInput(teamTask) {
+        if (this.getAttribute('mode') !== 'edit') {
+            return html`<span>Completed at <strong>${teamTask.completion_time_input}</strong></span>`;
+        }
+
+        const isNew = teamTask.isNew();
+        const completionTime = DateTime.fromSQL(teamTask.completion_time_input);
+        const isCompletionTimeValid = completionTime.isValid;
+        const isCompletionTimeChanged = teamTask.isCompletionTimeChanged();
+        const timeClassValue = classNames({
+            invalid: !isCompletionTimeValid,
+            changed: isCompletionTimeValid && !isNew && isCompletionTimeChanged
+        });
+
+        return html`<label> Completed at <input 
+               class=${timeClassValue} 
+               onkeyup=${this.handleCompletionTime.bind(this, teamTask)} 
+               type="text" 
+               value=${teamTask.completion_time_input}/>
+               </label>`;
     }
 
     renderSavedCompletionTime(teamTask) {
@@ -359,6 +395,10 @@ class TasksTable extends HTMLDivElement {
     renderBlogsRow(task, teamTask) {
         if (!task.is_progress) {
             return null;
+        }
+
+        if (this.getAttribute('mode') !== 'edit') {
+            return html`<span>Blog count <strong>${teamTask.blog_count}</strong></span>`;
         }
 
         const isNew = teamTask.isNew();
@@ -430,10 +470,26 @@ class TasksTable extends HTMLDivElement {
         return html`<div class="points-used"><span>Points used: </span><strong>${total}</strong></div>`;
     }
 
-    renderParticipantRow(teamTask, taskParticipant) {
-        if (taskParticipant.isRemoved) {
-            const participant = this.getParticipantById(taskParticipant.participant_id);
+    renderAddParticipant(teamTask) {
+        if (this.getAttribute('mode') !== 'edit') {
+            return html`<div class="title">Participants:</div>`;
+        }
 
+        return html`<button class="add-participant" onclick=${this.handleAddParticipant.bind(this, teamTask)}>
+            Add participant</button>`;
+    }
+
+    renderParticipantRow(teamTask, taskParticipant) {
+        const participant = this.getParticipantById(taskParticipant.participant_id);
+
+        if (this.getAttribute('mode') !== 'edit') {
+            return html`<div class="participant-row view">
+                <span>${participant.name}</span>
+                <strong>${taskParticipant.points}</strong>
+                </div>`;
+        }
+
+        if (taskParticipant.isRemoved) {
             return html`<div class="removed participant-row">
                 <span>${participant.name}</span>
                 <span>${taskParticipant.points}</span>

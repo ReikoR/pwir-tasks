@@ -1,24 +1,36 @@
 import {html, render} from './lib/heresy.mjs';
-import {getParticipantsAndPoints} from "./services/api.js";
+import {getParticipantsAndPoints, getSession} from "./services/api.js";
 import './components/tasks-table.js';
+import './components/page-header.js';
 
 const mainElement = document.getElementById('main');
 
 (async function () {
     const participantsAndPoints = await getParticipantsAndPoints();
-    console.log(participantsAndPoints);
+    let session = null;
+
+    try {
+        session = await getSession();
+        tasksTableMode = session.role === 'instructor' ? 'edit' : 'inspect';
+    } catch (e) {}
 
     participantsAndPoints.sort((a, b) => b.total_points - a.total_points);
 
     const columns = ['Name', 'Points'];
 
-    render(mainElement, html`<div><table>
+    render(mainElement, html`
+        <PageHeader session=${session} title="Participants" links=${[['/', 'Tasks table']]}/>
+        <div class="page-content">
+        <table>
         <thead><tr>${columns.map(c => html`<th>${c}</th>`)}</tr></thead>
         <tbody>
-        ${participantsAndPoints.map(p => {
-            const link = `/participant-tasks?p=${p.participant_id}`;
-            return html`<tr><td><a href=${link}>${p.name}</a></td><td>${p.total_points}</td></tr>`;
-        })}
+        ${participantsAndPoints.map(renderRow)}
         </tbody>
-        </table></div>`);
+        </table>
+        </div>`);
+
+    function renderRow(participant) {
+        const link = `/participant-tasks?p=${participant.participant_id}`;
+        return html`<tr><td><a href=${link}>${participant.name}</a></td><td>${participant.total_points}</td></tr>`;
+    }
 })();

@@ -10,8 +10,6 @@ async function get(url) {
             }
         }
 
-        console.log(response);
-
         throw await response.json();
     }).catch((errorInfo) => {
         console.error(errorInfo);
@@ -35,14 +33,16 @@ async function post(url, params) {
             }
         }
 
-        console.log(response);
-
         throw await response.json();
     }).catch((errorInfo) => {
         console.error(errorInfo);
 
         throw errorInfo;
     });
+}
+
+export function getSession() {
+    return get('/session');
 }
 
 export function getTasks() {

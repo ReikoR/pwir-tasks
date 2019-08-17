@@ -1,0 +1,36 @@
+#main {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form > * {
+    display: block;
+    width: 300px;
+}
+
+input, button {
+    font-size: inherit;
+}
+
+input {
+    padding: 5px;
+}
+
+button {
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 6px;
+}
+
+form > button {
+    margin-top: 10px;
+}
+
+.error {
+    width: 100%;
+    text-align: center;
+    padding: 7px;
+    color: orangered;
+}

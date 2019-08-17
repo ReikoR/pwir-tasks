@@ -12,7 +12,6 @@ const mainElement = document.getElementById('main');
         const participant_id = parseInt(queryUrlMatch[1]);
 
         participantTaskPoints = await getParticipantTaskPoints({participant_id});
-        console.log(participantTaskPoints);
     }
 
     const columns = ['Task', 'Points used', 'Total points'];

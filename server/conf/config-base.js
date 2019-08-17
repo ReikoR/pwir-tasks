@@ -33,4 +33,12 @@ config.db.connectionParams = {
 config.session = {};
 config.session.secret = '';
 
+config.mailgun = {
+    apiKey: '',
+    apiUrl: '',
+    domain: '',
+    from: '',
+    loginLinkHostname: '',
+};
+
 module.exports = config;
