@@ -69,8 +69,10 @@ router.post('/get-completed-task', requireUser, async (req, res) => {
 
 router.post('/set-completed-task', requireEditor, async (req, res) => {
     try {
+        const editor_id = req.session.user.participant_id;
+
         const {task_id, team_id, completion_time, participants} = req.body;
-        await database.setCompletedTask(task_id, team_id, completion_time, participants);
+        await database.setCompletedTask(task_id, team_id, completion_time, participants, editor_id);
         res.send('OK');
     } catch (e) {
         console.error(e);

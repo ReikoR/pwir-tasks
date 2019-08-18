@@ -8,7 +8,9 @@ const knex = require('knex')({
 
 async function getParticipantByEmail(email) {
     try {
-        return (await knex('participant').select().where({email}))[0];
+        return (await knex('participant')
+            .select('participant_id', 'name', 'role', 'email')
+            .where({email}))[0];
     } catch (e) {
         return null;
     }
@@ -16,7 +18,9 @@ async function getParticipantByEmail(email) {
 
 async function getParticipantById(participant_id) {
     try {
-        return (await knex('participant').select().where({participant_id}))[0];
+        return (await knex('participant')
+            .select('participant_id', 'name', 'role', 'email')
+            .where({participant_id}))[0];
     } catch (e) {
         return null;
     }
@@ -103,7 +107,7 @@ async function getCompletedTask(task_id, team_id, transaction) {
     return (await query).rows;
 }
 
-async function setCompletedTask(task_id, team_id, completion_time, participantPoints) {
+async function setCompletedTask(task_id, team_id, completion_time, participantPoints, editor_id) {
     console.log(
         'setCompletedTask',
         'task_id', task_id,
@@ -151,11 +155,20 @@ async function setCompletedTask(task_id, team_id, completion_time, participantPo
 
         if (toChange.length > 0) {
             for (const p of toChange) {
-                const changeResult = await trx('completed_task_participant').update({
+                await trx('completed_task_participant').update({
                     points: p.points
                 }).where({task_id, team_id, participant_id: p.participant_id});
             }
         }
+
+        const newState = (await getCompletedTask(task_id, team_id, trx))[0];
+
+        await trx('completed_task_history').insert({
+            task_id,
+            team_id,
+            editor_id,
+            state: newState
+        });
 
         await trx.commit();
     } catch (e) {

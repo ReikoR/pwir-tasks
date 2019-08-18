@@ -68,5 +68,12 @@ create table completed_task_participant (
     foreign key (task_id, team_id) references completed_task(task_id, team_id)
 );
 
-drop table completed_task cascade;
-drop table completed_task_participant cascade;
+create table completed_task_history (
+    completed_task_history_id serial primary key,
+    task_id integer not null,
+    team_id integer not null,
+    edit_time timestamptz not null default now(),
+    editor_id integer not null references participant(participant_id),
+    state jsonb,
+    foreign key (task_id, team_id) references completed_task(task_id, team_id)
+)
