@@ -72,6 +72,11 @@ tr.team-tasks-row td {
     background-color: #ccc;
 }
 
+.team-tasks {
+    display: flex;
+    flex-direction: column;
+}
+
 .team-task {
     background-color: #f8f8f8;
     padding: 10px;
@@ -79,8 +84,7 @@ tr.team-tasks-row td {
     margin-bottom: 2px;
 }
 
-input.points,
-.blog-count input {
+input.points {
     width: 100px;
 }
 

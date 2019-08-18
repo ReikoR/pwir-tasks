@@ -88,7 +88,6 @@ async function getCompletedTask(task_id, team_id, transaction) {
                completed_task.task_id,
                completed_task.team_id,
                completion_time,
-               blog_count,
                jsonb_agg(jsonb_build_object('participant_id', participant_id, 'points', points)) as participants
         from completed_task
         left join completed_task_participant ctp using (task_id, team_id)
@@ -104,7 +103,7 @@ async function getCompletedTask(task_id, team_id, transaction) {
     return (await query).rows;
 }
 
-async function setCompletedTask(task_id, team_id, completion_time, participantPoints, blog_count = null) {
+async function setCompletedTask(task_id, team_id, completion_time, participantPoints) {
     console.log(
         'setCompletedTask',
         'task_id', task_id,
@@ -125,11 +124,11 @@ async function setCompletedTask(task_id, team_id, completion_time, participantPo
 
         if (currentState) {
             await trx('completed_task')
-                .update({completion_time, blog_count})
+                .update({completion_time})
                 .where({task_id, team_id});
         } else {
             await trx('completed_task')
-                .insert({task_id, team_id, completion_time, blog_count});
+                .insert({task_id, team_id, completion_time});
         }
 
         if (toDelete.length > 0) {

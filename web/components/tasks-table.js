@@ -192,23 +192,8 @@ class TasksTable extends HTMLDivElement {
         this.render();
     }
 
-    handleBlogCount(teamTask, event) {
-        const newValue = parseInt(event.currentTarget.value, 10) || null;
-
-        if (teamTask.blog_count === newValue) {
-            return;
-        }
-
-        teamTask.blog_count = newValue;
-        this.render();
-    }
-
     handleTaskParticipantPoints(taskParticipant, event) {
         const newValue = parseInt(event.currentTarget.value, 10) || null;
-
-        if (taskParticipant.blog_count === newValue) {
-            return;
-        }
 
         taskParticipant.points = newValue;
         this.render();
@@ -237,11 +222,6 @@ class TasksTable extends HTMLDivElement {
 
     handleRevertCompletionTime(teamTask) {
         teamTask.revertCompletionTime();
-        this.render();
-    }
-
-    handleRevertBlogCount(teamTask) {
-        teamTask.revertBlogCount();
         this.render();
     }
 
@@ -277,11 +257,11 @@ class TasksTable extends HTMLDivElement {
             <td>${formatTime(task.deadline)}</td>
             ${this.teams.map(team => this.renderTeamTaskCell(team, task))}
             </tr>
-            <tr class="team-tasks-row"><td colspan="${columnCount}">
+            <tr class="team-tasks-row"><td colspan="${columnCount}"><div class="team-tasks">
             ${this.teams
             .filter(team => this.isTeamTaskOpen(team, task))
             .map(team => this.renderTeamTask(team, task))}
-            </td></tr>
+            </div></td></tr>
             `)}</tbody>`;
     }
 
@@ -339,10 +319,6 @@ class TasksTable extends HTMLDivElement {
             ${this.renderCompletedAtInput(teamTask)}
             ${this.renderSavedCompletionTime(teamTask)}
             </div>
-            <div class="blog-count">
-            ${this.renderBlogsRow(task, teamTask)}
-            ${this.renderSavedBlogCount(teamTask)}
-            </div>
             ${this.renderAvailablePoints(team, task)}
             ${this.renderUsedPoints(team, task)}
             <div class="participants">
@@ -392,40 +368,6 @@ class TasksTable extends HTMLDivElement {
         return null;
     }
 
-    renderBlogsRow(task, teamTask) {
-        if (!task.is_progress) {
-            return null;
-        }
-
-        if (this.getAttribute('mode') !== 'edit') {
-            return html`<span>Blog count <strong>${teamTask.blog_count}</strong></span>`;
-        }
-
-        const isNew = teamTask.isNew();
-        const isChanged = teamTask.isBlogCountChanged();
-
-        const classValue = classNames({
-            changed: !isNew && isChanged
-        });
-
-        return html`<label>Blog count 
-            <input 
-                class=${classValue} 
-                onkeyup="${this.handleBlogCount.bind(this, teamTask)}" 
-                type="text" 
-                value=${teamTask.blog_count}/>
-            </label>`;
-    }
-
-    renderSavedBlogCount(teamTask) {
-        if (!teamTask.isNew() && teamTask.isBlogCountChanged()) {
-            return html`<del>${teamTask.blog_count}</del>
-                <button onclick=${this.handleRevertBlogCount.bind(this, teamTask)}>Undo</button>`;
-        }
-
-        return null;
-    }
-
     renderAvailablePoints(team, task) {
         const teamTask = this.getTeamTask(team, task);
         const completionDateTime = DateTime.fromISO(teamTask.completion_time);
@@ -442,13 +384,6 @@ class TasksTable extends HTMLDivElement {
             } else if (task.week_before_bonus && completionDateTime <= deadlineDateTime) {
                 isOnTime = true;
             }
-        }
-
-        const blogCount = teamTask.blog_count || 0;
-
-        if (task.is_progress) {
-            return html`<div class="points-available"><span>Points available: </span>
-            ${basePoints} &times; ${blogCount} = <strong>${basePoints * blogCount}</strong></div>`;
         }
 
         const bonusPoints = isWeekBefore ? basePoints * 0.2 : (isOnTime ? basePoints * 0.1 : 0);
@@ -515,11 +450,19 @@ class TasksTable extends HTMLDivElement {
     }
 
     renderParticipantSelector(selectedParticipant, teamTask) {
+        const task = this.getTaskById(teamTask.task_id);
         const task_team_id = teamTask.team_id;
 
-        const options = [{value: '', text: 'Select participant'}].concat(this.participants
+        const options = [{value: null, text: 'Select participant'}].concat(this.participants
             .slice()
-            .filter(p => selectedParticipant.participant_id === p.participant_id || !teamTask.containsParticipant(p.participant_id))
+            .filter(p => {
+                const isAlreadyAdded = teamTask.containsParticipant(p.participant_id);
+                const isSelected = selectedParticipant.participant_id === p.participant_id;
+                const isTeamMember = p.team_id === teamTask.team_id;
+                const canShow = isSelected || !isAlreadyAdded;
+
+                return task.is_progress ? isTeamMember && canShow : canShow;
+            })
             .sort((a, b) => compareParticipantsOptions(a, b, task_team_id))
             .map(p => {
                 const className = p.team_id === task_team_id ? 'team-member' : '';
@@ -594,7 +537,6 @@ class TeamTask {
         this.completion_time = null;
         this.completion_time_input = null;
         this.participants = [];
-        this.blog_count = null;
 
         this.isOpen = false;
 
@@ -606,7 +548,6 @@ class TeamTask {
         teamTask.savedState = cloneObject(savedState);
         teamTask.completion_time = savedState.completion_time;
         teamTask.completion_time_input = formatTime(savedState.completion_time);
-        teamTask.blog_count = savedState.blog_count;
         teamTask.participants = savedState.participants.map(p => TaskParticipant.fromSavedState(p));
 
         return teamTask;
@@ -622,7 +563,6 @@ class TeamTask {
             team_id: this.team_id,
             task_id: this.task_id,
             completion_time: this.completion_time,
-            blog_count: this.blog_count,
             participants: this.participants.filter(p => !p.isRemoved).map(p => p.getSaveInfo()),
         }
     }
@@ -677,18 +617,6 @@ class TeamTask {
     revertCompletionTime() {
         this.completion_time = this.getSavedCompletionTime();
         this.completion_time_input = formatTime(this.completion_time);
-    }
-
-    getSavedBlogCount() {
-        return this.savedState && this.savedState.blog_count;
-    }
-
-    isBlogCountChanged() {
-        return this.getSavedBlogCount() !== this.blog_count;
-    }
-
-    revertBlogCount() {
-        this.blog_count = this.getSavedBlogCount();
     }
 }
 

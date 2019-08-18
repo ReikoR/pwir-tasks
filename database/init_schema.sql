@@ -56,7 +56,6 @@ create table completed_task (
     task_id integer not null references task(task_id),
     team_id integer not null references team(team_id),
     completion_time timestamptz not null,
-    blog_count integer,
     primary key (task_id, team_id)
 );
 
