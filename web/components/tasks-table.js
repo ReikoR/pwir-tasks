@@ -381,7 +381,7 @@ class TasksTable extends HTMLDivElement {
 
             if (task.week_before_bonus && completionDateTime <= weekBeforeDeadlineDateTime) {
                 isWeekBefore = true;
-            } else if (task.week_before_bonus && completionDateTime <= deadlineDateTime) {
+            } else if (task.on_time_bonus && completionDateTime <= deadlineDateTime) {
                 isOnTime = true;
             }
         }
@@ -392,7 +392,7 @@ class TasksTable extends HTMLDivElement {
             return html`<div class="points-available"><span>Points available: </span><strong>${basePoints}</strong>`;
         }
 
-        const info = isWeekBefore ? '(20% for at least 1 week before deadline)' : '(10% for before deadline)';
+        const info = isWeekBefore ? '(120% for at least 1 week before deadline)' : '(110% for before deadline)';
 
         return html`<div class="points-available"><span>Points available: </span>
             ${basePoints} + ${bonusPoints} = <strong>${basePoints + bonusPoints}</strong> ${info}</div>`;
