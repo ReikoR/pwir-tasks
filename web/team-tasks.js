@@ -16,8 +16,10 @@ const mainElement = document.getElementById('main');
         tasksTableMode = session.role === 'instructor' ? 'edit' : 'inspect';
     } catch (e) {}
 
+    const links = session !== null ? [['/participants', 'Participants']] : [];
+
     render(mainElement, html`
-        <PageHeader session=${session} title="Tasks table" links=${[['/participants', 'Participants']]}/>
+        <PageHeader session=${session} title="Tasks table" links=${links}/>
         <div class="page-content">
         <TasksTable mode=${tasksTableMode} tasks=${tasks} teams=${teams}/>
         </div>`);
