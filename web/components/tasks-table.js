@@ -127,7 +127,7 @@ class TasksTable extends HTMLDivElement {
     }
 
     calcTaskMaxPoints(task) {
-        return task.points * (1 + (task.week_before_bonus ? 0.2 : task.on_time_bonus ? 0.1 : 0))
+        return Math.round(task.points * (1 + (task.week_before_bonus ? 0.2 : task.on_time_bonus ? 0.1 : 0)));
     }
 
     async handleTeamTask(team, task) {
@@ -201,10 +201,9 @@ class TasksTable extends HTMLDivElement {
 
     /**
      * @param {TaskParticipant} taskParticipant
-     * @param {TeamTask} teamTask
      * @param {Event} event
      */
-    handleParticipantNameChanged(taskParticipant, teamTask, event) {
+    handleParticipantNameChanged(taskParticipant, event) {
         taskParticipant.participant_id = parseInt(event.currentTarget.value, 10) || null;
 
         this.render();
@@ -452,9 +451,13 @@ class TasksTable extends HTMLDivElement {
     renderParticipantSelector(selectedParticipant, teamTask) {
         const task = this.getTaskById(teamTask.task_id);
         const task_team_id = teamTask.team_id;
+        const defaultOption = {
+            value: null,
+            text: 'Select participant',
+            selected: selectedParticipant.participant_id === null
+        };
 
-        const options = [{value: null, text: 'Select participant'}].concat(this.participants
-            .slice()
+        const options = [defaultOption].concat(this.participants
             .filter(p => {
                 const isAlreadyAdded = teamTask.containsParticipant(p.participant_id);
                 const isSelected = selectedParticipant.participant_id === p.participant_id;
@@ -466,23 +469,24 @@ class TasksTable extends HTMLDivElement {
             .sort((a, b) => compareParticipantsOptions(a, b, task_team_id))
             .map(p => {
                 const className = p.team_id === task_team_id ? 'team-member' : '';
-                return {value: p.participant_id, text: p.name, className};
+                return {
+                    value: p.participant_id,
+                    text: p.name,
+                    selected: p.participant_id === selectedParticipant.participant_id,
+                    className,
+                };
             }));
 
+        const selectedParticipantId = selectedParticipant.participant_id;
         const isNew = selectedParticipant.isNew();
         const isNameChanged = selectedParticipant.isNameChanged();
 
         const classValue = classNames({changed: !isNew && isNameChanged, added: isNew});
 
-        return html`<select class=${classValue} onchange=${this.handleParticipantNameChanged.bind(this, selectedParticipant, teamTask)}>
-            ${options.map(option => {
-                return html`<option 
-                    class=${option.className}
-                    selected="${selectedParticipant.participant_id === option.value}"
-                    value="${option.value}"
-                    >${option.text}</option>`;
-            })}
-            </select>`;
+        return html`<ParticipantSelect 
+            options=${options}
+            class=${classValue} 
+            onchange=${this.handleParticipantNameChanged.bind(this, selectedParticipant)}/>`;
     }
 
     renderParticipantPointsAvailable(teamTask, taskParticipant) {
@@ -499,7 +503,7 @@ class TasksTable extends HTMLDivElement {
         }
         const maxPoints = this.calcTaskMaxPoints(task);
         const savedPoints = taskParticipant.getSavedPoints();
-        const available = maxPoints - used + savedPoints;
+        const available = Math.round(maxPoints - used + savedPoints);
 
         return html`<span>Available: </span><strong>${available}</strong><span> of ${maxPoints}</span>`;
     }
@@ -527,6 +531,28 @@ class TasksTable extends HTMLDivElement {
         }
 
         return null;
+    }
+}
+
+const _options = new WeakMap();
+
+class ParticipantSelect extends HTMLSelectElement {
+    get options() {
+        return _options.get(this);
+    }
+
+    set options(options) {
+        _options.set(this, options);
+        this.render();
+    }
+
+    render() {
+        this.html`${this.options.map(option => this.renderParticipantOption(option))}`;
+    }
+
+    renderParticipantOption(option) {
+        return html`<option class=${option.className} selected="${option.selected}" value="${option.value}">
+            ${option.text}</option>`;
     }
 }
 
@@ -689,4 +715,5 @@ function compareParticipantsOptions(a, b, task_team_id) {
     return a.name.localeCompare(b.name);
 }
 
+define('ParticipantSelect:select', ParticipantSelect);
 define('TasksTable:div', TasksTable);
