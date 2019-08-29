@@ -40,7 +40,7 @@ table thead {
     color: white;
 }
 
-table tbody tr.task-row td:nth-child(-n+3) {
+table tbody tr.task-row td:nth-child(-n+4) {
     background-color: #eee;
 }
 
@@ -56,10 +56,6 @@ tr.team-tasks-row td {
     text-align: center;
 }
 
-.team-task-cell.done {
-    background-color: palegreen;
-}
-
 .team-task-cell.available {
     background-color: white;
 }
@@ -68,8 +64,12 @@ tr.team-tasks-row td {
     background-color: #eee;
 }
 
+.team-task-cell.done {
+    background-color: palegreen;
+}
+
 .team-task-cell.can-open:hover {
-    background-color: #ccc;
+    border: 1px solid #ccc;
 }
 
 .team-tasks {

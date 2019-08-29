@@ -242,18 +242,19 @@ class TasksTable extends HTMLDivElement {
     }
 
     renderHeader() {
-        const columns = ['Task', 'Points', 'Deadline'].concat(this.teams.map(team => team.name));
+        const columns = ['Task', 'Points', 'Deadline', 'Expires at'].concat(this.teams.map(team => team.name));
 
         return html`<thead><tr>${columns.map(column => html`<th>${column}</th>`)}</tr></thead>`;
     }
 
     renderBody() {
-        const columnCount = this.teams.length + 3;
+        const columnCount = this.teams.length + 4;
 
         return html`<tbody>${this.tasks.map(task => html`<tr class="task-row">
             <td>${task.name}</td>
             <td>${task.points}</td>
             <td>${formatTime(task.deadline)}</td>
+            <td>${formatTime(task.expires_at)}</td>
             ${this.teams.map(team => this.renderTeamTaskCell(team, task))}
             </tr>
             <tr class="team-tasks-row"><td colspan="${columnCount}"><div class="team-tasks">
@@ -268,7 +269,7 @@ class TasksTable extends HTMLDivElement {
         const mode = this.getAttribute('mode');
         const done = this.isTeamTaskDone(team, task);
         const canOpen = mode === 'edit' || mode === 'inspect' && done;
-        const unavailable = !done && !task.allow_overdue && DateTime.fromISO(task.deadline) < DateTime.local();
+        const unavailable = DateTime.fromISO(task.expires_at) < DateTime.local();
         const classValue = classNames({
             'team-task-cell': true,
             'can-open': canOpen,

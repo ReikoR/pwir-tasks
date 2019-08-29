@@ -19,9 +19,9 @@ create table task (
     description text,
     points integer not null,
     deadline timestamptz not null,
+    expires_at timestamptz not null,
     on_time_bonus boolean not null default true,
     week_before_bonus boolean not null default true,
-    allow_overdue boolean not null default true,
     is_optional boolean not null default false,
     is_progress boolean not null default false
 );

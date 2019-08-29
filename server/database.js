@@ -27,7 +27,7 @@ async function getParticipantById(participant_id) {
 }
 
 function getTasks() {
-    return knex('task').select().orderBy('deadline');
+    return knex('task').select().orderBy('task_id');
 }
 
 function getTeams() {
