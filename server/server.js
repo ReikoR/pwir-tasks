@@ -45,4 +45,18 @@ function requireUser(req, res, next) {
     }
 }
 
-server.listen(config.port);
+if (config.useHttps) {
+    const httpApp = express();
+    const httpServer = http.createServer(httpApp);
+
+    httpApp.use(helmet());
+
+    httpApp.use((req, res) => {
+        res.redirect('https://' + req.headers.host + req.url);
+    });
+
+    httpServer.listen(80);
+    server.listen(443);
+} else {
+    server.listen(config.port);
+}
