@@ -5,8 +5,8 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const nanoid = require('nanoid');
-const mailgun = require('mailgun.js');
-const mg = mailgun.client({username: 'api', key: config.mailgun.apiKey, url: config.mailgun.apiUrl});
+const axios = require('axios');
+const {URLSearchParams} = require('url');
 const jsonParser = bodyParser.json();
 
 const tokenTTLSeconds = 5 * 60;
@@ -103,14 +103,22 @@ function createLoginToken(participant_id) {
 function sendTokenEmail(token, email) {
     const link = `${config.mailgun.loginLinkHostname}/login/x?y=${token}`;
 
-    console.log(link);
+    const data = new URLSearchParams();
+    data.append('from', config.mailgun.from);
+    data.append('to', email);
+    data.append('subject', 'Login link');
+    data.append('text', link);
+    data.append('html', `<a href="${link}">${link}</a>`);
 
-    return mg.messages.create(config.mailgun.domain, {
-        from: config.mailgun.from,
-        to: [email],
-        subject: 'Login link',
-        text: link,
-        html: `<a href="${link}">${link}</a>`
+    return axios({
+        method: 'post',
+        url: `${config.mailgun.apiUrl}/v3/${config.mailgun.domain}/messages`,
+        data,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        auth: {
+            username: 'api',
+            password: config.mailgun.apiKey
+        }
     });
 }
 
