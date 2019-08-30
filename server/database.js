@@ -2,8 +2,7 @@ const config = require('./conf/config');
 const knex = require('knex')({
     client: 'pg',
     connection: config.db.connectionParams,
-    pool: config.db.pool,
-    debug: true
+    pool: config.db.pool
 });
 
 async function getParticipantByEmail(email) {
