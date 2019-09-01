@@ -242,17 +242,20 @@ class TasksTable extends HTMLDivElement {
     }
 
     renderHeader() {
-        const columns = ['Task', 'Points', 'Deadline', 'Expires at', 'Description'].concat(this.teams.map(team => team.name));
+        const columns = ['Task', 'Points', 'Week before bonus', 'On time bonus', 'Deadline', 'Expires at', 'Description']
+            .concat(this.teams.map(team => team.name));
 
         return html`<thead><tr>${columns.map(column => html`<th>${column}</th>`)}</tr></thead>`;
     }
 
     renderBody() {
-        const columnCount = this.teams.length + 5;
+        const columnCount = this.teams.length + 7;
 
         return html`<tbody>${this.tasks.map(task => html`<tr class="task-row">
             <td>${task.name}</td>
             <td>${task.points}</td>
+            <td>${task.on_time_bonus ? 'Yes': null}</td>
+            <td>${task.week_before_bonus ? 'Yes': null}</td>
             <td>${formatTime(task.deadline)}</td>
             <td>${formatTime(task.expires_at)}</td>
             <td>${html([task.description])}</td>
