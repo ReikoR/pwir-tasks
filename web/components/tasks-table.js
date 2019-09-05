@@ -254,8 +254,8 @@ class TasksTable extends HTMLDivElement {
         return html`<tbody>${this.tasks.map(task => html`<tr class="task-row">
             <td>${task.name}</td>
             <td>${task.points}</td>
-            <td>${task.on_time_bonus ? 'Yes': null}</td>
             <td>${task.week_before_bonus ? 'Yes': null}</td>
+            <td>${task.on_time_bonus ? 'Yes': null}</td>
             <td>${formatTime(task.deadline)}</td>
             <td>${formatTime(task.expires_at)}</td>
             <td>${html([task.description])}</td>
