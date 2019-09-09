@@ -456,6 +456,7 @@ class TasksTable extends HTMLDivElement {
     renderParticipantSelector(selectedParticipant, teamTask) {
         const task = this.getTaskById(teamTask.task_id);
         const task_team_id = teamTask.team_id;
+        const completionDateTime = DateTime.fromISO(teamTask.completion_time);
         const defaultOption = {
             value: null,
             text: 'Select participant',
@@ -466,14 +467,16 @@ class TasksTable extends HTMLDivElement {
             .filter(p => {
                 const isAlreadyAdded = teamTask.containsParticipant(p.participant_id);
                 const isSelected = selectedParticipant.participant_id === p.participant_id;
-                const isTeamMember = p.team_id === teamTask.team_id;
+                const isTeamMember = findParticipantsTeamIdByDateTime(p, completionDateTime) === task_team_id;
                 const canShow = isSelected || !isAlreadyAdded;
 
                 return task.is_progress ? isTeamMember && canShow : canShow;
             })
-            .sort((a, b) => compareParticipantsOptions(a, b, task_team_id))
+            .sort((a, b) => compareParticipantsOptions(a, b, task_team_id, teamTask.completion_time))
             .map(p => {
-                const className = p.team_id === task_team_id ? 'team-member' : '';
+                const className = findParticipantsTeamIdByDateTime(p, completionDateTime) === task_team_id
+                    ? 'team-member' : '';
+
                 return {
                     value: p.participant_id,
                     text: p.name,
@@ -482,7 +485,6 @@ class TasksTable extends HTMLDivElement {
                 };
             }));
 
-        const selectedParticipantId = selectedParticipant.participant_id;
         const isNew = selectedParticipant.isNew();
         const isNameChanged = selectedParticipant.isNameChanged();
 
@@ -708,16 +710,42 @@ function formatTime(isoString) {
     return DateTime.fromISO(isoString).toFormat('yyyy-MM-dd T');
 }
 
-function compareParticipantsOptions(a, b, task_team_id) {
-    if (a.team_id === task_team_id && b.team_id !== task_team_id) {
-        return -1;
-    }
+function compareParticipantsOptions(a, b, task_team_id, completion_time) {
+    const completionDateTime = DateTime.fromISO(completion_time);
 
-    if (a.team_id !== task_team_id && b.team_id === task_team_id) {
-        return 1;
+    if (completionDateTime.isValid) {
+        const aTeamId = findParticipantsTeamIdByDateTime(a, completionDateTime);
+        const bTeamId = findParticipantsTeamIdByDateTime(b, completionDateTime);
+
+        if (aTeamId === task_team_id && bTeamId !== task_team_id) {
+            return -1;
+        }
+
+        if (aTeamId !== task_team_id && bTeamId === task_team_id) {
+            return 1;
+        }
     }
 
     return a.name.localeCompare(b.name);
+}
+
+function findParticipantsTeamIdByDateTime(participant, dateTime) {
+    const team = participant.teams.find(t => {
+        const startDateTime = DateTime.fromISO(t.start_time);
+        const endDateTime = DateTime.fromISO(t.end_time);
+
+        if (startDateTime.isValid) {
+            if (endDateTime.isValid) {
+                return startDateTime <= dateTime && dateTime <= endDateTime
+            }
+
+            return startDateTime <= dateTime;
+        }
+
+        return false;
+    });
+
+    return !!team ? team.team_id : null;
 }
 
 define('ParticipantSelect:select', ParticipantSelect);

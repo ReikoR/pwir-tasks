@@ -40,6 +40,10 @@ table thead {
     color: white;
 }
 
+table thead th:nth-child(-n+7) {
+    color: #ccc;
+}
+
 table tbody tr.task-row td:nth-child(-n+7) {
     background-color: #eee;
 }

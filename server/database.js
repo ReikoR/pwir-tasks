@@ -33,31 +33,24 @@ function getTeams() {
     return knex('team').select();
 }
 
-/*
-select
-    participant.participant_id,
-    participant.name,
-    (
-       select team_id from team_member
-       where start_time < now() and (end_time isnull or end_time > now())
-       and team_member.participant_id = participant.participant_id
-    ) as team_id
-from participant;
- */
-function getParticipants(roles) {
-    return knex('participant')
-        .select('participant.participant_id', 'participant.name', 'participant.role')
-        .select(
-            knex('team_member')
-                .select('team_id')
-                .whereRaw('team_member.participant_id = participant.participant_id')
-                .where('start_time', '<', knex.fn.now())
-                .andWhere(function () {
-                    this.whereNull('end_time').orWhere('end_time', '>', knex.fn.now());
-                })
-                .as('team_id')
-        )
-        .whereIn('participant.role', roles);
+async function getParticipants(roles) {
+    const queryString = `select
+            participant.participant_id,
+            participant.name,
+            participant.role,
+            (
+               select jsonb_agg(jsonb_build_object(
+                   'team_id', team_id,
+                   'start_time', start_time,
+                   'end_time', end_time
+                   )) from team_member
+               join team t using(team_id)
+               where team_member.participant_id = participant.participant_id
+            ) as teams
+        from participant
+        where participant.role = any(?);`;
+
+    return (await knex.raw(queryString, [roles])).rows;
 }
 
 async function getParticipantsAndPoints() {
