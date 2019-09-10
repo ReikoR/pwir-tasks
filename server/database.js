@@ -25,8 +25,14 @@ async function getParticipantById(participant_id) {
     }
 }
 
-function getTasks() {
-    return knex('task').select().orderBy('task_id');
+async function getTasks() {
+    const queryString = `select 
+               *, 
+               task_points_with_time(task, now()) as points_available 
+        from task
+        order by task_id;`;
+
+    return (await knex.raw(queryString, )).rows;
 }
 
 function getTeams() {
@@ -68,15 +74,22 @@ async function getParticipantsAndPoints() {
     return (await knex.raw(queryString)).rows;
 }
 
-/*
-select task_id, team_id from completed_task
-group by task_id, team_id;
- */
+async function getCompletedTasksOverview() {
+    const queryString = `select
+               task_id,
+               team_id,
+               completion_time,
+               task_points_with_time(task, completion_time) as points_available,
+               (
+                   select coalesce(sum(ctp.points), 0)::int 
+                   from completed_task_participant ctp 
+                   where ctp.task_id = ct.task_id and ctp.team_id = ct.team_id
+               ) as points_used
+        from completed_task ct
+        join task using (task_id)
+        group by ct.task_id, ct.team_id, task.task_id;`;
 
-function getCompletedTasksOverview() {
-    return knex('completed_task')
-        .select('task_id', 'team_id')
-        .groupBy('task_id', 'team_id');
+    return (await knex.raw(queryString)).rows;
 }
 
 async function getCompletedTask(task_id, team_id, transaction) {

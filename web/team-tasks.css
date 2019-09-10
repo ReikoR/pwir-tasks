@@ -40,16 +40,28 @@ table thead {
     color: white;
 }
 
-table thead th:nth-child(-n+7) {
+table thead th:nth-child(-n+8) {
     color: #ccc;
 }
 
-table tbody tr.task-row td:nth-child(-n+7) {
+table tbody tr.task-row td:nth-child(-n+8) {
     background-color: #eee;
 }
 
 tr.task-row td, th {
     padding: 5px;
+}
+
+.task-row.progress-task {
+    border-top: 1px solid #DDD;
+}
+
+.task-row.overdue-task td:nth-child(-n+8) {
+    color: #888;
+}
+
+.task-row.within-week-task td:nth-child(-n+8) {
+    font-weight: bold;
 }
 
 tr.team-tasks-row td {
@@ -72,8 +84,12 @@ tr.team-tasks-row td {
     background-color: palegreen;
 }
 
+.team-task-cell.points-invalid {
+    background-color: orange;
+}
+
 .team-task-cell.can-open:hover {
-    border: 1px solid #ccc;
+    background-color: #DEF;
 }
 
 .team-tasks {

@@ -20,6 +20,9 @@ class TasksTable extends HTMLDivElement {
         this.participants = null;
         this.completedTasksList = [];
 
+        this.nonTeamColumns = ['Task', 'Points', 'Points now', 'Week before bonus', 'On time bonus', 'Deadline',
+            'Expires at', 'Description'];
+
         this.fetchCompletedTasksList();
     }
 
@@ -64,13 +67,8 @@ class TasksTable extends HTMLDivElement {
         return cloneObject(this.participants.find(p => p.participant_id === id) || null);
     }
 
-    isTeamTaskDone(team, task) {
-        /*const teamTask = this.getTeamTask(team, task);
-
-        return teamTask && teamTask.savedState !== null;*/
-
-        return this.completedTasksList.findIndex(
-            t => t.task_id === task.task_id && t.team_id === team.team_id) !== -1;
+    getCompletedTaskInfo(team, task) {
+        return this.completedTasksList.find(t => t.task_id === task.task_id && t.team_id === team.team_id) || null;
     }
 
     isTeamTaskOpen(team, task) {
@@ -242,18 +240,34 @@ class TasksTable extends HTMLDivElement {
     }
 
     renderHeader() {
-        const columns = ['Task', 'Points', 'Week before bonus', 'On time bonus', 'Deadline', 'Expires at', 'Description']
-            .concat(this.teams.map(team => team.name));
+        const columns = this.nonTeamColumns.concat(this.teams.map(team => team.name));
 
         return html`<thead><tr>${columns.map(column => html`<th>${column}</th>`)}</tr></thead>`;
     }
 
     renderBody() {
-        const columnCount = this.teams.length + 7;
+        return html`<tbody>${this.tasks.map(task => this.renderRow(task))}</tbody>`;
+    }
 
-        return html`<tbody>${this.tasks.map(task => html`<tr class="task-row">
+    renderRow(task) {
+        const columnCount = this.nonTeamColumns.length + this.teams.length;
+
+        const deadlineDateTime = DateTime.fromISO(task.deadline);
+        const weekBeforeDeadline = deadlineDateTime.minus({weeks: 1});
+        const currentDateTime = DateTime.local();
+        const withinWeek = weekBeforeDeadline < currentDateTime && currentDateTime <= deadlineDateTime;
+        const overdue = deadlineDateTime < currentDateTime;
+
+        const classValue = classNames('task-row', {
+            'overdue-task': overdue,
+            'within-week-task': withinWeek,
+            'progress-task': task.is_progress
+        });
+
+        return html`<tr class=${classValue}>
             <td>${task.name}</td>
             <td>${task.points}</td>
+            <td>${task.points_available}</td>
             <td>${task.week_before_bonus ? 'Yes': null}</td>
             <td>${task.on_time_bonus ? 'Yes': null}</td>
             <td>${formatTime(task.deadline)}</td>
@@ -265,27 +279,42 @@ class TasksTable extends HTMLDivElement {
             ${this.teams
             .filter(team => this.isTeamTaskOpen(team, task))
             .map(team => this.renderTeamTask(team, task))}
-            </div></td></tr>
-            `)}</tbody>`;
+            </div></td></tr>`
     }
 
     renderTeamTaskCell(team, task) {
         const mode = this.getAttribute('mode');
-        const done = this.isTeamTaskDone(team, task);
+        const completedTaskInfo = this.getCompletedTaskInfo(team, task);
+        const done = !!completedTaskInfo;
         const canOpen = mode === 'edit' || mode === 'inspect' && done;
         const unavailable = DateTime.fromISO(task.expires_at) < DateTime.local();
+        const pointsUsed = done ? completedTaskInfo.points_used : 0;
+        const pointsAvailable = done ? completedTaskInfo.points_available : 0;
+        const pointsInvalid = pointsUsed !== pointsAvailable;
+        let title = '';
         const classValue = classNames({
             'team-task-cell': true,
             'can-open': canOpen,
             done,
+            'points-invalid': done && pointsInvalid,
             unavailable
         });
 
-        if (!canOpen) {
-            return html`<td class=${classValue}>${done ? 'Done' : ''}</td>`
+        if (pointsInvalid) {
+            if (pointsUsed === 0) {
+                title = 'Points not distributed';
+            } else if (pointsUsed < pointsAvailable) {
+                title = 'All points not used';
+            } else if (pointsUsed > pointsAvailable) {
+                title = 'Too much points used';
+            }
         }
 
-        return html`<td class=${classValue} onclick=${this.handleTeamTask.bind(this, team, task)}>
+        if (!canOpen) {
+            return html`<td class=${classValue} title=${title}>${done ? 'Done' : ''}</td>`
+        }
+
+        return html`<td class=${classValue} title=${title} onclick=${this.handleTeamTask.bind(this, team, task)}>
                 ${done ? 'Done' : ''}</td>`
     }
 
@@ -730,6 +759,15 @@ function compareParticipantsOptions(a, b, task_team_id, completion_time) {
 }
 
 function findParticipantsTeamIdByDateTime(participant, dateTime) {
+    if (
+        !Array.isArray(participant.teams)
+        || participant.teams.length === 0
+        || !dateTime
+        || !dateTime.isValid
+    ) {
+        return null;
+    }
+    
     const team = participant.teams.find(t => {
         const startDateTime = DateTime.fromISO(t.start_time);
         const endDateTime = DateTime.fromISO(t.end_time);
