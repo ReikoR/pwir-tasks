@@ -223,6 +223,7 @@ async function getParticipantTaskPoints(participant_id) {
     const queryString = `select
             task.task_id,
             task.name,
+            task.deadline,
             sum(ctp.points) as points_used,
             task.task_points_with_bonuses as total_task_points
         from task

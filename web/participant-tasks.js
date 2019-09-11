@@ -1,12 +1,18 @@
 import {html, render} from './lib/heresy.mjs';
-import {getParticipantTaskPoints} from "./services/api.js";
-import './components/tasks-table.js';
+import {getParticipantTaskPoints, getSession} from "./services/api.js";
+import './components/page-header.js';
+import {DateTime} from "./lib/luxon.js";
 
 const mainElement = document.getElementById('main');
 
 (async function () {
     const queryUrlMatch = location.search.match(/p=([0-9]+)/);
     let participantTaskPoints = [];
+    let session = null;
+
+    try {
+        session = await getSession();
+    } catch (e) {}
 
     if (queryUrlMatch && queryUrlMatch.length === 2) {
         const participant_id = parseInt(queryUrlMatch[1]);
@@ -14,14 +20,24 @@ const mainElement = document.getElementById('main');
         participantTaskPoints = await getParticipantTaskPoints({participant_id});
     }
 
-    const columns = ['Task', 'Points used', 'Total points'];
+    const columns = ['Task', 'Deadline', 'Points used', 'Total points'];
+    const links = [['/', 'Tasks table']];
 
-    render(mainElement, html`<div><table>
+    if (session) {
+        links.push(['/participants', 'Participants']);
+    }
+
+    render(mainElement, html`
+        <PageHeader session=${session} title="Participant points" links=${links}/>
+        <div class="page-content">
+        <table>
         <thead><tr>${columns.map(c => html`<th>${c}</th>`)}</tr></thead>
-        <tbody>${participantTaskPoints.map(p => html`<tr>
-            <td>${p.name}</td>
-            <td>${p.points_used}</td>
-            <td>${p.total_task_points}</td>
+        <tbody>${participantTaskPoints.map(tp => html`<tr>
+            <td>${tp.name}</td>
+            <td>${DateTime.fromISO(tp.deadline).toFormat('yyyy-MM-dd T')}</td>
+            <td>${tp.points_used || 0}</td>
+            <td>${tp.total_task_points}</td>
         </tr>`)}</tbody>
-        </table></div>`);
+        </table>
+        </div>`);
 })();

@@ -1,6 +1,5 @@
 import {html, render} from './lib/heresy.mjs';
 import {getParticipantsAndPoints, getSession} from "./services/api.js";
-import './components/tasks-table.js';
 import './components/page-header.js';
 
 const mainElement = document.getElementById('main');
@@ -11,7 +10,6 @@ const mainElement = document.getElementById('main');
 
     try {
         session = await getSession();
-        tasksTableMode = session.role === 'instructor' ? 'edit' : 'inspect';
     } catch (e) {}
 
     participantsAndPoints.sort((a, b) => b.total_points - a.total_points);
