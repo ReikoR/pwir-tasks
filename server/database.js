@@ -64,10 +64,16 @@ async function getParticipantsAndPoints() {
                participant.participant_id,
                participant.name,
                (
-                   select sum(ctp.points)
+                   select sum(ctp.points)::int
                    from completed_task_participant ctp
                    where ctp.participant_id = participant.participant_id
-               ) as total_points
+               ) as total_points,
+               (
+                   select name from team
+                   join team_member tm using (team_id)
+                   where tm.start_time <= now() and (end_time is null or end_time >= now())
+                   and tm.participant_id = participant.participant_id
+               ) as team_name
         from participant
         where participant.role = 'student';`;
 
