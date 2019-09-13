@@ -143,6 +143,7 @@ input.points {
 }
 
 .team-task .save-button,
+.team-task .save-status,
 .team-task .close-button {
     margin-left: 5px;
 }

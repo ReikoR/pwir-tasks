@@ -160,12 +160,23 @@ class TasksTable extends HTMLDivElement {
 
     async handleSaveTeamTask(teamTask) {
         const saveInfo = teamTask.getSaveInfo();
-        await setCompletedTask(saveInfo);
-        this.fetchCompletedTasksList();
-        this.fetchTeamTask(teamTask.team_id, teamTask.task_id);
+        teamTask.isSaving = true;
+        this.render();
 
-        for (const p of saveInfo.participants) {
-            this.fetchPointsUsedByTaskParticipant(teamTask.task_id, p.participant_id);
+        try {
+            await setCompletedTask(saveInfo);
+
+            teamTask.isSaving = false;
+
+            this.fetchCompletedTasksList();
+            this.fetchTeamTask(teamTask.team_id, teamTask.task_id);
+
+            for (const p of saveInfo.participants) {
+                this.fetchPointsUsedByTaskParticipant(teamTask.task_id, p.participant_id);
+            }
+        } catch (e) {
+            teamTask.isSaving = false;
+            this.render();
         }
     }
 
@@ -363,6 +374,10 @@ class TasksTable extends HTMLDivElement {
     renderSaveButton(teamTask) {
         if (this.getAttribute('mode') !== 'edit') {
             return null;
+        }
+
+        if (teamTask.isSaving) {
+            return html`<span class="save-status">Saving</span>`;
         }
 
         return html`<button class="save-button" onclick=${this.handleSaveTeamTask.bind(this, teamTask)}>Save</button>`;
@@ -601,6 +616,7 @@ class TeamTask {
         this.participants = [];
 
         this.isOpen = false;
+        this.isSaving = false;
 
         this.savedState = null;
     }
