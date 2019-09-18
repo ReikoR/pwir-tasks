@@ -103,7 +103,10 @@ async function getCompletedTask(task_id, team_id, transaction) {
                completed_task.task_id,
                completed_task.team_id,
                completion_time,
-               jsonb_agg(jsonb_build_object('participant_id', participant_id, 'points', points)) as participants
+               (select
+                       jsonb_agg(jsonb_build_object('participant_id', participant_id, 'points', points))
+               from completed_task_participant ctp
+               where ctp.task_id = completed_task.task_id and ctp.team_id = completed_task.team_id) as participants
         from completed_task
         left join completed_task_participant ctp using (task_id, team_id)
         where completed_task.task_id = ? and completed_task.team_id = ?
@@ -194,13 +197,15 @@ function diffCompletedTask(oldParticipants = [], newParticipants = []) {
     const toChange = [];
     const toDelete = [];
 
-    for (const oldParticipant of oldParticipants) {
-        const index = toAdd.findIndex(p => p.participant_id === oldParticipant.participant_id);
+    if (Array.isArray(oldParticipants)) {
+        for (const oldParticipant of oldParticipants) {
+            const index = toAdd.findIndex(p => p.participant_id === oldParticipant.participant_id);
 
-        if (index !== -1) {
-            toChange.push(toAdd.splice(index, 1)[0]);
-        } else {
-            toDelete.push(oldParticipant);
+            if (index !== -1) {
+                toChange.push(toAdd.splice(index, 1)[0]);
+            } else {
+                toDelete.push(oldParticipant);
+            }
         }
     }
 

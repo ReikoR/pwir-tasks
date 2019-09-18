@@ -656,14 +656,14 @@ class TeamTask {
         teamTask.savedState = cloneObject(savedState);
         teamTask.completion_time = savedState.completion_time;
         teamTask.completion_time_input = formatTime(savedState.completion_time);
-        teamTask.participants = savedState.participants.map(p => TaskParticipant.fromSavedState(p));
+        teamTask.participants = (savedState.participants || []).map(p => TaskParticipant.fromSavedState(p));
 
         return teamTask;
     }
 
     setSavedState(savedState) {
         this.savedState = cloneObject(savedState);
-        this.participants = savedState.participants.map(p => TaskParticipant.fromSavedState(p));
+        this.participants = (savedState.participants || []).map(p => TaskParticipant.fromSavedState(p));
     }
 
     getSaveInfo() {
