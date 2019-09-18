@@ -20,8 +20,7 @@ class TasksTable extends HTMLDivElement {
         this.participants = null;
         this.completedTasksList = [];
 
-        this.nonTeamColumns = ['Task', 'Points', 'Points now', 'Week before bonus', 'On time bonus', 'Deadline',
-            'Expires at', 'Description'];
+        this.nonTeamColumns = ['Task', 'Points', 'Points now', 'Bonuses', 'Deadline', 'Expires at'];
 
         this.fetchCompletedTasksList();
     }
@@ -276,14 +275,12 @@ class TasksTable extends HTMLDivElement {
         });
 
         return html`<tr class=${classValue}>
-            <td>${task.name}</td>
+            <td>${this.renderTaskName(task)}</td>
             <td>${task.points}</td>
             <td>${task.points_available}</td>
-            <td>${task.week_before_bonus ? 'Yes': null}</td>
-            <td>${task.on_time_bonus ? 'Yes': null}</td>
+            <td>${this.renderTaskBonuses(task)}</td>
             <td>${formatTime(task.deadline)}</td>
             <td>${formatTime(task.expires_at)}</td>
-            <td>${html([task.description])}</td>
             ${this.teams.map(team => this.renderTeamTaskCell(team, task))}
             </tr>
             <tr class="team-tasks-row"><td colspan="${columnCount}"><div class="team-tasks">
@@ -291,6 +288,39 @@ class TasksTable extends HTMLDivElement {
             .filter(team => this.isTeamTaskOpen(team, task))
             .map(team => this.renderTeamTask(team, task))}
             </div></td></tr>`
+    }
+
+    renderTaskName(task) {
+        if (task.description) {
+            const match = /href="(.+?)"/.exec(task.description);
+
+            if (match.length === 2) {
+                return html`<a href="${match[1]}" target="_blank">${task.name}</a>`
+            }
+        }
+
+        return html`${task.name}`;
+    }
+
+    renderTaskBonuses(task) {
+        const bonuses = [];
+        const dateTimeNow = DateTime.local();
+        const deadlineDateTime = DateTime.fromISO(task.deadline);
+        const weekBeforeDeadlineDateTime = DateTime.fromISO(task.deadline).minus({weeks: 1});
+
+        if (task.week_before_bonus) {
+            bonuses.push({text: '+20%', title: 'Week before', active: dateTimeNow <= weekBeforeDeadlineDateTime});
+        }
+
+        if (task.on_time_bonus) {
+            bonuses.push({text: '+10%', title: 'On time', active: dateTimeNow <= deadlineDateTime});
+        }
+
+        return html`<span class="bonus-indicators">${bonuses.map(b => {
+            const classValue = classNames('bonus-indicator', {active: b.active});
+
+            return html`<span class=${classValue} title=${b.title}>${b.text}</span>`;
+        })}</span>`;
     }
 
     renderTeamTaskCell(team, task) {

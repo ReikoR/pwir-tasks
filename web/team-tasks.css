@@ -42,11 +42,11 @@ table thead th {
     top: 0;
 }
 
-table thead th:nth-child(-n+8) {
+table thead th:nth-child(-n+6) {
     color: #ccc;
 }
 
-table tbody tr.task-row td:nth-child(-n+8) {
+table tbody tr.task-row td:nth-child(-n+6) {
     background-color: #eee;
 }
 
@@ -58,11 +58,11 @@ tr.task-row td, th {
     border-top: 1px solid #DDD;
 }
 
-.task-row.overdue-task td:nth-child(-n+8) {
+.task-row.overdue-task td:nth-child(-n+6) {
     color: #888;
 }
 
-.task-row.within-week-task td:nth-child(-n+8) {
+.task-row.within-week-task td:nth-child(-n+6) {
     font-weight: bold;
 }
 
@@ -185,4 +185,16 @@ input.points {
 
 option.team-member {
     font-weight: bold;
+}
+
+.bonus-indicator {
+    padding: 2px;
+    margin: 0 1px;
+    border: 1px solid #ddd;
+    display: inline-block;
+    opacity: 0.3;
+}
+
+.bonus-indicator.active {
+    opacity: 1;
 }
