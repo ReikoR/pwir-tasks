@@ -35,9 +35,11 @@ div[is^="tasks-table"] table {
     border-spacing: 0;
 }
 
-table thead {
+table thead th {
     background-color: black;
     color: white;
+    position: sticky;
+    top: 0;
 }
 
 table thead th:nth-child(-n+8) {
