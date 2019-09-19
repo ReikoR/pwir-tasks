@@ -80,3 +80,7 @@ export function getPointsUsedByTaskParticipant(params) {
 export function getParticipantTaskPoints(params) {
     return post('/api/get-participant-task-points', params);
 }
+
+export function getCompletedTaskChanges(params) {
+    return post('/api/get-completed-task-changes', params);
+}

@@ -5,6 +5,16 @@ const knex = require('knex')({
     pool: config.db.pool
 });
 
+const teamTaskDiffer = require('jsondiffpatch').create({
+    objectHash: function (obj) {
+        return obj.participant_id;
+    },
+    arrays: {
+        detectMove: true,
+        includeValueOnMove: true
+    }
+});
+
 async function getParticipantByEmail(email) {
     try {
         return (await knex('participant')
@@ -212,22 +222,19 @@ function diffCompletedTask(oldParticipants = [], newParticipants = []) {
     return {toAdd, toChange, toDelete};
 }
 
-/*
-select sum(completed_task.points) as used from completed_task
-where completed_task.task_id = 1 and completed_task.participant_id = 1
-group by completed_task.task_id;
- */
 async function getPointsUsedByTaskParticipant(task_id, participant_id) {
-    const rows = await knex('completed_task_participant')
-        .select(knex.raw('sum(completed_task_participant.points)::integer as used'))
-        .where('completed_task_participant.task_id', task_id)
-        .where('completed_task_participant.participant_id', participant_id);
+    const queryString = `select sum(points)::int as used 
+        from completed_task_participant
+        where task_id = ? and participant_id = ?
+        group by task_id;`;
+
+    const rows = (await knex.raw(queryString, [task_id, participant_id])).rows;
 
     if (rows.length === 1) {
         return {used: rows[0].used || 0};
     }
 
-    throw 'Task not found';
+    return {used: 0};
 }
 
 async function getParticipantTaskPoints(participant_id) {
@@ -246,6 +253,55 @@ async function getParticipantTaskPoints(participant_id) {
     return (await knex.raw(queryString, [participant_id])).rows;
 }
 
+async function getCompletedTaskChanges(task_id, team_id) {
+    const queryString = `select
+               edit_time,
+               participant.name as editor,
+               state
+        from completed_task_history
+        join task using (task_id)
+        join team using (team_id)
+        join participant ON completed_task_history.editor_id = participant.participant_id
+        where team_id = ? and task_id = ?
+        order by edit_time;`;
+
+    const rows = (await knex.raw(queryString, [team_id, task_id])).rows;
+
+    const cleanRows = rows.map(row => {
+        const {edit_time, editor, state} = row;
+        const participants = (state.participants || []).filter(p => p.participant_id !== null);
+        const cleanRow = {edit_time, editor, state: {completion_time: state.completion_time}};
+
+        if (participants.length > 0) {
+            const participantsMap = {};
+
+            for (const p of participants) {
+                participantsMap[p.participant_id] = p.points;
+            }
+
+            cleanRow.state.participants = participantsMap;
+        }
+
+        return cleanRow;
+    });
+
+    let prevState = {};
+    let changes = [];
+
+    for (const row of cleanRows) {
+        const {edit_time, editor, state} = row;
+        const diff = teamTaskDiffer.diff(prevState, state);
+
+        if (diff) {
+            changes.push({edit_time, editor, diff});
+        }
+
+        prevState = row.state;
+    }
+
+    return changes;
+}
+
 module.exports = {
     getParticipantByEmail,
     getParticipantById,
@@ -258,4 +314,5 @@ module.exports = {
     getPointsUsedByTaskParticipant,
     getParticipantsAndPoints,
     getParticipantTaskPoints,
+    getCompletedTaskChanges,
 };

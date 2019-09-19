@@ -1,6 +1,11 @@
 import {define, html} from '../lib/heresy.mjs';
 import {
-    getParticipants, getCompletedTask, setCompletedTask, getCompletedTasksList, getPointsUsedByTaskParticipant
+    getParticipants,
+    getCompletedTask,
+    setCompletedTask,
+    getCompletedTasksList,
+    getPointsUsedByTaskParticipant,
+    getCompletedTaskChanges
 } from "../services/api.js";
 import {cloneObject, deepFreeze, classNames} from "../util.js";
 import {DateTime} from "../lib/luxon.js";
@@ -15,7 +20,8 @@ class TasksTable extends HTMLDivElement {
         /**@type {Object.<number, TeamTask>}*/
         this.teamTasks = {};
 
-        this.paricipantPointsUsedCache = {};
+        this.participantPointsUsedCache = {};
+        this.isFetchingParticipantPointsUsed = {};
 
         this.participants = null;
         this.completedTasksList = [];
@@ -58,7 +64,7 @@ class TasksTable extends HTMLDivElement {
 
     getParticipantPointsUsed(task_id, participant_id) {
         const id = `${task_id}_${participant_id}`;
-        const used = this.paricipantPointsUsedCache[id];
+        const used = this.participantPointsUsedCache[id];
         return typeof used === 'number' ? used : null;
     }
 
@@ -105,22 +111,31 @@ class TasksTable extends HTMLDivElement {
         }
     }
 
+    fetchTeamTaskChanges(teamTask) {
+        getCompletedTaskChanges({task_id: teamTask.task_id, team_id: teamTask.team_id}).then(changes => {
+            teamTask.changes = changes;
+            this.render();
+        })
+    }
+
     fetchPointsUsedByTaskParticipant(task_id, participant_id) {
         if (!task_id || !participant_id) {
             return;
         }
 
+        const id = `${task_id}_${participant_id}`;
+
+        if (this.isFetchingParticipantPointsUsed[id] || this.participantPointsUsedCache[id] !== undefined) {
+            return;
+        }
+
+        this.isFetchingParticipantPointsUsed[id] = true;
+
         getPointsUsedByTaskParticipant({task_id, participant_id}).then(info => {
-            const id = `${task_id}_${participant_id}`;
-            this.paricipantPointsUsedCache[id] = info.used;
+            this.isFetchingParticipantPointsUsed[id] = false;
+            this.participantPointsUsedCache[id] = info.used;
             this.render();
         });
-    }
-
-    checkPointsUsedByTaskParticipant(task_id, participant_id) {
-        if (this.getParticipantPointsUsed(task_id, participant_id) === null) {
-            this.fetchPointsUsedByTaskParticipant(task_id, participant_id);
-        }
     }
 
     calcTaskMaxPoints(task) {
@@ -240,6 +255,10 @@ class TasksTable extends HTMLDivElement {
     handleRevertPoints(taskParticipant) {
         taskParticipant.revertPoints();
         this.render();
+    }
+
+    handleShowTeamTaskChanges(teamTask) {
+        this.fetchTeamTaskChanges(teamTask);
     }
 
     render() {
@@ -398,6 +417,7 @@ class TasksTable extends HTMLDivElement {
             <div class="participants">
             ${this.renderAddParticipant(teamTask)}
             ${teamTask.participants.map(taskParticipant =>  this.renderParticipantRow(teamTask, taskParticipant))}
+            ${this.renderTeamTaskChanges(teamTask)}
             </div></div>`;
     }
 
@@ -510,7 +530,11 @@ class TasksTable extends HTMLDivElement {
                 </div>`;
         }
 
-        this.checkPointsUsedByTaskParticipant(teamTask.task_id, taskParticipant.participant_id);
+        const task = this.getTaskById(teamTask.task_id);
+
+        if (!task.is_progress) {
+            this.fetchPointsUsedByTaskParticipant(teamTask.task_id, taskParticipant.participant_id);
+        }
 
         const isNew = taskParticipant.isNew();
         const isPointsChanged = taskParticipant.isPointsChanged();
@@ -613,6 +637,72 @@ class TasksTable extends HTMLDivElement {
 
         return null;
     }
+
+    renderTeamTaskChanges(teamTask) {
+        if (!teamTask.savedState) {
+            return null;
+        }
+
+        return html`<div class="team-task-changelog">
+            <button onclick=${this.handleShowTeamTaskChanges.bind(this, teamTask)}>Show changelog</button>
+            <div>${(teamTask.changes || []).map(c => this.renderTeamTaskChangeRow(c))}</div>
+            </div>`;
+    }
+
+    renderTeamTaskChangeRow(changeRow) {
+        return html`<div>
+            <div>
+            <strong>${formatTime(changeRow.edit_time)}</strong>
+            <span>${changeRow.editor}</span>
+            </div>
+            <ol>
+            ${this.renderTeamTaskChangeDiff(changeRow.diff)}
+            </ol>
+            </div>`;
+    }
+
+    renderTeamTaskChangeDiff(diff) {
+        if (!diff) {
+            return html`<li>No changes</li>`;
+        }
+
+        const changeTexts = [];
+
+        if (Array.isArray(diff.completion_time)) {
+            if (diff.completion_time.length === 1) {
+                changeTexts.push(html`<li>${'Added completion time ' + formatTime(diff.completion_time[0])}</li`);
+            } else if (diff.completion_time.length === 2) {
+                changeTexts.push(html`<li>${`Changed completion time ${formatTime(diff.completion_time[0])} to ${formatTime(diff.completion_time[1])}`}</li`);
+            }
+        }
+
+        if (Array.isArray(diff.participants)) {
+            if (diff.participants.length === 1) {
+                const participantPointsTexts = Object.entries(diff.participants[0])
+                    .map(entry => html`<li>${this.getParticipantById(parseInt(entry[0]), 10).name} ${entry[1]} points</li>`);
+
+                changeTexts.push(html`<li>Added participants: ${html`<ul>${participantPointsTexts}</ul>`}</li>`);
+            } else if (diff.participants.length === 2) {
+                changeTexts.push(html`<li>${'Changed participants'}</li`);
+            } else if (diff.participants.length === 3) {
+                changeTexts.push(html`<li>${'Removed participants'}</li`);
+            }
+        } else if (diff.participants) {
+            for (let [key, pointsChanges] of Object.entries(diff.participants)) {
+                const participantId = parseInt(key,10);
+
+                if (pointsChanges.length === 1) {
+                    changeTexts.push(html`<li>${`Added ${this.getParticipantById(participantId).name} ${pointsChanges[0]} points`}</li`);
+                } else if (pointsChanges.length === 2) {
+                    changeTexts.push(html`<li>${`Changed ${this.getParticipantById(participantId).name} points from ${pointsChanges[0]} to ${pointsChanges[1]}`}</li`);
+                } else if (pointsChanges.length === 3) {
+                    changeTexts.push(html`<li>${'Removed ' + this.getParticipantById(participantId).name}</li`);
+                }
+             }
+        }
+
+        return html`${changeTexts}`;
+    }
 }
 
 const _options = new WeakMap();
@@ -649,6 +739,8 @@ class TeamTask {
         this.isSaving = false;
 
         this.savedState = null;
+
+        this.changes = null;
     }
 
     static fromSavedState(savedState) {

@@ -198,3 +198,12 @@ option.team-member {
 .bonus-indicator.active {
     opacity: 1;
 }
+
+.team-task-changelog button {
+    margin: 10px 0;
+}
+
+.team-task-changelog ol {
+    margin: 0;
+    margin-bottom: 5px;
+}

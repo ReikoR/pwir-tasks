@@ -102,6 +102,17 @@ router.post('/get-participant-task-points', requireUser, async (req, res) => {
     }
 });
 
+router.post('/get-completed-task-changes', requireUser, async (req, res) => {
+    try {
+        const {task_id, team_id} = req.body;
+        const result = await database.getCompletedTaskChanges(task_id, team_id);
+        res.send(result);
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
 function requireUser(req, res, next) {
     if (req.session && req.session.user && ['student', 'instructor'].includes(req.session.user.role)) {
         next();
