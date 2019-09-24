@@ -118,12 +118,16 @@ class TasksTable extends HTMLDivElement {
         })
     }
 
-    fetchPointsUsedByTaskParticipant(task_id, participant_id) {
+    fetchPointsUsedByTaskParticipant(task_id, participant_id, clearCache = false) {
         if (!task_id || !participant_id) {
             return;
         }
 
         const id = `${task_id}_${participant_id}`;
+
+        if (clearCache) {
+            delete this.participantPointsUsedCache[id];
+        }
 
         if (this.isFetchingParticipantPointsUsed[id] || this.participantPointsUsedCache[id] !== undefined) {
             return;
@@ -186,7 +190,7 @@ class TasksTable extends HTMLDivElement {
             this.fetchTeamTask(teamTask.team_id, teamTask.task_id);
 
             for (const p of saveInfo.participants) {
-                this.fetchPointsUsedByTaskParticipant(teamTask.task_id, p.participant_id);
+                this.fetchPointsUsedByTaskParticipant(teamTask.task_id, p.participant_id, true);
             }
         } catch (e) {
             teamTask.isSaving = false;
