@@ -1,29 +1,19 @@
-import {define, html} from '../lib/heresy.mjs';
+import {LitElement, html} from "../lib/lit-element.mjs";
 
-const _session = new WeakMap();
-const _links = new WeakMap();
-
-class PageHeader extends HTMLDivElement {
-    get session() {
-        return _session.get(this);
+class PageHeader extends LitElement {
+    static get properties() {
+        return {
+            session: {type: Object},
+            links: {type: Array}
+        };
     }
 
-    set session(session) {
-        _session.set(this, session);
-        this.render();
-    }
-
-    get links() {
-        return _links.get(this) || [];
-    }
-
-    set links(links) {
-        _links.set(this, links);
-        this.render();
+    createRenderRoot() {
+        return this;
     }
 
     render() {
-        this.html`<span>
+        return html`<span>
             <span class="title">${this.getAttribute('title')}</span>
             <span>${this.links.map(l => this.renderLink(l))}</span>
             </span>
@@ -47,4 +37,4 @@ class PageHeader extends HTMLDivElement {
     }
 }
 
-define('PageHeader:div', PageHeader);
+customElements.define('page-header', PageHeader);

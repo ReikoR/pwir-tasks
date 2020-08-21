@@ -1,4 +1,4 @@
-import {html, render} from './lib/heresy.mjs';
+import {html, render} from "./lib/lit-element.mjs";
 import {getParticipantTaskPoints, getSession} from "./services/api.js";
 import './components/page-header.js';
 import {DateTime} from "./lib/luxon.mjs";
@@ -27,8 +27,8 @@ const mainElement = document.getElementById('main');
         links.push(['/participants', 'Participants']);
     }
 
-    render(mainElement, html`
-        <PageHeader session=${session} title="Participant points" links=${links}/>
+    render(html`
+        <page-header .session=${session} title="Participant points" .links=${links}></page-header>
         <div class="page-content">
         <table>
         <thead><tr>${columns.map(c => html`<th>${c}</th>`)}</tr></thead>
@@ -39,5 +39,6 @@ const mainElement = document.getElementById('main');
             <td>${tp.total_task_points}</td>
         </tr>`)}</tbody>
         </table>
-        </div>`);
+        </div>`,
+        mainElement);
 })();

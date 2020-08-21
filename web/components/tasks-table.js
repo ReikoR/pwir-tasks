@@ -1,4 +1,4 @@
-import {define, html} from '../lib/heresy.mjs';
+import {LitElement, html} from "../lib/lit-element.mjs";
 import {
     getParticipants,
     getCompletedTask,
@@ -7,16 +7,18 @@ import {
     getPointsUsedByTaskParticipant,
     getCompletedTaskChanges
 } from "../services/api.js";
-import {cloneObject, deepFreeze, classNames} from "../util.js";
+import {cloneObject, deepFreeze, classNames, shallowCloneObject} from "../util.js";
 import {DateTime} from "../lib/luxon.mjs";
-
-const _tasks = new WeakMap();
-const _teams = new WeakMap();
 
 const timeZone = 'Europe/Tallinn';
 
-class TasksTable extends HTMLDivElement {
-    oninit() {
+class TasksTable extends LitElement {
+    constructor() {
+        super();
+
+        this.teams = [];
+        this.tasks = [];
+
         /**@type {Object.<number, TeamTask>}*/
         this.teamTasks = {};
 
@@ -31,22 +33,20 @@ class TasksTable extends HTMLDivElement {
         this.fetchCompletedTasksList();
     }
 
-    get tasks() {
-        return _tasks.get(this) || [];
+    static get properties() {
+        return {
+            teams: {type: Array},
+            tasks: {type: Array},
+            participants: {type: Array},
+            completedTasksList: {type: Array},
+            teamTasks: {type: Object},
+            participantPointsUsedCache: {type: Object},
+            isFetchingParticipantPointsUsed: {type: Object},
+        };
     }
 
-    set tasks(tasks) {
-        _tasks.set(this, tasks);
-        this.render();
-    }
-
-    get teams() {
-        return _teams.get(this) || [];
-    }
-
-    set teams(teams) {
-        _teams.set(this, teams);
-        this.render();
+    createRenderRoot() {
+        return this;
     }
 
     getTeamById(id) {
@@ -85,13 +85,11 @@ class TasksTable extends HTMLDivElement {
     async fetchParticipants() {
         this.participants = await getParticipants({roles: ['student']});
         deepFreeze(this.participants);
-        this.render();
     }
 
     async fetchCompletedTasksList() {
         this.completedTasksList = await getCompletedTasksList();
         deepFreeze(this.completedTasksList);
-        this.render();
     }
 
     async fetchTeamTask(team_id, task_id) {
@@ -105,16 +103,15 @@ class TasksTable extends HTMLDivElement {
                 existingTeamTask.setSavedState(savedTeamTasks[0]);
             } else {
                 delete this.teamTasks[id];
+                this.teamTasks = shallowCloneObject(this.teamTasks);
             }
-
-            this.render();
         }
     }
 
     fetchTeamTaskChanges(teamTask) {
         getCompletedTaskChanges({task_id: teamTask.task_id, team_id: teamTask.team_id}).then(changes => {
             teamTask.changes = changes;
-            this.render();
+            this.teamTasks = shallowCloneObject(this.teamTasks);
         })
     }
 
@@ -127,6 +124,7 @@ class TasksTable extends HTMLDivElement {
 
         if (clearCache) {
             delete this.participantPointsUsedCache[id];
+            this.isFetchingParticipantPointsUsed = shallowCloneObject(this.isFetchingParticipantPointsUsed);
         }
 
         if (this.isFetchingParticipantPointsUsed[id] || this.participantPointsUsedCache[id] !== undefined) {
@@ -138,7 +136,8 @@ class TasksTable extends HTMLDivElement {
         getPointsUsedByTaskParticipant({task_id, participant_id}).then(info => {
             this.isFetchingParticipantPointsUsed[id] = false;
             this.participantPointsUsedCache[id] = info.used;
-            this.render();
+            this.isFetchingParticipantPointsUsed = shallowCloneObject(this.isFetchingParticipantPointsUsed);
+            this.participantPointsUsedCache = shallowCloneObject(this.participantPointsUsedCache);
         });
     }
 
@@ -166,20 +165,20 @@ class TasksTable extends HTMLDivElement {
             teamTask.isOpen = !teamTask.isOpen;
         }
 
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleAddParticipant(teamTask) {
         if (teamTask) {
             teamTask.addParticipant(null, null);
-            this.render();
+            this.teamTasks = shallowCloneObject(this.teamTasks);
         }
     }
 
     async handleSaveTeamTask(teamTask) {
         const saveInfo = teamTask.getSaveInfo();
         teamTask.isSaving = true;
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
 
         try {
             await setCompletedTask(saveInfo);
@@ -194,13 +193,13 @@ class TasksTable extends HTMLDivElement {
             }
         } catch (e) {
             teamTask.isSaving = false;
-            this.render();
+            this.teamTasks = shallowCloneObject(this.teamTasks);
         }
     }
 
     handleCloseTeamTask(teamTask) {
         teamTask.isOpen = false;
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleCompletionTime(teamTask, event) {
@@ -216,14 +215,14 @@ class TasksTable extends HTMLDivElement {
             teamTask.completion_time = dateTime.toISO();
         }
 
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleTaskParticipantPoints(taskParticipant, event) {
         const newValue = parseInt(event.currentTarget.value, 10) || null;
 
         taskParticipant.points = newValue;
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     /**
@@ -231,34 +230,34 @@ class TasksTable extends HTMLDivElement {
      * @param {Event} event
      */
     handleParticipantNameChanged(taskParticipant, event) {
-        taskParticipant.participant_id = parseInt(event.currentTarget.value, 10) || null;
+        taskParticipant.participant_id = parseInt(event.target.value, 10) || null;
 
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleTaskParticipantRemove(teamTask, taskParticipant) {
         teamTask.removeParticipant(taskParticipant);
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleTaskParticipantRestore(teamTask, taskParticipant) {
         teamTask.restoreParticipant(taskParticipant.participant_id);
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleRevertCompletionTime(teamTask) {
         teamTask.revertCompletionTime();
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleRevertName(taskParticipant) {
         taskParticipant.revertName();
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleRevertPoints(taskParticipant) {
         taskParticipant.revertPoints();
-        this.render();
+        this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
     handleShowTeamTaskChanges(teamTask) {
@@ -266,7 +265,7 @@ class TasksTable extends HTMLDivElement {
     }
 
     render() {
-        this.html`<table>
+        return html`<table>
             ${this.renderHeader()}
             ${this.renderBody()}
             </table>`;
@@ -378,7 +377,7 @@ class TasksTable extends HTMLDivElement {
             return html`<td class=${classValue} title=${title}>${done ? 'Done' : ''}</td>`
         }
 
-        return html`<td class=${classValue} title=${title} onclick=${this.handleTeamTask.bind(this, team, task)}>
+        return html`<td class=${classValue} title=${title} @click=${this.handleTeamTask.bind(this, team, task)}>
                 ${done ? 'Done' : ''}</td>`
     }
 
@@ -409,7 +408,7 @@ class TasksTable extends HTMLDivElement {
             <div class="title"><span>Team:</span><strong>${team.name}</strong><span> Task:</span><strong>${task.name}</strong></div>
             <div>
             ${this.renderSaveButton(teamTask)}
-            <button class="close-button" onclick=${this.handleCloseTeamTask.bind(this, teamTask)}>Close</button>
+            <button class="close-button" @click=${this.handleCloseTeamTask.bind(this, teamTask)}>Close</button>
             </div>
             </div>
             <div class="completion-time">
@@ -434,7 +433,7 @@ class TasksTable extends HTMLDivElement {
             return html`<span class="save-status">Saving</span>`;
         }
 
-        return html`<button class="save-button" onclick=${this.handleSaveTeamTask.bind(this, teamTask)}>Save</button>`;
+        return html`<button class="save-button" @click=${this.handleSaveTeamTask.bind(this, teamTask)}>Save</button>`;
     }
 
     renderCompletedAtInput(teamTask) {
@@ -453,9 +452,9 @@ class TasksTable extends HTMLDivElement {
 
         return html`<label> Completed at <input 
                class=${timeClassValue} 
-               onkeyup=${this.handleCompletionTime.bind(this, teamTask)} 
+               @keyup=${this.handleCompletionTime.bind(this, teamTask)} 
                type="text" 
-               value=${teamTask.completion_time_input}/>
+               .value=${teamTask.completion_time_input}>
                </label>`;
     }
 
@@ -464,7 +463,7 @@ class TasksTable extends HTMLDivElement {
             const time = DateTime.fromISO(teamTask.getSavedCompletionTime());
 
             return html`<del>${time.toSQL({includeOffset: false})}</del>
-                <button onclick=${this.handleRevertCompletionTime.bind(this, teamTask)}>Undo</button>`;
+                <button @click=${this.handleRevertCompletionTime.bind(this, teamTask)}>Undo</button>`;
         }
 
         return null;
@@ -512,7 +511,7 @@ class TasksTable extends HTMLDivElement {
             return html`<div class="title">Participants:</div>`;
         }
 
-        return html`<button class="add-participant" onclick=${this.handleAddParticipant.bind(this, teamTask)}>
+        return html`<button class="add-participant" @click=${this.handleAddParticipant.bind(this, teamTask)}>
             Add participant</button>`;
     }
 
@@ -530,7 +529,7 @@ class TasksTable extends HTMLDivElement {
             return html`<div class="removed participant-row">
                 <span>${participant.name}</span>
                 <span>${taskParticipant.points}</span>
-                <button onclick=${this.handleTaskParticipantRestore.bind(this, teamTask, taskParticipant)}>Restore</button>
+                <button @click=${this.handleTaskParticipantRestore.bind(this, teamTask, taskParticipant)}>Restore</button>
                 </div>`;
         }
 
@@ -547,8 +546,8 @@ class TasksTable extends HTMLDivElement {
 
         return html`<div class="participant-row">
                     ${this.renderParticipantSelector(taskParticipant, teamTask)}
-                    <input class=${pointsClassValue} onkeyup=${this.handleTaskParticipantPoints.bind(this, taskParticipant)} value=${taskParticipant.points} type="text"/>
-                    <button onclick=${this.handleTaskParticipantRemove.bind(this, teamTask, taskParticipant)}>Remove</button>
+                    <input class=${pointsClassValue} @keyup=${this.handleTaskParticipantPoints.bind(this, taskParticipant)} .value=${taskParticipant.points} type="text">
+                    <button @click=${this.handleTaskParticipantRemove.bind(this, teamTask, taskParticipant)}>Remove</button>
                     ${this.renderParticipantPointsAvailable(teamTask, taskParticipant)}
                     ${this.renderSavedParticipantName(taskParticipant)}
                     ${this.renderSavedParticipantPoints(taskParticipant)}
@@ -592,10 +591,10 @@ class TasksTable extends HTMLDivElement {
 
         const classValue = classNames({changed: !isNew && isNameChanged, added: isNew});
 
-        return html`<ParticipantSelect 
-            options=${options}
+        return html`<participant-select 
+            .options=${options}
             class=${classValue} 
-            onchange=${this.handleParticipantNameChanged.bind(this, selectedParticipant)}/>`;
+            @change=${this.handleParticipantNameChanged.bind(this, selectedParticipant)}></participant-select>`;
     }
 
     renderParticipantPointsAvailable(teamTask, taskParticipant) {
@@ -624,7 +623,7 @@ class TasksTable extends HTMLDivElement {
 
             if (p) {
                 return html`<del>${p.name}</del>
-                    <button onclick=${this.handleRevertName.bind(this, taskParticipant)}>Undo</button>`;
+                    <button @click=${this.handleRevertName.bind(this, taskParticipant)}>Undo</button>`;
             }
         }
 
@@ -636,7 +635,7 @@ class TasksTable extends HTMLDivElement {
             const points = taskParticipant.getSavedPoints();
 
             return html`<del>${points}</del>
-                <button onclick=${this.handleRevertPoints.bind(this, taskParticipant)}>Undo</button>`;
+                <button @click=${this.handleRevertPoints.bind(this, taskParticipant)}>Undo</button>`;
         }
 
         return null;
@@ -648,7 +647,7 @@ class TasksTable extends HTMLDivElement {
         }
 
         return html`<div class="team-task-changelog">
-            <button onclick=${this.handleShowTeamTaskChanges.bind(this, teamTask)}>Show changelog</button>
+            <button @click=${this.handleShowTeamTaskChanges.bind(this, teamTask)}>Show changelog</button>
             <div>${(teamTask.changes || []).map(c => this.renderTeamTaskChangeRow(c))}</div>
             </div>`;
     }
@@ -709,24 +708,29 @@ class TasksTable extends HTMLDivElement {
     }
 }
 
-const _options = new WeakMap();
+class ParticipantSelect extends LitElement {
+    constructor() {
+        super();
 
-class ParticipantSelect extends HTMLSelectElement {
-    get options() {
-        return _options.get(this);
+        this.options = [];
     }
 
-    set options(options) {
-        _options.set(this, options);
-        this.render();
+    static get properties() {
+        return {
+            options: {type: Array},
+        };
+    }
+
+    createRenderRoot() {
+        return this;
     }
 
     render() {
-        this.html`${this.options.map(option => this.renderParticipantOption(option))}`;
+        return html`<select>${this.options.map(option => this.renderParticipantOption(option))}</select>`;
     }
 
     renderParticipantOption(option) {
-        return html`<option class=${option.className} selected="${option.selected}" value="${option.value}">
+        return html`<option class=${option.className} .selected="${option.selected}" .value="${option.value}">
             ${option.text}</option>`;
     }
 }
@@ -928,5 +932,5 @@ function findParticipantsTeamIdByDateTime(participant, dateTime) {
     return !!team ? team.team_id : null;
 }
 
-define('ParticipantSelect:select', ParticipantSelect);
-define('TasksTable:div', TasksTable);
+customElements.define('participant-select', ParticipantSelect);
+customElements.define('tasks-table', TasksTable);

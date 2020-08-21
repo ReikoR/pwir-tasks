@@ -1,4 +1,4 @@
-div[is^="page-header"] {
+page-header {
     width: 100%;
     background-color: steelblue;
     color: white;
@@ -7,18 +7,18 @@ div[is^="page-header"] {
     font-weight: bold;
 }
 
-div[is^="page-header"] *::selection {
+page-header *::selection {
     background-color: fuchsia;
 }
 
-div[is^="page-header"] a {
+page-header a {
     text-decoration: none;
     color: white;
     padding: 10px;
     display: inline-block;
 }
 
-div[is^="page-header"] .title {
+page-header .title {
     display: inline-block;
     padding: 10px;
     color: #afcee8;

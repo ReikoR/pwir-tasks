@@ -1,4 +1,4 @@
-import {html, render} from './lib/heresy.mjs';
+import {html, render} from './lib/lit-element.mjs';
 import {getTeams, getTasks, getSession} from "./services/api.js";
 import './components/tasks-table.js';
 import './components/page-header.js';
@@ -18,9 +18,10 @@ const mainElement = document.getElementById('main');
 
     const links = session !== null ? [['/participants', 'Participants']] : [];
 
-    render(mainElement, html`
-        <PageHeader session=${session} title="Tasks table" links=${links}/>
+    render(html`
+        <page-header .session=${session} title="Tasks table" .links=${links}></page-header>
         <div class="page-content">
-        <TasksTable mode=${tasksTableMode} tasks=${tasks} teams=${teams}/>
-        </div>`);
+        <tasks-table mode=${tasksTableMode} .tasks=${tasks} .teams=${teams}></tasks-table>
+        </div>`,
+        mainElement);
 })();

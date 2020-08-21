@@ -1,4 +1,4 @@
-import {html, render, ref} from './lib/heresy.mjs';
+import {html, render} from './lib/lit-element.mjs';
 
 const mainElement = document.getElementById('main');
 
@@ -7,7 +7,6 @@ const mainElement = document.getElementById('main');
     let isSending = false;
     let error = null;
     let email = null;
-    let inputRef = ref();
 
     async function login(email) {
         return await fetch('/login', {
@@ -49,25 +48,22 @@ const mainElement = document.getElementById('main');
 
     function renderMain() {
         if (isSuccess) {
-            render(mainElement, html`<div>E-mail sent</div>`);
+            render(html`<div>E-mail sent</div>`, mainElement);
             return;
         }
 
         if (isSending) {
-            render(mainElement, html`<div>Sending e-mail to ${email}</div>`);
+            render(html`<div>Sending e-mail to ${email}</div>`, mainElement);
             return;
         }
 
-        render(mainElement, html`<div>            
-            <form onsubmit="${handleLogin}">
-            <input ref=${inputRef} type="email" name="email" placeholder="E-mail" value=${email}>
+        render( html`<div>            
+            <form @submit="${handleLogin}">
+            <input type="email" name="email" placeholder="E-mail" .value=${email} autofocus>
             <button type="submit">Send login link</button>
             </form>
-            ${renderError()}</div>`);
-
-        if (inputRef.current) {
-            inputRef.current.focus();
-        }
+            ${renderError()}</div>`,
+            mainElement);
     }
 
     function renderError() {

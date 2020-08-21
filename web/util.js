@@ -32,6 +32,10 @@ export function cloneObject(object) {
     return JSON.parse(JSON.stringify(object));
 }
 
+export function shallowCloneObject(object) {
+    return Object.assign({}, object);
+}
+
 export function deepFreeze(object) {
     // Retrieve the property names defined on object
     const propNames = Object.getOwnPropertyNames(object);

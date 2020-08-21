@@ -1,4 +1,4 @@
-import {html, render} from './lib/heresy.mjs';
+import {html, render} from "./lib/lit-element.mjs";
 import {getParticipantsAndPoints, getSession} from "./services/api.js";
 import './components/page-header.js';
 import {classNames} from "./util.js";
@@ -48,8 +48,8 @@ const mainElement = document.getElementById('main');
     }
 
     function renderMain() {
-        render(mainElement, html`
-            <PageHeader session=${session} title="Participants" links=${[['/', 'Tasks table']]}/>
+        render(html`
+            <page-header .session=${session} title="Participants" .links=${[['/', 'Tasks table']]}></page-header>
             <div class="page-content">
             <table>
             <thead><tr>${columns.map(c => renderHeaderCell(c))}</tr></thead>
@@ -57,7 +57,8 @@ const mainElement = document.getElementById('main');
             ${participantsAndPoints.map(renderRow)}
             </tbody>
             </table>
-            </div>`);
+            </div>`,
+            mainElement);
     }
 
     function renderHeaderCell(column) {
@@ -66,7 +67,7 @@ const mainElement = document.getElementById('main');
             desc: sortColumn === column.id && !sortAscending
         });
 
-        return html`<th class=${classValue} onclick=${handleHeaderCellClick.bind(this, column)}>${column.name}</th>`;
+        return html`<th class=${classValue} @click=${handleHeaderCellClick.bind(this, column)}>${column.name}</th>`;
     }
 
     function renderRow(participant) {

@@ -30,7 +30,7 @@ button {
     height: 26px;
 }
 
-div[is^="tasks-table"] table {
+tasks-table table {
     border-collapse: collapse;
     border-spacing: 0;
 }
