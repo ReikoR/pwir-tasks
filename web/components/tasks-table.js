@@ -8,7 +8,7 @@ import {
     getCompletedTaskChanges
 } from "../services/api.js";
 import {cloneObject, deepFreeze, classNames} from "../util.js";
-import {DateTime} from "../lib/luxon.js";
+import {DateTime} from "../lib/luxon.mjs";
 
 const _tasks = new WeakMap();
 const _teams = new WeakMap();

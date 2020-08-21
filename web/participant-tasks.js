@@ -1,7 +1,7 @@
 import {html, render} from './lib/heresy.mjs';
 import {getParticipantTaskPoints, getSession} from "./services/api.js";
 import './components/page-header.js';
-import {DateTime} from "./lib/luxon.js";
+import {DateTime} from "./lib/luxon.mjs";
 
 const mainElement = document.getElementById('main');
 
