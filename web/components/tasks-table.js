@@ -28,7 +28,7 @@ class TasksTable extends LitElement {
         this.participants = null;
         this.completedTasksList = [];
 
-        this.nonTeamColumns = ['Task', 'Points', 'Points now', 'Bonuses', 'Deadline', 'Expires at'];
+        this.nonTeamColumns = ['Task', 'Points', 'Expires at'];
 
         this.fetchCompletedTasksList();
     }
@@ -142,7 +142,7 @@ class TasksTable extends LitElement {
     }
 
     calcTaskMaxPoints(task) {
-        return Math.round(task.points * (1 + (task.week_before_bonus ? 0.2 : task.on_time_bonus ? 0.1 : 0)));
+        return task.points;
     }
 
     async handleTeamTask(team, task) {
@@ -284,24 +284,13 @@ class TasksTable extends LitElement {
     renderRow(task) {
         const columnCount = this.nonTeamColumns.length + this.teams.length;
 
-        const deadlineDateTime = DateTime.fromISO(task.deadline);
-        const weekBeforeDeadline = deadlineDateTime.minus({weeks: 1});
-        const currentDateTime = DateTime.local();
-        const withinWeek = weekBeforeDeadline < currentDateTime && currentDateTime <= deadlineDateTime;
-        const overdue = deadlineDateTime < currentDateTime;
-
         const classValue = classNames('task-row', {
-            'overdue-task': overdue,
-            'within-week-task': withinWeek,
             'progress-task': task.is_progress
         });
 
         return html`<tr class=${classValue}>
             <td>${this.renderTaskName(task)}</td>
             <td>${task.points}</td>
-            <td>${task.points_available}</td>
-            <td>${this.renderTaskBonuses(task)}</td>
-            <td>${formatTime(task.deadline)}</td>
             <td>${formatTime(task.expires_at)}</td>
             ${this.teams.map(team => this.renderTeamTaskCell(team, task))}
             </tr>
@@ -322,27 +311,6 @@ class TasksTable extends LitElement {
         }
 
         return html`${task.name}`;
-    }
-
-    renderTaskBonuses(task) {
-        const bonuses = [];
-        const dateTimeNow = DateTime.local();
-        const deadlineDateTime = DateTime.fromISO(task.deadline);
-        const weekBeforeDeadlineDateTime = DateTime.fromISO(task.deadline).minus({weeks: 1});
-
-        if (task.week_before_bonus) {
-            bonuses.push({text: '+20%', title: 'Week before', active: dateTimeNow <= weekBeforeDeadlineDateTime});
-        }
-
-        if (task.on_time_bonus) {
-            bonuses.push({text: '+10%', title: 'On time', active: dateTimeNow <= deadlineDateTime});
-        }
-
-        return html`<span class="bonus-indicators">${bonuses.map(b => {
-            const classValue = classNames('bonus-indicator', {active: b.active});
-
-            return html`<span class=${classValue} title=${b.title}>${b.text}</span>`;
-        })}</span>`;
     }
 
     renderTeamTaskCell(team, task) {
@@ -472,31 +440,17 @@ class TasksTable extends LitElement {
     renderAvailablePoints(team, task) {
         const teamTask = this.getTeamTask(team, task);
         const completionDateTime = DateTime.fromISO(teamTask.completion_time);
-        const basePoints = task.points;
-        let isOnTime = false;
-        let isWeekBefore = false;
+        let pointsAvailable = task.points;
 
         if (completionDateTime.isValid) {
-            const deadlineDateTime = DateTime.fromISO(task.deadline);
-            const weekBeforeDeadlineDateTime = DateTime.fromISO(task.deadline).minus({weeks: 1});
+            const expiresAtDateTime = DateTime.fromISO(task.expires_at);
 
-            if (task.week_before_bonus && completionDateTime <= weekBeforeDeadlineDateTime) {
-                isWeekBefore = true;
-            } else if (task.on_time_bonus && completionDateTime <= deadlineDateTime) {
-                isOnTime = true;
+            if (completionDateTime > expiresAtDateTime) {
+                pointsAvailable = 0;
             }
         }
 
-        const bonusPoints = isWeekBefore ? basePoints * 0.2 : (isOnTime ? basePoints * 0.1 : 0);
-
-        if (bonusPoints === 0) {
-            return html`<div class="points-available"><span>Points available: </span><strong>${basePoints}</strong>`;
-        }
-
-        const info = isWeekBefore ? '(120% for at least 1 week before deadline)' : '(110% for before deadline)';
-
-        return html`<div class="points-available"><span>Points available: </span>
-            ${basePoints} + ${bonusPoints} = <strong>${basePoints + bonusPoints}</strong> ${info}</div>`;
+        return html`<div class="points-available"><span>Points available: </span><strong>${pointsAvailable}</strong>`;
     }
 
     renderUsedPoints(team, task) {

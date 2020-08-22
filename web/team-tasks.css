@@ -43,11 +43,11 @@ table thead th {
     z-index: 1;
 }
 
-table thead th:nth-child(-n+6) {
+table thead th:nth-child(-n+3) {
     color: #ccc;
 }
 
-table tbody tr.task-row td:nth-child(-n+6) {
+table tbody tr.task-row td:nth-child(-n+3) {
     background-color: #eee;
 }
 
