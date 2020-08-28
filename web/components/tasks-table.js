@@ -284,9 +284,7 @@ class TasksTable extends LitElement {
     renderRow(task) {
         const columnCount = this.nonTeamColumns.length + this.teams.length;
 
-        const classValue = classNames('task-row', {
-            'progress-task': task.is_progress
-        });
+        const classValue = classNames('task-row', `${task.task_group}-task`);
 
         return html`<tr class=${classValue}>
             <td>${this.renderTaskName(task)}</td>

@@ -59,12 +59,28 @@ tr.task-row td, th {
     border-top: 1px solid #DDD;
 }
 
-.task-row.overdue-task td:nth-child(-n+6) {
+.task-row.overdue-task td:nth-child(-n+3) {
     color: #888;
 }
 
-.task-row.within-week-task td:nth-child(-n+6) {
+.task-row.within-week-task td:nth-child(-n+3) {
     font-weight: bold;
+}
+
+.task-row.programming-task {
+    border-left: 16px solid #000;
+}
+
+.task-row.mechanics-task {
+    border-left: 16px solid #555;
+}
+
+.task-row.electronics-task {
+    border-left: 16px solid #AAA;
+}
+
+.task-row.other-task {
+    border-left: 16px solid #FFF;
 }
 
 tr.team-tasks-row td {
