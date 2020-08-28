@@ -301,11 +301,7 @@ class TasksTable extends LitElement {
 
     renderTaskName(task) {
         if (task.description) {
-            const match = /href="(.+?)"/.exec(task.description);
-
-            if (match.length === 2) {
-                return html`<a href="${match[1]}" target="_blank">${task.name}</a>`
-            }
+            return html`<a href="${task.description}" target="_blank">${task.name}</a>`
         }
 
         return html`${task.name}`;
