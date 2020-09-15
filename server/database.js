@@ -70,7 +70,8 @@ async function getParticipants(roles) {
 }
 
 async function getParticipantsAndPoints() {
-    const queryString = `select
+    const queryString = `select * from (
+        select
                participant.participant_id,
                participant.name,
                (
@@ -85,7 +86,8 @@ async function getParticipantsAndPoints() {
                    and tm.participant_id = participant.participant_id
                ) as team_name
         from participant
-        where participant.role = 'student';`;
+        where participant.role = 'student') as sub
+        where sub.team_name is not null;`;
 
     return (await knex.raw(queryString)).rows;
 }
