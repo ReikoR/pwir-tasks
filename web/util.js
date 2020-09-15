@@ -49,3 +49,16 @@ export function deepFreeze(object) {
 
     return Object.freeze(object);
 }
+
+export function divideIntoIntegers(sum, count) {
+    const min = Math.floor(sum / count);
+
+    const values = Array(count).fill(min);
+    const leftOver = sum - min * count;
+
+    for (let i = 0; i < leftOver; i++) {
+        values[i]++;
+    }
+
+    return values;
+}

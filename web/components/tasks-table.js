@@ -7,7 +7,7 @@ import {
     getPointsUsedByTaskParticipant,
     getCompletedTaskChanges
 } from "../services/api.js";
-import {cloneObject, deepFreeze, classNames, shallowCloneObject} from "../util.js";
+import {cloneObject, deepFreeze, classNames, shallowCloneObject, divideIntoIntegers} from "../util.js";
 import {DateTime} from "../lib/luxon.mjs";
 
 const timeZone = 'Europe/Tallinn';
@@ -74,6 +74,18 @@ class TasksTable extends LitElement {
 
     getCompletedTaskInfo(team, task) {
         return this.completedTasksList.find(t => t.task_id === task.task_id && t.team_id === team.team_id) || null;
+    }
+
+    getTeamParticipantIds(team_id, dateTime) {
+        const ids = [];
+
+        for (const participant of this.participants) {
+            if (team_id === findParticipantsTeamIdByDateTime(participant, dateTime)) {
+                ids.push(participant.participant_id);
+            }
+        }
+
+        return ids;
     }
 
     isTeamTaskOpen(team, task) {
@@ -168,6 +180,28 @@ class TasksTable extends LitElement {
         this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
+    /**
+     * @param {TeamTask} teamTask
+     */
+    handleDistributeEquallyInTeam(teamTask) {
+        if (teamTask) {
+            const completionDateTime = DateTime.fromISO(teamTask.completion_time);
+
+            teamTask.removeAllParticipants();
+
+            const task = this.getTaskById(teamTask.task_id);
+            const participantIds = this.getTeamParticipantIds(teamTask.team_id, completionDateTime);
+            const totalPoints = task.points;
+            const participantPoints = divideIntoIntegers(totalPoints, participantIds.length);
+
+            for (const [index, pId] of participantIds.entries()) {
+                teamTask.addParticipant(pId, participantPoints[index]);
+            }
+
+            this.teamTasks = shallowCloneObject(this.teamTasks);
+        }
+    }
+
     handleAddParticipant(teamTask) {
         if (teamTask) {
             teamTask.addParticipant(null, null);
@@ -213,6 +247,8 @@ class TasksTable extends LitElement {
 
         if (dateTime.isValid) {
             teamTask.completion_time = dateTime.toISO();
+        } else {
+            teamTask.completion_time = null;
         }
 
         this.teamTasks = shallowCloneObject(this.teamTasks);
@@ -380,6 +416,7 @@ class TasksTable extends LitElement {
             ${this.renderAvailablePoints(team, task)}
             ${this.renderUsedPoints(team, task)}
             <div class="participants">
+            ${this.renderDistributeEquallyInTeam(teamTask)}
             ${this.renderAddParticipant(teamTask)}
             ${teamTask.participants.map(taskParticipant =>  this.renderParticipantRow(teamTask, taskParticipant))}
             ${this.renderTeamTaskChanges(teamTask)}
@@ -449,9 +486,18 @@ class TasksTable extends LitElement {
 
     renderUsedPoints(team, task) {
         const teamTask = this.getTeamTask(team, task);
-        const total = teamTask.participants.reduce((runningTotal, p) => runningTotal + p.points, 0);
+        const total = teamTask.participants.reduce((runningTotal, p) => runningTotal + (p.isRemoved ? 0: p.points), 0);
 
         return html`<div class="points-used"><span>Points used: </span><strong>${total}</strong></div>`;
+    }
+
+    renderDistributeEquallyInTeam(teamTask) {
+        if (this.getAttribute('mode') !== 'edit') {
+            return null;
+        }
+
+        return html`<button class="distribute-equally-in-team" @click=${this.handleDistributeEquallyInTeam.bind(this, teamTask)}>
+            Distribute equally between team members</button>`;
     }
 
     renderAddParticipant(teamTask) {
@@ -731,8 +777,19 @@ class TeamTask {
         return this.participants.findIndex(p => p.participant_id === participant_id) !== -1;
     }
 
+    getParticipantById(participant_id) {
+        return this.participants.find(p => p.participant_id === participant_id);
+    }
+
     addParticipant(participant_id, points) {
-        this.participants.push(new TaskParticipant(participant_id, points));
+        const participant = this.getParticipantById(participant_id);
+
+        if (participant) {
+            participant.points = points;
+            participant.isRemoved = false;
+        } else {
+            this.participants.push(new TaskParticipant(participant_id, points));
+        }
     }
 
     removeParticipant(taskParticipant) {
@@ -749,6 +806,12 @@ class TeamTask {
 
         const participant = this.participants[index];
         participant.isRemoved = true;
+    }
+
+    removeAllParticipants() {
+        for (const participant of this.participants.slice()) {
+            this.removeParticipant(participant);
+        }
     }
 
     restoreParticipant(participant_id) {
