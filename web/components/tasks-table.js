@@ -1,4 +1,4 @@
-import {LitElement, html} from "../lib/lit-element.mjs";
+import {LitElement, html} from "../lib/lit.mjs";
 import {
     getParticipants,
     getCompletedTask,

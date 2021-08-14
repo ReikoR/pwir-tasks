@@ -1,4 +1,4 @@
-import {html, render} from './lib/lit-element.mjs';
+import {html, render} from './lib/lit.mjs';
 
 const mainElement = document.getElementById('main');
 

@@ -1,21 +1,21 @@
 import resolve from '@rollup/plugin-node-resolve';
 import includePaths from 'rollup-plugin-includepaths';
-//import { terser } from 'rollup-plugin-terser';
+// import {terser} from 'rollup-plugin-terser';
 
 export default {
-    input: './node_modules/luxon/src/luxon.js',
+    input: './lit-wrapper.js',
     plugins: [
         includePaths({
             include: {},
         }),
         resolve({mainFields: ['module']}),
-        //terser()
+        // terser()
     ],
     context: 'null',
     moduleContext: 'null',
     output: {
-        file: '../web/lib/luxon.mjs',
+        file: '../web/lib/lit.mjs',
         format: 'esm',
-        name: 'luxon'
+        name: 'lit'
     }
 };

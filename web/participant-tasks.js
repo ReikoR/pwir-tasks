@@ -1,4 +1,4 @@
-import {html, render} from "./lib/lit-element.mjs";
+import {html, render} from "./lib/lit.mjs";
 import {getParticipantTaskPoints, getSession} from "./services/api.js";
 import './components/page-header.js';
 import {DateTime} from "./lib/luxon.mjs";

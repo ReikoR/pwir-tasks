@@ -1,4 +1,4 @@
-import {html, render} from "./lib/lit-element.mjs";
+import {html, render} from "./lib/lit.mjs";
 import {getParticipantsAndPoints, getSession} from "./services/api.js";
 import './components/page-header.js';
 import {classNames} from "./util.js";

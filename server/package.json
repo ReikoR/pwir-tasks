@@ -10,15 +10,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "body-parser": "latest",
     "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "helmet": "^4.1.0",
+    "express-session": "^1.17.2",
+    "helmet": "^4.6.0",
     "jsondiffpatch": "^0.4.1",
-    "knex": "^0.21.5",
-    "nanoid": "^3.1.12",
-    "pg": "^8.3.2",
+    "knex": "^0.21.21",
+    "nanoid": "^3.1.25",
+    "pg": "^8.7.1",
     "serve-static": "latest",
     "session-file-store": "^1.4.0"
   }
