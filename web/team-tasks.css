@@ -155,7 +155,8 @@ input.points {
     margin-top: 5px;
 }
 
-.team-task-header {
+.team-task-header,
+.completion-time {
     display: flex;
     align-items: center;
     justify-content: left;

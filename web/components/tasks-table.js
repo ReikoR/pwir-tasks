@@ -286,6 +286,11 @@ class TasksTable extends LitElement {
         this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
+    handleSetCompletionTimeToNow(teamTask) {
+        teamTask.setCompletionTime(DateTime.local().startOf('minute').toISO());
+        this.teamTasks = shallowCloneObject(this.teamTasks);
+    }
+
     handleRevertName(taskParticipant) {
         taskParticipant.revertName();
         this.teamTasks = shallowCloneObject(this.teamTasks);
@@ -411,6 +416,7 @@ class TasksTable extends LitElement {
             </div>
             <div class="completion-time">
             ${this.renderCompletedAtInput(teamTask)}
+            ${this.renderCompletedAtSetNow(teamTask)}
             ${this.renderSavedCompletionTime(teamTask)}
             </div>
             ${this.renderAvailablePoints(team, task)}
@@ -455,6 +461,16 @@ class TasksTable extends LitElement {
                type="text" 
                .value=${teamTask.completion_time_input}>
                </label>`;
+    }
+
+    renderCompletedAtSetNow(teamTask) {
+        if (this.getAttribute('mode') !== 'edit') {
+            return null;
+        }
+
+        return html`<button @click=${this.handleSetCompletionTimeToNow.bind(this, teamTask)}>Set to now</button>`;
+
+        return null;
     }
 
     renderSavedCompletionTime(teamTask) {
@@ -834,7 +850,11 @@ class TeamTask {
     }
 
     revertCompletionTime() {
-        this.completion_time = this.getSavedCompletionTime();
+        this.setCompletionTime(this.getSavedCompletionTime());
+    }
+
+    setCompletionTime(completionTime) {
+        this.completion_time = completionTime;
         this.completion_time_input = formatTime(this.completion_time);
     }
 }
