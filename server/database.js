@@ -243,9 +243,9 @@ async function getParticipantTaskPoints(participant_id) {
     const queryString = `select
             task.task_id,
             task.name,
-            task.deadline,
+            task.expires_at,
             sum(ctp.points) as points_used,
-            task.task_points_with_bonuses as total_task_points
+            task.points as total_task_points
         from task
         left join (select * from completed_task_participant where participant_id = ?) as ctp 
             on ctp.task_id = task.task_id

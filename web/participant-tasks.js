@@ -20,7 +20,7 @@ const mainElement = document.getElementById('main');
         participantTaskPoints = await getParticipantTaskPoints({participant_id});
     }
 
-    const columns = ['Task', 'Deadline', 'Points used', 'Total points'];
+    const columns = ['Task', 'Expires at', 'Points used', 'Total points'];
     const links = [['/', 'Tasks table']];
 
     if (session) {
@@ -34,7 +34,7 @@ const mainElement = document.getElementById('main');
         <thead><tr>${columns.map(c => html`<th>${c}</th>`)}</tr></thead>
         <tbody>${participantTaskPoints.map(tp => html`<tr>
             <td>${tp.name}</td>
-            <td>${DateTime.fromISO(tp.deadline).toFormat('yyyy-MM-dd T')}</td>
+            <td>${DateTime.fromISO(tp.expires_at).toFormat('yyyy-MM-dd T')}</td>
             <td>${tp.points_used || 0}</td>
             <td>${tp.total_task_points}</td>
         </tr>`)}</tbody>
