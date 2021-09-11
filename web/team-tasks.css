@@ -68,19 +68,27 @@ tr.task-row td, th {
 }
 
 .task-row.programming-task {
-    border-left: 16px solid #000;
+    border-left: 16px solid rgba(32, 75, 126, 1);
 }
 
 .task-row.mechanics-task {
-    border-left: 16px solid #555;
+    border-left: 16px solid rgba(32, 75, 126, 0.85);
 }
 
 .task-row.electronics-task {
-    border-left: 16px solid #AAA;
+    border-left: 16px solid rgba(32, 75, 126, 0.7);
 }
 
 .task-row.other-task {
-    border-left: 16px solid #FFF;
+    border-left: 16px solid rgba(32, 75, 126, 0.55);
+}
+
+.task-row.progress-task {
+    border-left: 16px solid rgba(32, 75, 126, 0.4);
+}
+
+.task-row.competitions-task {
+    border-left: 16px solid rgba(32, 75, 126, 0.15);
 }
 
 tr.team-tasks-row td {
