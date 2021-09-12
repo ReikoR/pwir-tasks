@@ -49,6 +49,16 @@ function getTeams() {
     return knex('team').select();
 }
 
+async function getTeamsAndPoints() {
+    const queryString = `select team.team_id, team.name, coalesce(sum(task.points)::integer, 0) as team_points from team
+        left join completed_task on team.team_id = completed_task.team_id
+        left join task on completed_task.task_id = task.task_id
+        group by team.team_id
+        order by team_points desc, team.team_id;`
+
+    return (await knex.raw(queryString)).rows;
+}
+
 async function getParticipants(roles) {
     const queryString = `select
             participant.participant_id,
@@ -304,11 +314,16 @@ async function getCompletedTaskChanges(task_id, team_id) {
     return changes;
 }
 
+async function close() {
+    return knex.destroy();
+}
+
 module.exports = {
     getParticipantByEmail,
     getParticipantById,
     getTasks,
     getTeams,
+    getTeamsAndPoints,
     getParticipants,
     setCompletedTask,
     getCompletedTask,
@@ -317,4 +332,5 @@ module.exports = {
     getParticipantsAndPoints,
     getParticipantTaskPoints,
     getCompletedTaskChanges,
+    close,
 };

@@ -2,6 +2,7 @@ const database = require('./database');
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
+const {generateTeamSVGs} = require("./tools.js");
 
 router.use(jsonParser);
 
@@ -18,6 +19,16 @@ router.get('/tasks', async (req, res) => {
 router.get('/teams', async (req, res) => {
     try {
         const rows = await database.getTeams();
+        res.send(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
+router.get('/teams-and-points', async (req, res) => {
+    try {
+        const rows = await database.getTeamsAndPoints();
         res.send(rows);
     } catch (e) {
         console.error(e);
@@ -74,6 +85,12 @@ router.post('/set-completed-task', requireEditor, async (req, res) => {
         const {task_id, team_id, completion_time, participants} = req.body;
         await database.setCompletedTask(task_id, team_id, completion_time, participants, editor_id);
         res.send('OK');
+
+        try {
+            await generateTeamSVGs(team_id);
+        } catch (e) {
+            console.error(e);
+        }
     } catch (e) {
         console.error(e);
         res.status(400).send('Internal error');

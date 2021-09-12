@@ -1,17 +1,12 @@
 import {html, render} from "./lib/lit.mjs";
-import {getParticipantsAndPoints, getSession} from "./services/api.js";
-import './components/page-header.js';
+import {getParticipantsAndPoints} from "./services/api.js";
+import './components/default-page-header.js';
 import {classNames} from "./util.js";
 
 const mainElement = document.getElementById('main');
 
 (async function () {
     const participantsAndPoints = await getParticipantsAndPoints();
-    let session = null;
-
-    try {
-        session = await getSession();
-    } catch (e) {}
 
     participantsAndPoints.sort((a, b) => b.total_points - a.total_points);
 
@@ -49,7 +44,7 @@ const mainElement = document.getElementById('main');
 
     function renderMain() {
         render(html`
-            <page-header .session=${session} title="Participants" .links=${[['/', 'Tasks table']]}></page-header>
+            <default-page-header title="Participants"></default-page-header>
             <div class="page-content">
             <table>
             <thead><tr>${columns.map(c => renderHeaderCell(c))}</tr></thead>

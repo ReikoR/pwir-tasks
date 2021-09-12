@@ -3,3 +3,5 @@ server/conf/config_.js
 server/node_modules/
 server/sessions/
 web-dependencies/node_modules/
+web/img/generated/
+database/node_modules/

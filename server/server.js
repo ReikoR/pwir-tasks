@@ -10,15 +10,24 @@ const authRouter = require('./auth');
 const path = require('path');
 const webFolder = path.join(__dirname, '../web/');
 const helmet = require('helmet');
+const {generateAllSVGs} = require("./tools.js");
 
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+            "object-src": "'self'", // For SVGs embedded with object tag
+        },
+    }
+}));
+
 app.use(serveStatic(webFolder, {index: false}));
 
 app.use(authRouter);
 app.use('/api', apiRouter);
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(webFolder, 'team-tasks.html'));
+    res.sendFile(path.join(webFolder, 'overview.html'));
 });
 
 app.get('/login', (req, res) => {
@@ -27,6 +36,14 @@ app.get('/login', (req, res) => {
     } else {
         res.sendFile(path.join(webFolder, 'login.html'));
     }
+});
+
+app.get('/tasks-table', (req, res) => {
+    res.sendFile(path.join(webFolder, 'team-tasks.html'));
+});
+
+app.get('/team-schedule', (req, res) => {
+    res.sendFile(path.join(webFolder, 'team-schedule.html'));
 });
 
 app.get('/participants', requireUser, (req, res) => {
@@ -60,3 +77,5 @@ if (config.useHttps) {
 } else {
     server.listen(config.port);
 }
+
+generateAllSVGs();

@@ -1,72 +1,72 @@
-Task	Points	Expires at
+Task	Points	Expires at	Short time	Optional	Link override
 Group: programming
-Mainboard communication	1000	2022-01-25 20:00
-Robot finds a ball	2000	2022-01-25 20:00
-Robot follows a ball	1600	2022-01-25 20:00
-Robot finds basket with a ball	1600	2022-01-25 20:00
-Robot throws a ball	800	2022-01-25 20:00
-Robot can properly react to referee commands	1000	2022-01-25 20:00
-Code works on new robot	1200	2022-01-25 20:00
-3 of 11 balls in 60 seconds	2400	2022-01-26 18:00
-5 of 11 balls in 60 seconds	1600	2022-01-26 18:00
-2 of 5 balls with 6 balls outside	2000	2022-01-25 20:00
-Dealing with opponent robot using 1 ball	2000	2022-01-25 20:00
-Robot movable with remote controller	400	2022-01-25 20:00
-Throwing range test	1200	2022-01-25 20:00
-Ball holding test	1200	2022-01-25 20:00
+Mainboard communication	1000	2022-01-25 20:00	W3	0
+Robot finds a ball	2000	2022-01-25 20:00	W4	0
+Robot follows a ball	1600	2022-01-25 20:00	W5-6	0
+Robot finds basket with a ball	1600	2022-01-25 20:00	W7-8	0
+Robot throws a ball	800	2022-01-25 20:00	W9-10	0
+Robot can properly react to referee commands	1000	2022-01-25 20:00	W11	0
+Code works on new robot	1200	2022-01-25 20:00	W14	0
+3 of 11 balls in 60 seconds	2400	2022-01-26 18:00	W15	0
+5 of 11 balls in 60 seconds	1600	2022-01-26 18:00	W19	1
+2 of 5 balls with 6 balls outside	2000	2022-01-25 20:00	W20	1
+Dealing with opponent robot using 1 ball	2000	2022-01-25 20:00	W21	1
+Robot movable with remote controller	400	2022-01-25 20:00	W5	1
+Throwing range test	1200	2022-01-25 20:00	W14	1
+Ball holding test	1200	2022-01-25 20:00	W15	1
 Group: mechanics
-Test robot thrower design completed	800	2022-01-25 20:00
-Test robot thrower fabricated	400	2022-01-25 20:00
-Test robot thrower mechanics assembled and attached to robot	400	2022-01-25 20:00
-Omni wheels design completed	1000	2022-01-25 20:00
-Motor mounts design completed	400	2022-01-25 20:00
-Camera mount design completed	400	2022-01-25 20:00
-Ball thrower design completed	800	2022-01-25 20:00
-Adjustable ball throwing angle design completed	1200	2022-01-25 20:00
-Ball holding thrower design completed	1200	2022-01-25 20:00
-Robot chassis design completed	1000	2022-01-25 20:00
-Whole new robot fabricated	1000	2022-01-25 20:00
-Mechanics assembled	1600	2022-01-25 20:00
+Test robot thrower design completed	800	2022-01-25 20:00	W3	0
+Test robot thrower fabricated	400	2022-01-25 20:00	W4	0
+Test robot thrower mechanics assembled and attached to robot	400	2022-01-25 20:00	W4	0
+Omni wheels design completed	1000	2022-01-25 20:00	W5-6	0
+Motor mounts design completed	400	2022-01-25 20:00	W5-6	0
+Camera mount design completed	400	2022-01-25 20:00	W7	0
+Ball thrower design completed	800	2022-01-25 20:00	W8-10	0
+Adjustable ball throwing angle design completed	1200	2022-01-25 20:00	W8-10	1
+Ball holding thrower design completed	1200	2022-01-25 20:00	W8-10	1
+Robot chassis design completed	1000	2022-01-25 20:00	W5-10	0
+Whole new robot fabricated	1000	2022-01-25 20:00	W11-12	0
+Mechanics assembled	1600	2022-01-25 20:00	W13	0
 Group: electronics
-Test robot thrower electronics attached and working	400	2022-01-25 20:00
-Mainboard design completed	2000	2022-01-25 20:00
-Mainboard soldered and working	600	2022-01-25 20:00
-Mainboard firmware completed	1000	2022-01-25 20:00
-Motor driver design completed	1000	2022-01-25 20:00
-Motor drivers soldered and working	600	2022-01-25 20:00
-Mainboard documented	600	2022-01-25 20:00
-Motor driver documented	600	2022-01-25 20:00
-Power path controller soldered and working	200	2022-01-25 20:00
-Throwing angle adjustable through mainboard	1000	2022-01-25 20:00
-Ball holder controllable through mainboard	1200	2022-01-25 20:00
-Thrower voltage regulator attached and working	400	2022-01-25 20:00
-Electronics attached to the robot and working	1200	2022-01-25 20:00
+Test robot thrower electronics attached and working	400	2022-01-25 20:00	W4	0
+Mainboard design completed	2000	2022-01-25 20:00	W3-10	0
+Mainboard soldered and working	600	2022-01-25 20:00	W13	0
+Mainboard firmware completed	1000	2022-01-25 20:00	W11-14	0
+Motor driver design completed	1000	2022-01-25 20:00	W3-10	0
+Motor drivers soldered and working	600	2022-01-25 20:00	W13	0
+Mainboard documented	600	2022-01-25 20:00	W20	0
+Motor driver documented	600	2022-01-25 20:00	W20	0
+Power path controller soldered and working	200	2022-01-25 20:00	W13	0
+Throwing angle adjustable through mainboard	1000	2022-01-25 20:00	W3-14	1
+Ball holder controllable through mainboard	1200	2022-01-25 20:00	W3-14	1
+Thrower voltage regulator attached and working	400	2022-01-25 20:00	W14	0
+Electronics attached to the robot and working	1200	2022-01-25 20:00	W14	0
 Group: other
-Test robot assembled	1200	2022-01-25 20:00
-Team wiki page created	200	2022-01-25 20:00
-Team wiki page completed and final presentation	0	2022-01-27 20:00
-Parts returned	0	2022-01-27 20:00
+Test robot assembled	1200	2022-01-25 20:00	W2-3	0
+Team wiki page created	200	2022-01-25 20:00	W2	0
+Team wiki page completed and final presentation	0	2022-01-27 20:00	2022-01-27	0
+Parts returned	0	2022-01-27 20:00	2022-01-27	0
 Group: progress
-Progress blog and presentation	200	2021-09-13 20:00
-Progress blog and presentation	200	2021-09-27 20:00
-Progress blog and presentation	200	2021-10-11 20:00
-Progress blog and presentation	200	2021-10-25 20:00
-Progress blog and presentation	200	2021-11-08 20:00
-Progress blog and presentation	200	2021-11-22 20:00
-Progress blog and presentation	200	2021-12-06 20:00
-Progress blog and presentation	200	2022-01-10 20:00
+Progress blog and presentation	200	2021-09-13 20:00	2021-09-13	0
+Progress blog and presentation	200	2021-09-27 20:00	2021-09-27	0
+Progress blog and presentation	200	2021-10-11 20:00	2021-10-11	0
+Progress blog and presentation	200	2021-10-25 20:00	2021-10-25	0
+Progress blog and presentation	200	2021-11-08 20:00	2021-11-08	0
+Progress blog and presentation	200	2021-11-22 20:00	2021-11-22	0
+Progress blog and presentation	200	2021-12-06 20:00	2021-12-06	0
+Progress blog and presentation	200	2022-01-10 20:00	2022-01-10	0
 Group: competitions
-1st old robot test competition	800	2021-11-18 20:00
-1st old robot test competition winner	400	2021-11-18 20:00
-2nd old robot competition	800	2021-12-02 20:00
-2nd old robot competition winner	400	2021-12-02 20:00
-1st new robot test competition	800	2021-12-16 20:00
-1st new robot test competition winner	400	2021-12-16 20:00
-2nd new robot test competition	800	2022-01-06 20:00
-2nd new robot test competition winner	400	2022-01-06 20:00
-3rd new robot test competition	800	2022-01-20 20:00
-3rd new robot test competition winner	400	2022-01-20 20:00
-Delta X	4000	2022-01-26 20:00
-Delta X best course robot	1000	2022-01-26 20:00
-Delta X 2nd best course robot	400	2022-01-26 20:00
-Delta X 3rd best course robot	200	2022-01-26 20:00
+1st old robot test competition	800	2021-11-18 20:00	2021-11-18	0	Test_competition
+1st old robot test competition winner	400	2021-11-18 20:00	2021-11-18	1	Test_competition
+2nd old robot competition	800	2021-12-02 20:00	2021-12-02	0	Test_competition
+2nd old robot competition winner	400	2021-12-02 20:00	2021-12-02	1	Test_competition
+1st new robot test competition	800	2021-12-16 20:00	2021-12-16	0	Test_competition
+1st new robot test competition winner	400	2021-12-16 20:00	2021-12-16	1	Test_competition
+2nd new robot test competition	800	2022-01-06 20:00	2022-01-06	0	Test_competition
+2nd new robot test competition winner	400	2022-01-06 20:00	2022-01-06	1	Test_competition
+3rd new robot test competition	800	2022-01-20 20:00	2022-01-20	0	Test_competition
+3rd new robot test competition winner	400	2022-01-20 20:00	2022-01-20	1	Test_competition
+Delta X	4000	2022-01-26 20:00	2022-01-26	0
+Delta X best course robot	1000	2022-01-26 20:00	2022-01-26	1
+Delta X 2nd best course robot	400	2022-01-26 20:00	2022-01-26	1
+Delta X 3rd best course robot	200	2022-01-26 20:00	2022-01-26	1

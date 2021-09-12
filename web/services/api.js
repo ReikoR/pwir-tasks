@@ -53,6 +53,10 @@ export function getTeams() {
     return get('/api/teams');
 }
 
+export function getTeamsAndPoints() {
+    return get('/api/teams-and-points');
+}
+
 export function getParticipants(params) {
     return post('/api/participants', params);
 }

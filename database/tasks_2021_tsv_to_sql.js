@@ -1,18 +1,43 @@
 const fs = require('fs');
+const {DateTime} = require('luxon');
 
 const content = fs.readFileSync('tasks_2021.tsv', 'utf8');
 const lines = content.split(/[\r\n]+/);
 
+const week1StartDateTime = DateTime.local(2021, 9, 1).startOf('week');
 const dateTimePattern = /^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2})/;
+const datePattern = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 const dateTimeReplaceString = '$1-$2-$3 $4:$5:00 Europe/Tallinn';
 const wikiBaseURL = 'https://digilabor.ut.ee/index.php/2021_PiCR_grading_and_tasks#';
 let activeGroup = 'other';
 
 let outputFileContent = `insert into task (name, points, task_group, is_optional, is_progress,
-                  expires_at,
+                  expires_at, start_time, end_time,
                   description)
 values\n`;
 const valueLines = [];
+
+function shortDurationToLongDuration(shortDuration) {
+    if (datePattern.test(shortDuration)) {
+        return [shortDuration + ' 00:00:00 Europe/Tallinn', shortDuration + ' 23:59:00 Europe/Tallinn'];
+    } else if (shortDuration.startsWith('W')) {
+        const startAndEndWeek = shortDuration.slice(1).split('-').map(v => parseInt(v, 10));
+
+        if (startAndEndWeek.length === 1) {
+            const startDateTime = week1StartDateTime.plus({weeks: startAndEndWeek[0] - 1});
+            const endDateTime = startDateTime.endOf('week');
+
+            return [startDateTime.toSQL({includeZone: true}), endDateTime.toSQL({includeZone: true})];
+        } else if (startAndEndWeek.length === 2) {
+            const startDateTime = week1StartDateTime.plus({weeks: startAndEndWeek[0] - 1});
+            const endDateTime = week1StartDateTime.plus({weeks: startAndEndWeek[1] - 1}).endOf('week');
+
+            return [startDateTime.toSQL({includeZone: true}), endDateTime.toSQL({includeZone: true})];
+        }
+    }
+
+    return [shortDuration + ' 00:00:00 Europe/Tallinn', shortDuration + ' 23:59:00 Europe/Tallinn'];
+}
 
 for (const line of lines) {
     const cells = line.split('\t');
@@ -28,23 +53,19 @@ for (const line of lines) {
     }
 
     let name = cells[0];
-    const description = wikiBaseURL + name.replace(/ /g, '_');
+    const description = wikiBaseURL + (cells[5] || name.replace(/ /g, '_'));
     const points = cells[1];
     const expiresAt = cells[2].replace(dateTimePattern, dateTimeReplaceString);
-    const isOptional = false;
+    const isOptional = cells[4] === '1';
     const isProgress = name.includes('Progress');
 
+    const [startTime, endTime] = shortDurationToLongDuration(cells[3]);
+
     valueLines.push(`\t('${name}', ${points}, '${activeGroup}', ${isOptional}, ${isProgress},
-\t'${expiresAt}',
+\t'${expiresAt}', '${startTime}', '${endTime}',
 \t'${description}')`);
 }
 
 outputFileContent += valueLines.join(',\n') + ';';
 
 fs.writeFileSync('init_tasks_2021.sql', outputFileContent);
-
-/*
-name, points, task_group, on_time_bonus, week_before_bonus, is_optional, is_progress
-deadline, expires_at,
-description
- */

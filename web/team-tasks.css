@@ -55,10 +55,6 @@ tr.task-row td, th {
     padding: 5px;
 }
 
-.task-row.progress-task {
-    border-top: 1px solid #DDD;
-}
-
 .task-row.overdue-task td:nth-child(-n+3) {
     color: #888;
 }

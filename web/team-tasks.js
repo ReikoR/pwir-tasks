@@ -1,7 +1,7 @@
 import {html, render} from './lib/lit.mjs';
 import {getTeams, getTasks, getSession} from "./services/api.js";
 import './components/tasks-table.js';
-import './components/page-header.js';
+import './components/default-page-header.js';
 
 const mainElement = document.getElementById('main');
 
@@ -16,10 +16,8 @@ const mainElement = document.getElementById('main');
         tasksTableMode = session.role === 'instructor' ? 'edit' : 'inspect';
     } catch (e) {}
 
-    const links = session !== null ? [['/participants', 'Participants']] : [];
-
     render(html`
-        <page-header .session=${session} title="Tasks table" .links=${links}></page-header>
+        <default-page-header title="Tasks table" .session=${session}></default-page-header>
         <div class="page-content">
         <tasks-table mode=${tasksTableMode} .tasks=${tasks} .teams=${teams}></tasks-table>
         </div>`,

@@ -7,8 +7,8 @@ Robot finds basket with a ball	1600	2021-01-27 20:00
 Robot throws a ball	800	2021-01-27 20:00
 Robot can properly react to referee commands	1000	2021-01-27 20:00
 Code works on new robot	1200	2021-01-27 20:00
-3 of 11 balls in 60s	2400	2021-01-27 20:00
-5 of 11 balls in 60s	1600	2021-01-27 20:00
+3 of 11 balls in 60 seconds	2400	2021-01-27 20:00
+5 of 11 balls in 60 seconds	1600	2021-01-27 20:00
 2 of 5 balls with 6 balls outside	2000	2021-01-27 20:00
 Dealing with opponent robot using 1 ball	2000	2021-01-27 20:00
 Robot movable with remote controller	400	2021-01-27 20:00
@@ -18,7 +18,7 @@ Group: mechanics
 Test robot thrower design completed	800	2021-01-27 20:00
 Test robot thrower fabricated	400	2021-01-27 20:00
 Test robot thrower mechanics assembled and attached to robot	400	2021-01-27 20:00
-Omniwheels design completed	1000	2021-01-27 20:00
+Omni wheels design completed	1000	2021-01-27 20:00
 Motor mounts design completed	400	2021-01-27 20:00
 Camera mount design completed	400	2021-01-27 20:00
 Ball thrower design completed	800	2021-01-27 20:00
