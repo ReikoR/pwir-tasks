@@ -292,7 +292,7 @@ async function generateSVGs(teams, tasks, completedTasksList, shouldGenerateDate
     await fs.mkdir(imageOutputDirectory, {recursive: true});
 
     if (shouldGenerateDateScale) {
-        console.log(DateTime.now().toISO(), 'Generate SVG for data scale');
+        console.log(DateTime.now().toISO(), 'Generate SVG for date scale');
         const datesSVG = toSVG(dateScale(), 62, dayHeight * dayCount + 1);
         await fs.writeFile(`${imageOutputDirectory}schedule-dates.svg`, datesSVG);
     }
