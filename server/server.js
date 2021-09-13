@@ -10,6 +10,7 @@ const authRouter = require('./auth');
 const path = require('path');
 const webFolder = path.join(__dirname, '../web/');
 const helmet = require('helmet');
+const {DateTime} = require('luxon');
 const {generateAllSVGs} = require("./tools.js");
 
 app.use(helmet({
@@ -79,3 +80,16 @@ if (config.useHttps) {
 }
 
 generateAllSVGs();
+
+let lastDateTime = DateTime.local();
+
+setInterval(() => {
+    const currentDateTime = DateTime.local();
+
+    if (currentDateTime.day > lastDateTime.day) {
+        console.log(currentDateTime.toISO(), 'day has changed');
+        generateAllSVGs();
+    }
+
+    lastDateTime = currentDateTime;
+}, 3600 * 1000);
