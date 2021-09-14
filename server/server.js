@@ -81,10 +81,11 @@ if (config.useHttps) {
 
 generateAllSVGs();
 
-let lastDateTime = DateTime.local();
+const timeZone = 'Europe/Tallinn';
+let lastDateTime = DateTime.local({zone: timeZone});
 
 setInterval(() => {
-    const currentDateTime = DateTime.local();
+    const currentDateTime = DateTime.local({zone: timeZone});
 
     if (currentDateTime.day > lastDateTime.day) {
         console.log(currentDateTime.toISO(), 'day has changed');
