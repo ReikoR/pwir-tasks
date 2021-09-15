@@ -15,11 +15,13 @@ const timeZone = 'Europe/Tallinn';
 const locale = 'en-GB';
 const week1StartDateTime = DateTime.local(2021, 9, 1, 0, 0, 0, 0, {zone: timeZone, locale}).startOf('week');
 const courseEndDateTime = week1StartDateTime.plus({days: 7 * 22});
-const nowDateTime = DateTime.local({zone: timeZone});
-//const nowDateTime = DateTime.local(2021, 10, 1, {zone: timeZone});
 const taskGroupOrder = ['progress', 'competitions', 'other', 'programming', 'mechanics', 'electronics'];
 
 const imageOutputDirectory = '../web/img/generated/'
+
+function getNowDateTime() {
+    return DateTime.local({zone: timeZone});
+}
 
 const LabelSide = {
     top: 'top',
@@ -106,7 +108,12 @@ const box = (x, y, width, height, textString, {
         </g>`;
 }
 
-const dateScaleToday = (width) => {
+/**
+ * @param {DateTime} nowDateTime
+ * @param {number} width
+ * @returns {string|null}
+ */
+const dateScaleToday = (nowDateTime, width) => {
     const startOfNowDateTime = nowDateTime.startOf('day');
 
     if (startOfNowDateTime < week1StartDateTime || startOfNowDateTime > courseEndDateTime) {
@@ -170,16 +177,29 @@ const dateScaleWeeks = (weekCount) => {
     return fragments.join('');
 }
 
-const dateScale = () => {
+/**
+ * @param {DateTime} nowDateTime
+ * @returns {string}>
+*/
+const dateScale = (nowDateTime) => {
     return `<g transform="translate(0.5, 0.5)">
-        ${dateScaleToday(60)}
+        ${dateScaleToday(nowDateTime, 60)}
         ${dateScaleMonths(week1StartDateTime, week1StartDateTime.plus({days: dayCount}))}
         ${dateScaleDays(week1StartDateTime, dayCount)}
         ${dateScaleWeeks(weekCount)}
         </g>`;
 };
 
-const tasksSchedule = (tasks, team, completedTasksMap, isPreview) => {
+/**
+ *
+ * @param {DateTime} nowDateTime
+ * @param {Object[]} tasks
+ * @param {Object} team
+ * @param {Object} completedTasksMap
+ * @param {Boolean} isPreview
+ * @returns {{width: number, content: string}}
+ */
+const tasksSchedule = (nowDateTime, tasks, team, completedTasksMap, isPreview) => {
     const width = isPreview ? 8 : 60;
     const fragments = [];
     const taskGroupLaneStartIndices = [0, 0, 1, 2, 4, 6];
@@ -263,7 +283,7 @@ const tasksSchedule = (tasks, team, completedTasksMap, isPreview) => {
     }
 
     const fullWidth = gridOccupation.length * width;
-    fragments.unshift(dateScaleToday(fullWidth));
+    fragments.unshift(dateScaleToday(nowDateTime, fullWidth));
 
     fragments.unshift(`<style>
         .task-name {
@@ -291,9 +311,11 @@ const tasksSchedule = (tasks, team, completedTasksMap, isPreview) => {
 async function generateSVGs(teams, tasks, completedTasksList, shouldGenerateDateScale = true) {
     await fs.mkdir(imageOutputDirectory, {recursive: true});
 
+    const nowDateTime = getNowDateTime();
+
     if (shouldGenerateDateScale) {
         console.log(DateTime.now().toISO(), 'Generate SVG for date scale');
-        const datesSVG = toSVG(dateScale(), 62, dayHeight * dayCount + 1);
+        const datesSVG = toSVG(dateScale(nowDateTime), 62, dayHeight * dayCount + 1);
         await fs.writeFile(`${imageOutputDirectory}schedule-dates.svg`, datesSVG);
     }
 
@@ -310,12 +332,12 @@ async function generateSVGs(teams, tasks, completedTasksList, shouldGenerateDate
             }
         }
 
-        const {content: contentPreview, width: widthPreview} = tasksSchedule(tasks, team, completedTasksMap, true);
+        const {content: contentPreview, width: widthPreview} = tasksSchedule(nowDateTime, tasks, team, completedTasksMap, true);
         const tasksPreviewSVG = toSVG(contentPreview, widthPreview + 1, fullHeight);
 
         await fs.writeFile(`${imageOutputDirectory}schedule-tasks-team-${team.team_id}-preview.svg`, tasksPreviewSVG);
 
-        const {content, width} = tasksSchedule(tasks, team, completedTasksMap, false);
+        const {content, width} = tasksSchedule(nowDateTime, tasks, team, completedTasksMap, false);
         const tasksSVG = toSVG(content, width + 1, fullHeight);
 
         await fs.writeFile(`${imageOutputDirectory}schedule-tasks-team-${team.team_id}.svg`, tasksSVG);
