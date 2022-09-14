@@ -30,15 +30,16 @@ config.db.connectionParams = {
     dateStrings: true
 };
 
+config.db.connectionParamsPrivate = {
+    user: config.db.privateUsername,
+    database: config.db.name,
+    password: config.db.privatePassword,
+    port: config.db.port,
+    host: config.db.host,
+    dateStrings: true
+};
+
 config.session = {};
 config.session.secret = '';
-
-config.mailgun = {
-    apiKey: '',
-    apiUrl: '',
-    domain: '',
-    from: '',
-    loginLinkHostname: '',
-};
 
 module.exports = config;

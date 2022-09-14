@@ -11,15 +11,37 @@ const mainElement = document.getElementById('main');
     let session = null;
     let tasksTableMode = null;
 
-    try {
-        session = await getSession();
-        tasksTableMode = session.role === 'instructor' ? 'edit' : 'inspect';
-    } catch (e) {}
+    async function fetchSession() {
+        try {
+            session = await getSession();
+            console.log(session);
+            tasksTableMode = session.role === 'instructor' ? 'edit' : 'inspect';
+        } catch (e) {
+            session = null;
+            tasksTableMode = null;
+        }
+    }
 
-    render(html`
-        <default-page-header title="Tasks table" .session=${session}></default-page-header>
-        <div class="page-content">
-        <tasks-table mode=${tasksTableMode} .tasks=${tasks} .teams=${teams}></tasks-table>
-        </div>`,
-        mainElement);
+    async function handleLoginChanged() {
+        console.log('handleLoginChanged');
+        await fetchSession();
+        renderContent();
+    }
+
+    function renderContent() {
+        render(html`
+            <default-page-header 
+                title="Tasks table" 
+                .session=${session}
+                @login-changed=${handleLoginChanged}
+            ></default-page-header>
+            <div class="page-content">
+            <tasks-table .mode=${tasksTableMode} .tasks=${tasks} .teams=${teams}></tasks-table>
+            </div>`,
+            mainElement);
+    }
+
+    await fetchSession();
+
+    renderContent();
 })();

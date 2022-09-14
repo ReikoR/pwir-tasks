@@ -23,3 +23,30 @@ page-header .title {
     padding: 10px;
     color: #afcee8;
 }
+
+page-header .user {
+    display: flex;
+    align-items: baseline;
+    padding-left: 10px;
+}
+
+page-header .user input {
+    max-width: 100px;
+    font-size: inherit;
+}
+
+page-header .user button {
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+    display: inline-block;
+    font-weight: bold;
+    font-family: sans-serif;
+    background-color: transparent;
+    border: none;
+    font-size: inherit;
+}
+
+page-header .user.error {
+    background-color: orangered;
+}

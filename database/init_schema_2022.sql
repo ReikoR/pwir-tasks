@@ -4,8 +4,6 @@ create type task_group_name as enum ('programming', 'mechanics', 'electronics', 
 create table participant (
     participant_id serial primary key,
     name text not null,
-    study_book_no text unique,
-    email text unique,
     role participant_role not null default 'student'
 );
 
@@ -82,3 +80,62 @@ begin
   return t.points; -- before deadline
 end;
 $$ stable language 'plpgsql';
+
+create schema private;
+
+create table private.account (
+    participant_id integer primary key references public.participant(participant_id),
+    account_name text not null unique,
+    password_hash text not null
+);
+
+create table private.account_invite (
+    account_invite_id serial primary key,
+    uuid text unique not null,
+    participant_id integer not null references public.participant(participant_id),
+    created_at timestamptz not null default now(),
+    expires_at timestamptz not null
+);
+
+create role ui_user with login;
+
+grant connect on database picr2022 to ui_user;
+grant usage on schema public to ui_user;
+grant usage, select on all sequences in schema public to ui_user;
+
+grant select on table task to ui_user;
+grant select on table team to ui_user;
+grant select on table completed_task to ui_user;
+grant select on table participant to ui_user;
+grant select on table team_member to ui_user;
+grant select on table completed_task_participant to ui_user;
+grant select on table completed_task_history to ui_user;
+
+grant insert on table completed_task to ui_user;
+grant update on table completed_task to ui_user;
+grant delete on table completed_task_participant to ui_user;
+grant insert on table completed_task_participant to ui_user;
+grant update on table completed_task_participant to ui_user;
+grant insert on table completed_task_history to ui_user;
+
+create role server_private_user with login;
+
+grant connect on database picr2022 to server_private_user;
+grant usage on schema public to server_private_user;
+grant usage on schema private to server_private_user;
+grant select on public.participant to server_private_user;
+grant insert on public.participant to server_private_user;
+grant update on public.participant to server_private_user;
+grant delete on public.participant to server_private_user;
+
+grant select on private.account to server_private_user;
+grant insert on private.account to server_private_user;
+grant update on private.account to server_private_user;
+grant delete on private.account to server_private_user;
+grant usage, select on public.participant_participant_id_seq to server_private_user;
+
+grant select on private.account_invite to server_private_user;
+grant insert on private.account_invite to server_private_user;
+grant update on private.account_invite to server_private_user;
+grant delete on private.account_invite to server_private_user;
+grant usage, select on private.account_invite_account_invite_id_seq to server_private_user;

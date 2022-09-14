@@ -1,16 +1,28 @@
-async function get(url) {
-    return await fetch(url, {
-        credentials: 'include',
-    }).then(async (response) => {
-        if (response.ok) {
-            try {
-                return await response.json();
-            } catch {
-                return response.statusText;
+async function request(url, options) {
+    return await fetch(url, options).then(async (response) => {
+        const contentType = response.headers.get('Content-Type');
+
+        if (contentType) {
+            if (contentType.includes('json')) {
+                if (response.ok) {
+                    return response.json();
+                }
+
+                throw await response.json();
+            } else if (contentType.includes('octet-stream')) {
+                if (response.ok) {
+                    return response.arrayBuffer();
+                }
+
+                throw response.status;
             }
         }
 
-        throw await response.json();
+        if (response.ok) {
+            return response.text();
+        }
+
+        throw await response.text();
     }).catch((errorInfo) => {
         console.error(errorInfo);
 
@@ -18,31 +30,31 @@ async function get(url) {
     });
 }
 
+async function get(url) {
+    return request(url, {
+        credentials: 'include',
+    });
+}
+
 async function post(url, params) {
-    return await fetch(url, {
+    return request(url, {
         method: 'POST',
         credentials: 'include',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(params)
-    }).then(async (response) => {
-        if (response.ok) {
-            try {
-                return await response.json();
-            } catch {
-                return response.statusText;
-            }
-        }
-
-        throw await response.json();
-    }).catch((errorInfo) => {
-        console.error(errorInfo);
-
-        throw errorInfo;
     });
 }
 
 export function getSession() {
     return get('/session');
+}
+
+export function login(username, password) {
+    return post('/login', {username, password});
+}
+
+export function logout() {
+    return get('/logout');
 }
 
 export function getTasks() {

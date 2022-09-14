@@ -85,12 +85,6 @@ router.post('/set-completed-task', requireEditor, async (req, res) => {
         const {task_id, team_id, completion_time, participants} = req.body;
         await database.setCompletedTask(task_id, team_id, completion_time, participants, editor_id);
         res.send('OK');
-
-        try {
-            await generateTeamSVGs(team_id);
-        } catch (e) {
-            console.error(e);
-        }
     } catch (e) {
         console.error(e);
         res.status(400).send('Internal error');

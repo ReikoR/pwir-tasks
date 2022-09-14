@@ -1,4 +1,14 @@
 const config = require('./conf/config');
+const {DateTime} = require('luxon');
+const crypto = require('node:crypto');
+const util = require('node:util');
+const pg = require('pg');
+
+const {Pool} = pg;
+const poolPrivate = new Pool(config.db.connectionParamsPrivate);
+
+const pbkdf2Async = util.promisify(crypto.pbkdf2);
+
 const knex = require('knex')({
     client: 'pg',
     connection: config.db.connectionParams,
@@ -15,20 +25,10 @@ const teamTaskDiffer = require('jsondiffpatch').create({
     }
 });
 
-async function getParticipantByEmail(email) {
-    try {
-        return (await knex('participant')
-            .select('participant_id', 'name', 'role', 'email')
-            .where({email}))[0];
-    } catch (e) {
-        return null;
-    }
-}
-
 async function getParticipantById(participant_id) {
     try {
         return (await knex('participant')
-            .select('participant_id', 'name', 'role', 'email')
+            .select('participant_id', 'name', 'role')
             .where({participant_id}))[0];
     } catch (e) {
         return null;
@@ -314,12 +314,104 @@ async function getCompletedTaskChanges(task_id, team_id) {
     return changes;
 }
 
+async function createAccount(accountInviteToken, accountName, password) {
+    const client = await poolPrivate.connect();
+
+    try {
+        client.query('begin');
+
+        const invitesResult = await client.query(
+            'select * from private.account_invite where uuid = $1',
+            [accountInviteToken]
+        );
+
+        if (invitesResult.rows.length !== 1) {
+            throw `Invite (${accountInviteToken}) not found`;
+        }
+
+        const inviteInfo = invitesResult.rows[0];
+        const expiresAtDateTime = DateTime.fromISO(inviteInfo.expires_at);
+        const currentDateTime = DateTime.now();
+
+        if (currentDateTime > expiresAtDateTime) {
+            await client.query(
+                'delete from private.account_invite where uuid = $1',
+                [accountInviteToken]
+            );
+
+            throw `Invite (${accountInviteToken}) has expired`;
+        }
+
+        const salt = crypto.randomBytes(32).toString('hex');
+        const hash = (await pbkdf2Async(password, salt, 100000, 128, 'sha512')).toString('hex');
+
+        await client.query(
+            'insert into private.account (participant_id, account_name, password_hash) values ($1, $2, $3)',
+            [inviteInfo.participant_id, accountName, `${salt}.${hash}`]
+        );
+
+        await client.query(
+            'delete from private.account_invite where participant_id = $1',
+            [inviteInfo.participant_id]
+        );
+
+        client.query('commit');
+    } catch (e) {
+        client.query('rollback');
+        console.error(e);
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
+async function getAccountByName(name) {
+    try {
+        const result = await poolPrivate.query('select * from private.account where account_name = $1', [name]);
+
+        if (result.rows.length === 1) {
+            return result.rows[0];
+        }
+    } catch (e) {
+        return null;
+    }
+
+    return null;
+}
+
+async function isValidAccount(name, password) {
+    const accountInfo = await getAccountByName(name);
+
+    if (!accountInfo) {
+        return false;
+    }
+
+    const [salt, hash] = accountInfo.password_hash.split('.');
+
+    const passwordHash = (await pbkdf2Async(password, salt, 100000, 128, 'sha512')).toString('hex');
+
+    return passwordHash === hash;
+}
+
+async function getParticipantByAccountName(name) {
+    try {
+        const accountInfo = await getAccountByName(name);
+
+        if (!accountInfo) {
+            return null;
+        }
+
+        return getParticipantById(accountInfo.participant_id);
+    } catch (e) {
+        return null;
+    }
+}
+
 async function close() {
     return knex.destroy();
 }
 
 module.exports = {
-    getParticipantByEmail,
     getParticipantById,
     getTasks,
     getTeams,
@@ -332,5 +424,9 @@ module.exports = {
     getParticipantsAndPoints,
     getParticipantTaskPoints,
     getCompletedTaskChanges,
+    createAccount,
+    getAccountByName,
+    isValidAccount,
+    getParticipantByAccountName,
     close,
 };

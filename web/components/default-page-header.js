@@ -24,7 +24,9 @@ class DefaultPageHeader extends LitElement {
     async fetchSession() {
         try {
             this.session = await getSession();
-        } catch (e) {}
+        } catch (e) {
+            this.session = null;
+        }
     }
 
     firstUpdated(changedProperties) {
@@ -35,14 +37,35 @@ class DefaultPageHeader extends LitElement {
         }
     }
 
+    dispatchLogInChangedEvent() {
+        let event = new CustomEvent('login-changed');
+
+        this.dispatchEvent(event);
+    }
+
+    handleLoginChanged() {
+        this.fetchSession();
+
+        this.dispatchLogInChangedEvent();
+    }
+
     render() {
-        let links = this.links.filter(l => l[0] !== location.pathname);
+        const title = this.getAttribute('title');
+
+        let links = this.links.slice();
 
         if (this.session) {
             links = links.concat(this.privateLinks);
         }
 
-        return html`<page-header .session=${this.session} title=${this.getAttribute('title')} .links=${links}></page-header>`;
+        links = links.filter(l => l[1] !== title);
+
+        return html`<page-header 
+            .session=${this.session} 
+            title=${title} 
+            .links=${links}
+            @login-changed=${this.handleLoginChanged}
+        ></page-header>`;
     }
 }
 

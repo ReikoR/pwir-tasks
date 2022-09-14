@@ -35,6 +35,7 @@ class TasksTable extends LitElement {
 
     static get properties() {
         return {
+            mode: {type: String},
             teams: {type: Array},
             tasks: {type: Array},
             participants: {type: Array},
@@ -367,7 +368,7 @@ class TasksTable extends LitElement {
     }
 
     renderTeamTaskCell(team, task) {
-        const mode = this.getAttribute('mode');
+        const mode = this.mode;
         const completedTaskInfo = this.getCompletedTaskInfo(team, task);
         const done = !!completedTaskInfo;
         const canOpen = mode === 'edit' || mode === 'inspect' && done;
@@ -408,9 +409,7 @@ class TasksTable extends LitElement {
             return html`<div class="team-task">Loading...</div>`;
         }
 
-        const mode = this.getAttribute('mode');
-
-        if (!mode) {
+        if (!this.mode) {
             return null;
         }
 
@@ -448,7 +447,7 @@ class TasksTable extends LitElement {
     }
 
     renderSaveButton(teamTask) {
-        if (this.getAttribute('mode') !== 'edit') {
+        if (this.mode !== 'edit') {
             return null;
         }
 
@@ -460,7 +459,7 @@ class TasksTable extends LitElement {
     }
 
     renderCompletedAtInput(teamTask) {
-        if (this.getAttribute('mode') !== 'edit') {
+        if (this.mode !== 'edit') {
             return html`<span>Completed at <strong>${teamTask.completion_time_input}</strong></span>`;
         }
 
@@ -482,7 +481,7 @@ class TasksTable extends LitElement {
     }
 
     renderCompletedAtSetNow(teamTask) {
-        if (this.getAttribute('mode') !== 'edit') {
+        if (this.mode !== 'edit') {
             return null;
         }
 
@@ -518,7 +517,7 @@ class TasksTable extends LitElement {
     }
 
     renderDistributeEquallyInTeam(teamTask) {
-        if (this.getAttribute('mode') !== 'edit') {
+        if (this.mode !== 'edit') {
             return null;
         }
 
@@ -527,7 +526,7 @@ class TasksTable extends LitElement {
     }
 
     renderAddParticipant(teamTask) {
-        if (this.getAttribute('mode') !== 'edit') {
+        if (this.mode !== 'edit') {
             return html`<div class="title">Participants:</div>`;
         }
 
@@ -538,7 +537,7 @@ class TasksTable extends LitElement {
     renderParticipantRow(teamTask, taskParticipant) {
         const participant = this.getParticipantById(taskParticipant.participant_id);
 
-        if (this.getAttribute('mode') !== 'edit') {
+        if (this.mode !== 'edit') {
             return html`<div class="participant-row view">
                 <span>${participant.name}</span>
                 <strong>${taskParticipant.points}</strong>

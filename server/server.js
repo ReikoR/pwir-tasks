@@ -10,7 +10,6 @@ const authRouter = require('./auth');
 const path = require('path');
 const webFolder = path.join(__dirname, '../web/');
 const helmet = require('helmet');
-const {DateTime} = require('luxon');
 const {generateAllSVGs} = require("./tools.js");
 
 app.use(helmet({
@@ -31,11 +30,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(webFolder, 'overview.html'));
 });
 
-app.get('/login', (req, res) => {
+app.get('/cafi/x', (req, res) => {
     if (req.session && req.session.user) {
         res.redirect('/');
     } else {
-        res.sendFile(path.join(webFolder, 'login.html'));
+        res.sendFile(path.join(webFolder, 'create-account.html'));
     }
 });
 
