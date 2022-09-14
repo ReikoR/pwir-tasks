@@ -21,6 +21,7 @@ create table task (
     points integer not null,
     start_time timestamptz,
     end_time timestamptz,
+    deadline timestamptz,
     expires_at timestamptz not null,
     is_optional boolean not null default false,
     is_progress boolean not null default false,
@@ -72,10 +73,12 @@ create table completed_task_history (
 
 create or replace function task_points_with_time(t task, completion_time timestamptz) returns integer as $$
 begin
-    if t.expires_at < completion_time then
+    if t.expires_at < completion_time then -- after expires_at
         return 0;
+    elsif t.deadline < completion_time then -- after deadline, before expires_at
+        return t.points / 2;
     end if;
 
-  return t.points;
+  return t.points; -- before deadline
 end;
 $$ stable language 'plpgsql';

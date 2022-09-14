@@ -28,7 +28,7 @@ class TasksTable extends LitElement {
         this.participants = null;
         this.completedTasksList = [];
 
-        this.nonTeamColumns = ['Task', 'Points', 'Expires at'];
+        this.nonTeamColumns = ['Task', 'Points', 'Deadline', 'Expires at'];
 
         this.fetchCompletedTasksList();
     }
@@ -55,6 +55,23 @@ class TasksTable extends LitElement {
 
     getTaskById(id) {
         return this.tasks.find(task => task.task_id === id);
+    }
+
+    getTaskPointsByDateTime(task, dateTime) {
+        let pointsAvailable = task.points;
+
+        if (dateTime.isValid) {
+            const expiresAtDateTime = DateTime.fromISO(task.expires_at);
+            const deadlineDateTime = DateTime.fromISO(task.deadline);
+
+            if (dateTime > expiresAtDateTime) {
+                pointsAvailable = 0;
+            } else if (deadlineDateTime.isValid && dateTime > deadlineDateTime) {
+                pointsAvailable /= 2;
+            }
+        }
+
+        return pointsAvailable;
     }
 
     getTeamTask(team, task) {
@@ -191,8 +208,8 @@ class TasksTable extends LitElement {
 
             const task = this.getTaskById(teamTask.task_id);
             const participantIds = this.getTeamParticipantIds(teamTask.team_id, completionDateTime);
-            const totalPoints = task.points;
-            const participantPoints = divideIntoIntegers(totalPoints, participantIds.length);
+            const pointsAvailable = this.getTaskPointsByDateTime(task, completionDateTime);
+            const participantPoints = divideIntoIntegers(pointsAvailable, participantIds.length);
 
             for (const [index, pId] of participantIds.entries()) {
                 teamTask.addParticipant(pId, participantPoints[index]);
@@ -330,6 +347,7 @@ class TasksTable extends LitElement {
         return html`<tr class=${classValue}>
             <td>${this.renderTaskName(task)}</td>
             <td>${task.points}</td>
+            <td>${formatTime(task.deadline)}</td>
             <td>${formatTime(task.expires_at)}</td>
             ${this.teams.map(team => this.renderTeamTaskCell(team, task))}
             </tr>
@@ -487,15 +505,7 @@ class TasksTable extends LitElement {
     renderAvailablePoints(team, task) {
         const teamTask = this.getTeamTask(team, task);
         const completionDateTime = DateTime.fromISO(teamTask.completion_time);
-        let pointsAvailable = task.points;
-
-        if (completionDateTime.isValid) {
-            const expiresAtDateTime = DateTime.fromISO(task.expires_at);
-
-            if (completionDateTime > expiresAtDateTime) {
-                pointsAvailable = 0;
-            }
-        }
+        const pointsAvailable = this.getTaskPointsByDateTime(task, completionDateTime);
 
         return html`<div class="points-available"><span>Points available: </span><strong>${pointsAvailable}</strong>`;
     }
@@ -913,7 +923,13 @@ class TaskParticipant {
 }
 
 function formatTime(isoString) {
-    return DateTime.fromISO(isoString).toFormat('yyyy-MM-dd T');
+    const dateTime = DateTime.fromISO(isoString);
+
+    if (!dateTime.isValid) {
+        return null;
+    }
+
+    return dateTime.toFormat('yyyy-MM-dd T');
 }
 
 function compareParticipantsOptions(a, b, task_team_id, completion_time) {
