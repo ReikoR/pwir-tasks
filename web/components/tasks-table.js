@@ -43,6 +43,8 @@ class TasksTable extends LitElement {
             teamTasks: {type: Object},
             participantPointsUsedCache: {type: Object},
             isFetchingParticipantPointsUsed: {type: Object},
+            highlightedTeamId: {type: Number},
+            highlightedTaskId: {type: Number},
         };
     }
 
@@ -198,6 +200,16 @@ class TasksTable extends LitElement {
         this.teamTasks = shallowCloneObject(this.teamTasks);
     }
 
+    handleTeamTaskCellMouseEnter(team, task) {
+        this.highlightedTeamId = team.team_id;
+        this.highlightedTaskId = task.task_id;
+    }
+
+    handleTeamTaskCellMouseLeave(team, task) {
+        this.highlightedTeamId = null;
+        this.highlightedTaskId = null;
+    }
+
     /**
      * @param {TeamTask} teamTask
      */
@@ -331,9 +343,16 @@ class TasksTable extends LitElement {
     }
 
     renderHeader() {
-        const columns = this.nonTeamColumns.concat(this.teams.map(team => team.name));
-
-        return html`<thead><tr>${columns.map(column => html`<th>${column}</th>`)}</tr></thead>`;
+        return html`<thead><tr>
+            ${this.nonTeamColumns.map(column => html`<th>${column}</th>`)}
+            ${this.teams.map(team => {
+                const classValue = classNames({
+                    'highlighted': team.team_id === this.highlightedTeamId,
+                });
+                
+                return html`<th class=${classValue}>${team.name}</th>`;
+            })
+        }</tr></thead>`;
     }
 
     renderBody() {
@@ -345,8 +364,10 @@ class TasksTable extends LitElement {
 
         const classValue = classNames('task-row', `${task.task_group}-task`);
 
+        const classValueTaskName = classNames({highlighted: task.task_id === this.highlightedTaskId});
+
         return html`<tr class=${classValue}>
-            <td>${this.renderTaskName(task)}</td>
+            <td class=${classValueTaskName}>${this.renderTaskName(task)}</td>
             <td>${task.points}</td>
             <td>${formatTime(task.deadline)}</td>
             <td>${formatTime(task.expires_at)}</td>
@@ -399,7 +420,7 @@ class TasksTable extends LitElement {
             return html`<td class=${classValue} title=${title}>${done ? 'Done' : ''}</td>`
         }
 
-        return html`<td class=${classValue} title=${title} @click=${this.handleTeamTask.bind(this, team, task)}>
+        return html`<td class=${classValue} title=${title} @click=${this.handleTeamTask.bind(this, team, task)} @mouseenter=${this.handleTeamTaskCellMouseEnter.bind(this, team, task)} @mouseleave=${this.handleTeamTaskCellMouseLeave.bind(this, team, task)}>
                 ${done ? 'Done' : ''}</td>`
     }
 
