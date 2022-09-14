@@ -29,8 +29,7 @@ if (!participantIdArgument) {
     process.exit();
 }
 
-const inviteLinkHostname =
-    `${config.useHttps ? 'https' : 'http'}://${config.host}${config.port ? ':' + config.port: ''}`;
+const inviteLinkHostname = config.accountInviteLinkHostname;
 
 const client = await pool.connect();
 

@@ -8,6 +8,9 @@ config.port = 8111;
 config.useHttps = false;
 config.httpsOptions = {};
 
+config.accountInviteLinkHostname =
+    `${config.useHttps ? 'https' : 'http'}://${config.host}${config.port ? ':' + config.port: ''}`
+
 config.db = {
     vendor: 'postgres',
     name: 'pwir',
