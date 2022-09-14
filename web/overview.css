@@ -1,3 +1,12 @@
 a img:hover {
     background-color: #def;
 }
+
+table {
+    font-size: 20px;
+}
+
+table td,
+table th {
+    padding: 5px 10px;
+}

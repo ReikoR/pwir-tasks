@@ -10,7 +10,6 @@ const authRouter = require('./auth');
 const path = require('path');
 const webFolder = path.join(__dirname, '../web/');
 const helmet = require('helmet');
-const {generateAllSVGs} = require("./tools.js");
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -77,19 +76,3 @@ if (config.useHttps) {
 } else {
     server.listen(config.port);
 }
-
-generateAllSVGs();
-
-const timeZone = 'Europe/Tallinn';
-let lastDateTime = DateTime.local({zone: timeZone});
-
-setInterval(() => {
-    const currentDateTime = DateTime.local({zone: timeZone});
-
-    if (currentDateTime.day > lastDateTime.day) {
-        console.log(currentDateTime.toISO(), 'day has changed');
-        generateAllSVGs();
-    }
-
-    lastDateTime = currentDateTime;
-}, 3600 * 1000);
