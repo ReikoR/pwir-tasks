@@ -5,6 +5,7 @@ page-header {
     display: flex;
     justify-content: space-between;
     font-weight: bold;
+    flex-wrap: wrap;
 }
 
 page-header *::selection {
@@ -45,6 +46,7 @@ page-header .user button {
     background-color: transparent;
     border: none;
     font-size: inherit;
+    cursor: pointer;
 }
 
 page-header .user.error {
