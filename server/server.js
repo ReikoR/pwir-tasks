@@ -53,9 +53,13 @@ app.get('/participant-tasks', requireUser, (req, res) => {
     res.sendFile(path.join(webFolder, 'participant-tasks.html'));
 });
 
+app.get('*', function(req, res){
+    res.sendStatus(404);
+});
+
 function requireUser(req, res, next) {
     if (!(req.session && req.session.user)) {
-        res.redirect('/login');
+        res.sendStatus(403);
     } else {
         next();
     }
