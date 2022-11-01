@@ -62,7 +62,7 @@ for (const line of lines) {
     const [startTime, endTime] = shortDurationToLongDuration(shortDuration);
 
     valueLines.push(`\t('${name}', ${points}, '${activeGroup}', ${isOptional}, ${isProgress},
-\t${deadline === '' ? 'null' : `'${deadlineRaw}'`}, '${expiresAt}', '${startTime}', '${endTime}',
+\t${deadline === '' ? 'null' : `'${deadline}'`}, '${expiresAt}', '${startTime}', '${endTime}',
 \t'${description}')`);
 }
 
