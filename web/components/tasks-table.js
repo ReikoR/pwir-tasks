@@ -398,6 +398,13 @@ class TasksTable extends LitElement {
         const pointsAvailable = done ? completedTaskInfo.points_available : 0;
         const pointsInvalid = pointsUsed !== pointsAvailable;
         let title = '';
+        
+        const contentText = done
+            ? (DateTime.fromISO(completedTaskInfo.completion_time) > DateTime.fromISO(task.deadline)
+                ? 'Done late'
+                : 'Done')
+            : '';
+
         const classValue = classNames({
             'team-task-cell': true,
             'can-open': canOpen,
@@ -417,11 +424,16 @@ class TasksTable extends LitElement {
         }
 
         if (!canOpen) {
-            return html`<td class=${classValue} title=${title}>${done ? 'Done' : ''}</td>`
+            return html`<td class=${classValue} title=${title}>${contentText}</td>`
         }
 
-        return html`<td class=${classValue} title=${title} @click=${this.handleTeamTask.bind(this, team, task)} @mouseenter=${this.handleTeamTaskCellMouseEnter.bind(this, team, task)} @mouseleave=${this.handleTeamTaskCellMouseLeave.bind(this, team, task)}>
-                ${done ? 'Done' : ''}</td>`
+        return html`<td 
+                class=${classValue} 
+                title=${title} 
+                @click=${this.handleTeamTask.bind(this, team, task)} 
+                @mouseenter=${this.handleTeamTaskCellMouseEnter.bind(this, team, task)} 
+                @mouseleave=${this.handleTeamTaskCellMouseLeave.bind(this, team, task)}
+            >${contentText}</td>`
     }
 
     renderTeamTask(team, task) {
