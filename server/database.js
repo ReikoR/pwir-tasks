@@ -50,7 +50,11 @@ function getTeams() {
 }
 
 async function getTeamsAndPoints() {
-    const queryString = `select team.team_id, team.name, coalesce(sum(task.points)::integer, 0) as team_points from team
+    const queryString = `select 
+            team.team_id, 
+            team.name, 
+            coalesce(sum(task_points_with_time(task, completed_task.completion_time))::integer, 0) as team_points 
+        from team
         left join completed_task on team.team_id = completed_task.team_id
         left join task on completed_task.task_id = task.task_id
         group by team.team_id
