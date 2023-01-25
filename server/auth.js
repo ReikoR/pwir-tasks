@@ -19,8 +19,6 @@ router.use(session({
 router.post('/cafi', async (req, res) => {
     const {token, username, password} = req.body;
 
-    console.log('/cafi', token, username, password);
-
     try {
         await database.createAccount(token, username, password);
         res.sendStatus(200);
