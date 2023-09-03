@@ -31,7 +31,13 @@ picr22App.use('**', createProxyMiddleware({
     changeOrigin: true,
 }));
 
+picr23App.use('**', createProxyMiddleware({
+    target: 'http://localhost:8023',
+    changeOrigin: true,
+}));
+
 app.use(vhost('picr22.utr.ee', picr22App));
+app.use(vhost('picr23.utr.ee', picr23App));
 app.use(vhost('utr.ee', mainApp));
 
 if (config.useHttps) {
