@@ -1,5 +1,5 @@
 create type participant_role as enum ('instructor', 'student');
-create type task_group_name as enum ('programming', 'mechanics', 'electronics', 'other', 'progress', 'competitions');
+create type task_group_name as enum ('test_robot', 'programming', 'mechanics', 'electronics', 'progress_presentations', 'competitions', 'other');
 
 create table participant (
     participant_id serial primary key,
@@ -17,17 +17,12 @@ create table task (
     name text not null,
     description text,
     points integer not null,
-    start_time timestamptz,
-    end_time timestamptz,
     deadline timestamptz,
     expires_at timestamptz not null,
     is_optional boolean not null default false,
     is_progress boolean not null default false,
     task_group task_group_name not null
 );
-
-alter table task add constraint task_start_before_end
-    check (start_time isnull or end_time isnull or start_time < end_time);
 
 create table team_member (
     participant_id integer not null references participant(participant_id),
@@ -99,7 +94,7 @@ create table private.account_invite (
 
 create role ui_user with login;
 
-grant connect on database picr2022 to ui_user;
+grant connect on database picr2023 to ui_user;
 grant usage on schema public to ui_user;
 grant usage, select on all sequences in schema public to ui_user;
 
@@ -120,7 +115,7 @@ grant insert on table completed_task_history to ui_user;
 
 create role server_private_user with login;
 
-grant connect on database picr2022 to server_private_user;
+grant connect on database picr2023 to server_private_user;
 grant usage on schema public to server_private_user;
 grant usage on schema private to server_private_user;
 grant select on public.participant to server_private_user;

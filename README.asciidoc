@@ -1,0 +1,22 @@
+= PiCR course task completion tracker
+
+== Setup
+
+=== Database
+
+. Login to database with postgres user.
++
+[,console]
+----
+<SUDO_USER>@water:~$ psql -U postgres -h localhost -p 5434 picr2023
+----
+
+. Set passwords for database roles.
++
+[,psql]
+----
+picr2023=# \password ui_user
+picr2023=# \password server_private_user
+----
+
+. Exit psql console with `\q`.
