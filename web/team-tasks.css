@@ -67,28 +67,32 @@ table thead tr {
     border-left: 16px solid black;
 }
 
-.task-row.programming-task {
+.task-row.test_robot-task {
     border-left: 16px solid rgba(32, 75, 126, 1);
 }
 
-.task-row.mechanics-task {
+.task-row.programming-task {
     border-left: 16px solid rgba(32, 75, 126, 0.85);
 }
 
-.task-row.electronics-task {
+.task-row.mechanics-task {
     border-left: 16px solid rgba(32, 75, 126, 0.7);
 }
 
-.task-row.other-task {
+.task-row.electronics-task {
     border-left: 16px solid rgba(32, 75, 126, 0.55);
 }
 
-.task-row.progress-task {
+.task-row.progress_presentations-task {
     border-left: 16px solid rgba(32, 75, 126, 0.4);
 }
 
 .task-row.competitions-task {
     border-left: 16px solid rgba(32, 75, 126, 0.15);
+}
+
+.task-row.other-task {
+    border-left: 16px solid rgba(32, 75, 126, 0.0);
 }
 
 tr.team-tasks-row td {
