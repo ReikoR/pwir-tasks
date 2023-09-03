@@ -35,8 +35,8 @@ Mainboard schematic completed	1000	2023-10-23 20:00	2024-01-17 20:00			https://u
 Motor driver schematic completed	600	2023-10-23 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_motor_driver_schematic_completed
 Mainboard design completed	1200	2023-11-13 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_mainboard_design_completed
 Motor driver design completed	600	2023-11-13 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_motor_driver_design_completed
-PCB(s) soldered properly	600	2023-12-04 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_pcb(s)_soldered_properly
-PCB(s) working with firmware	1600	2023-12-11 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_pcb(s)_working_with_firmware
+PCB(s) soldered properly	600	2023-12-04 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_pcbs_soldered_properly
+PCB(s) working with firmware	1600	2023-12-11 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_pcbs_working_with_firmware
 Throwing angle adjustable through mainboard	1000	2023-12-11 20:00	2024-01-17 20:00	1		https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_throwing_angle_adjustable_through_mainboard
 Ball holder controllable through mainboard	1200	2023-12-11 20:00	2024-01-17 20:00	1		https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_ball_holder_controllable_through_mainboard
 Thrower voltage regulator attached and working	400	2023-12-11 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_thrower_voltage_regulator_attached_and_working
@@ -44,25 +44,25 @@ Electronics attached to the robot and working	1200	2023-12-11 20:00	2024-01-17 2
 Mainboard documented	600	2024-01-11 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_mainboard_documented
 Motor driver documented	600	2024-01-11 20:00	2024-01-17 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_motor_driver_documented
 Group: progress_presentations
-Progress blog and presentation	400		2023-09-18 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_blog_and_presentation
-Progress blog and presentation	400		2023-10-02 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_blog_and_presentation
-Progress blog and presentation	400		2023-10-16 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_blog_and_presentation
-Progress blog and presentation	400		2023-10-30 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_blog_and_presentation
-Progress blog and presentation	400		2023-11-13 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_blog_and_presentation
-Progress blog and presentation	400		2023-11-27 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_blog_and_presentation
-Progress blog and presentation	400		2023-12-11 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_blog_and_presentation
+Progress presentation	200		2023-09-18 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_presentation
+Progress presentation	200		2023-10-02 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_presentation
+Progress presentation	200		2023-10-16 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_presentation
+Progress presentation	200		2023-10-30 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_presentation
+Progress presentation	200		2023-11-13 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_presentation
+Progress presentation	200		2023-11-27 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_presentation
+Progress presentation	200		2023-12-11 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_progress_presentation
 Group: competitions
 1st test competition	1000		2023-11-09 20:00	1	test_competition	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition
 1st test competition with new mechanics	200		2023-11-09 20:00	1	test_competition_with_new_mechanics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_mechanics
-1st test competition with new electronics	200		2023-11-09 20:00	1	test_competition_with_new_mechanics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_mechanics
+1st test competition with new electronics	200		2023-11-09 20:00	1	test_competition_with_new_electronics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_electronics
 1st test competition winner	400		2023-11-09 20:00	1	test_competition_winner	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_winner
 2nd test competition	600		2023-11-23 20:00		test_competition	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition
 2nd test competition with new mechanics	400		2023-11-23 20:00		test_competition_with_new_mechanics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_mechanics
-2nd test competition with new electronics	400		2023-11-23 20:00		test_competition_with_new_mechanics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_mechanics
+2nd test competition with new electronics	400		2023-11-23 20:00		test_competition_with_new_electronics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_electronics
 2nd test competition winner	400		2023-11-23 20:00	1	test_competition_winner	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_winner
 3rd test competition	200		2023-12-07 20:00		test_competition	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition
 3rd test competition with new mechanics	600		2023-12-07 20:00		test_competition_with_new_mechanics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_mechanics
-3rd test competition with new electronics	600		2023-12-07 20:00		test_competition_with_new_mechanics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_mechanics
+3rd test competition with new electronics	600		2023-12-07 20:00		test_competition_with_new_electronics	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_with_new_electronics
 3rd test competition winner	400		2023-12-07 20:00	1	test_competition_winner	https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_test_competition_winner
 Delta X	2000		2023-12-14 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_delta_x
 Delta X with new mechanics	2000		2023-12-14 20:00			https://ut-robotics.github.io/picr23-home/grading_and_tasks.html#_delta_x_with_new_mechanics
