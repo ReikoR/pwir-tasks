@@ -6,7 +6,7 @@ const {generateTeamSVGs} = require("./tools.js");
 
 router.use(jsonParser);
 
-router.get('/tasks', async (req, res) => {
+router.get('/tasks', requireUser, async (req, res) => {
     try {
         const rows = await database.getTasks();
         res.send(rows);
@@ -16,7 +16,7 @@ router.get('/tasks', async (req, res) => {
     }
 });
 
-router.get('/teams', async (req, res) => {
+router.get('/teams', requireUser, async (req, res) => {
     try {
         const rows = await database.getTeams();
         res.send(rows);
@@ -26,7 +26,7 @@ router.get('/teams', async (req, res) => {
     }
 });
 
-router.get('/teams-and-points', async (req, res) => {
+router.get('/teams-and-points', requireUser, async (req, res) => {
     try {
         const rows = await database.getTeamsAndPoints();
         res.send(rows);
@@ -57,7 +57,7 @@ router.get('/participants-and-points', requireUser, async (req, res) => {
     }
 });
 
-router.get('/completed-tasks-list', async (req, res) => {
+router.get('/completed-tasks-list', requireUser, async (req, res) => {
     try {
         const rows = await database.getCompletedTasksOverview();
         res.send(rows);

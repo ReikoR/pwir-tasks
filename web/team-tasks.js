@@ -6,39 +6,52 @@ import './components/default-page-header.js';
 const mainElement = document.getElementById('main');
 
 (async function () {
-    const tasks = await getTasks();
-    const teams = await getTeams();
+    let tasks = null;
+    let teams = null;
     let session = null;
     let tasksTableMode = null;
 
     async function fetchSession() {
         try {
             session = await getSession();
-            console.log(session);
             tasksTableMode = session.role === 'instructor' ? 'edit' : 'inspect';
+            tasks = await getTasks();
+            teams = await getTeams();
         } catch (e) {
             session = null;
             tasksTableMode = null;
+            tasks = null;
+            teams = null;
         }
     }
 
     async function handleLoginChanged() {
-        console.log('handleLoginChanged');
         await fetchSession();
         renderContent();
     }
 
     function renderContent() {
-        render(html`
-            <default-page-header 
-                title="Tasks table" 
-                .session=${session}
-                @login-changed=${handleLoginChanged}
-            ></default-page-header>
-            <div class="page-content">
-            <tasks-table .mode=${tasksTableMode} .tasks=${tasks} .teams=${teams}></tasks-table>
-            </div>`,
-            mainElement);
+        if (!session) {
+            render(html`
+                <default-page-header 
+                        title="Home"
+                        .session=${session}
+                        @login-changed=${handleLoginChanged}
+                ></default-page-header>
+                <div class="page-content"></div>`,
+                mainElement);
+        } else {
+            render(html`
+                <default-page-header
+                        title="Tasks table"
+                        .session=${session}
+                        @login-changed=${handleLoginChanged}
+                ></default-page-header>
+                <div class="page-content">
+                    <tasks-table .mode=${tasksTableMode} .tasks=${tasks} .teams=${teams}></tasks-table>
+                </div>`,
+                mainElement);
+        }
     }
 
     await fetchSession();
