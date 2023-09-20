@@ -321,6 +321,14 @@ async function getCompletedTaskChanges(task_id, team_id) {
 async function createAccount(accountInviteToken, accountName, password) {
     const client = await poolPrivate.connect();
 
+    if (typeof accountName !== 'string' || accountName.length === 0) {
+        throw `Invite accountName not specified`;
+    }
+
+    if (typeof password !== 'string' || password.length === 0) {
+        throw `Invite password not specified`;
+    }
+
     try {
         client.query('begin');
 

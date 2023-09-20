@@ -3,6 +3,7 @@ import {html, render} from './lib/lit.mjs';
 const mainElement = document.getElementById('main');
 
 (async function () {
+    let isFilled = false;
     let isSuccess = false;
     let isSending = false;
     let error = null;
@@ -54,6 +55,16 @@ const mainElement = document.getElementById('main');
         renderMain();
     }
 
+    function handleInputChange(event) {
+        const data = new FormData(event.currentTarget.form);
+        const username = data.get('username');
+        const password = data.get('password');
+
+        isFilled = username !== '' && password !== '';
+
+        renderMain();
+    }
+
     function renderMain() {
         if (isSuccess) {
             render(html`<div>Account created</div>`, mainElement);
@@ -67,9 +78,9 @@ const mainElement = document.getElementById('main');
 
         render(html`<div>
                 <form @submit="${handleCreateAccount}">
-                    <input type="text" name="username" placeholder="Username" autofocus>
-                    <input type="password" name="password" placeholder="Password">
-                    <button type="submit">Create account</button>
+                    <input type="text" name="username" placeholder="Username" autofocus @keyup="${handleInputChange}">
+                    <input type="password" name="password" placeholder="Password" @keyup="${handleInputChange}">
+                    <button type="submit" ?disabled=${!isFilled}>Create account</button>
                 </form>
                 ${renderError()}
                 </div>`,
