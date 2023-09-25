@@ -7,3 +7,4 @@ web/img/generated/
 database/node_modules/
 server-main/conf/config_.js
 server-main/node_modules/
+server/reports/

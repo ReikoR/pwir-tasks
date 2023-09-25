@@ -2,7 +2,7 @@ const database = require('./database');
 const router = require('express').Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
-const {generateTeamSVGs} = require("./tools.js");
+const {generateDoneTasksReport} = require("./tools");
 
 router.use(jsonParser);
 
@@ -85,6 +85,12 @@ router.post('/set-completed-task', requireEditor, async (req, res) => {
         const {task_id, team_id, completion_time, participants} = req.body;
         await database.setCompletedTask(task_id, team_id, completion_time, participants, editor_id);
         res.send('OK');
+
+        try {
+            await generateDoneTasksReport();
+        } catch (e) {
+            console.error(e);
+        }
     } catch (e) {
         console.error(e);
         res.status(400).send('Internal error');

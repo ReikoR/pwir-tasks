@@ -10,6 +10,8 @@ const authRouter = require('./auth');
 const path = require('path');
 const webFolder = path.join(__dirname, '../web/');
 const helmet = require('helmet');
+const {generateDoneTasksReport} = require('./tools');
+const {DateTime} = require('luxon');
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -53,6 +55,10 @@ app.get('/participant-tasks', requireUser, (req, res) => {
     res.sendFile(path.join(webFolder, 'participant-tasks.html'));
 });
 
+app.get('/reports/done-tasks.html', (req, res) => {
+    res.sendFile('reports/done-tasks.html', {root: path.join(__dirname)});
+});
+
 app.get('*', function(req, res){
     res.sendStatus(404);
 });
@@ -80,3 +86,9 @@ if (config.useHttps) {
 } else {
     server.listen(config.port);
 }
+
+generateDoneTasksReport();
+
+setInterval(() => {
+    generateDoneTasksReport();
+}, 3600 * 1000);
