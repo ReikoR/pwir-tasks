@@ -40,7 +40,7 @@ function renderAll(teams, tasks, completedTasksList) {
                 }
                 
                 th:nth-child(2n+5) {
-                    border-bottom: 1px dotted grey;
+                    border-bottom: 1px solid grey;
                 }
                 
                 th:nth-child(2n+6) {
