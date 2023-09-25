@@ -11,7 +11,7 @@ const timeZone = 'Europe/Tallinn';
 const outputDirectory = 'reports';
 
 function formatTime(isoString) {
-    const dateTime = DateTime.fromJSDate(isoString);
+    const dateTime = DateTime.fromJSDate(isoString, {zone: timeZone});
 
     if (!dateTime.isValid) {
         return null;
@@ -117,8 +117,8 @@ function renderGroupRow(task, teams) {
 }
 
 function renderRow(task, teams, completedTasksList, nowDateTime) {
-    const deadlineDateTime = DateTime.fromJSDate(task.deadline);
-    const expiresAtDateTime = DateTime.fromJSDate(task.expires_at);
+    const deadlineDateTime = DateTime.fromJSDate(task.deadline, {zone: timeZone});
+    const expiresAtDateTime = DateTime.fromJSDate(task.expires_at, {zone: timeZone});
     const endMillis = nowDateTime.plus({weeks: 12}).toMillis(); // Start showing colors 12 weeks before
     const nowToEndInMillis = endMillis - nowDateTime.toMillis();
 
@@ -147,9 +147,9 @@ function renderRow(task, teams, completedTasksList, nowDateTime) {
         if (!completedTaskInfo) {
             cells.push('<td></td>');
         } else {
-            const deadlineDateTime = DateTime.fromJSDate(task.deadline);
-            const expiresAtDateTime = DateTime.fromJSDate(task.expires_at);
-            const competedAtDateTime = DateTime.fromJSDate(completedTaskInfo.completion_time);
+            const deadlineDateTime = DateTime.fromJSDate(task.deadline, {zone: timeZone});
+            const expiresAtDateTime = DateTime.fromJSDate(task.expires_at, {zone: timeZone});
+            const competedAtDateTime = DateTime.fromJSDate(completedTaskInfo.completion_time, {zone: timeZone});
 
             if (competedAtDateTime > expiresAtDateTime) {
                 cells.push('<td></td>');
