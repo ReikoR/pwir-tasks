@@ -35,19 +35,27 @@ function renderAll(teams, tasks, completedTasksList) {
                     border-collapse: collapse;
                 }
                 
-                td {
-                    padding: 2px 4px;
+                td, th {
+                    padding: 2px 8px;
                 }
                 
-                .done {
+                th:nth-child(2n+5) {
+                    border-bottom: 1px dotted grey;
+                }
+                
+                th:nth-child(2n+6) {
+                    border-bottom: 1px dashed grey;
+                }
+                
+                td.done {
                     background-color: limegreen;
                 }
                 
-                .done-late {
+                td.done-late {
                     background-color: lightgreen;
                 }
                 
-                .overdue {
+                td.overdue {
                     color: #444;
                     background-color: #DDD;
                 }
