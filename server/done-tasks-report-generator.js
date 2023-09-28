@@ -149,11 +149,11 @@ function renderRow(task, teams, completedTasksList, nowDateTime) {
         } else {
             const deadlineDateTime = DateTime.fromJSDate(task.deadline, {zone: timeZone});
             const expiresAtDateTime = DateTime.fromJSDate(task.expires_at, {zone: timeZone});
-            const competedAtDateTime = DateTime.fromJSDate(completedTaskInfo.completion_time, {zone: timeZone});
+            const completedAtDateTime = DateTime.fromJSDate(completedTaskInfo.completion_time, {zone: timeZone});
 
-            if (competedAtDateTime > expiresAtDateTime) {
+            if (!completedAtDateTime.isValid || completedAtDateTime > expiresAtDateTime) {
                 cells.push('<td></td>');
-            } else if (competedAtDateTime > deadlineDateTime) {
+            } else if (completedAtDateTime > deadlineDateTime) {
                 cells.push('<td class="done-late">Done late</td>');
             } else {
                 cells.push('<td class="done">Done</td>');

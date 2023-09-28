@@ -391,14 +391,14 @@ class TasksTable extends LitElement {
     renderTeamTaskCell(team, task) {
         const mode = this.mode;
         const completedTaskInfo = this.getCompletedTaskInfo(team, task);
-        const done = !!completedTaskInfo;
+        const done = typeof (completedTaskInfo && completedTaskInfo.completion_time) === 'string';
         const canOpen = mode === 'edit' || mode === 'inspect' && done;
         const unavailable = DateTime.fromISO(task.expires_at) < DateTime.local();
         const pointsUsed = done ? completedTaskInfo.points_used : 0;
         const pointsAvailable = done ? completedTaskInfo.points_available : 0;
         const pointsInvalid = pointsUsed !== pointsAvailable;
         let title = '';
-        
+
         const contentText = done
             ? (DateTime.fromISO(completedTaskInfo.completion_time) > DateTime.fromISO(task.deadline)
                 ? 'Done late'

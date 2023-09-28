@@ -41,7 +41,7 @@ alter table team_member add constraint team_member_no_time_overlap
 create table completed_task (
     task_id integer not null references task(task_id),
     team_id integer not null references team(team_id),
-    completion_time timestamptz not null,
+    completion_time timestamptz,
     primary key (task_id, team_id)
 );
 
@@ -66,7 +66,7 @@ create table completed_task_history (
 
 create or replace function task_points_with_time(t task, completion_time timestamptz) returns integer as $$
 begin
-    if t.expires_at < completion_time then -- after expires_at
+    if completion_time is null or t.expires_at < completion_time then -- after expires_at
         return 0;
     elsif t.deadline < completion_time then -- after deadline, before expires_at
         return t.points / 2;
