@@ -39,6 +39,12 @@ function renderAll(teams, tasks, completedTasksList) {
                     padding: 2px 8px;
                 }
                 
+                th {
+                    position: sticky;
+                    top: 0;
+                    background-color: white;
+                }
+                
                 th:nth-child(2n+5) {
                     border-bottom: 1px solid grey;
                 }
