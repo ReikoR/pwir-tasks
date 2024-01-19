@@ -61,6 +61,10 @@ function renderAll(teams, tasks, completedTasksList) {
                     background-color: lightgreen;
                 }
                 
+                td.done-after-expiry {
+                    background-color: #daee90;
+                }
+                
                 td.overdue {
                     color: #444;
                     background-color: #DDD;
@@ -157,8 +161,10 @@ function renderRow(task, teams, completedTasksList, nowDateTime) {
             const expiresAtDateTime = DateTime.fromJSDate(task.expires_at, {zone: timeZone});
             const completedAtDateTime = DateTime.fromJSDate(completedTaskInfo.completion_time, {zone: timeZone});
 
-            if (!completedAtDateTime.isValid || completedAtDateTime > expiresAtDateTime) {
+            if (!completedAtDateTime.isValid ) {
                 cells.push('<td></td>');
+            } else if (completedAtDateTime > expiresAtDateTime) {
+                cells.push('<td class="done-after-expiry">Done after expiry</td>');
             } else if (completedAtDateTime > deadlineDateTime) {
                 cells.push('<td class="done-late">Done late</td>');
             } else {

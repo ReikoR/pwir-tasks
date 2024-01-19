@@ -393,17 +393,26 @@ class TasksTable extends LitElement {
         const completedTaskInfo = this.getCompletedTaskInfo(team, task);
         const done = typeof (completedTaskInfo && completedTaskInfo.completion_time) === 'string';
         const canOpen = mode === 'edit' || mode === 'inspect' && done;
-        const unavailable = DateTime.fromISO(task.expires_at) < DateTime.local();
+        const isoDeadline = DateTime.fromISO(task.deadline);
+        const isoExpiresAt = DateTime.fromISO(task.expires_at);
+        const unavailable = isoExpiresAt < DateTime.local();
         const pointsUsed = done ? completedTaskInfo.points_used : 0;
         const pointsAvailable = done ? completedTaskInfo.points_available : 0;
         const pointsInvalid = pointsUsed !== pointsAvailable;
         let title = '';
+        let contentText = '';
 
-        const contentText = done
-            ? (DateTime.fromISO(completedTaskInfo.completion_time) > DateTime.fromISO(task.deadline)
-                ? 'Done late'
-                : 'Done')
-            : '';
+        if (done) {
+            const isoCompletionTime = DateTime.fromISO(completedTaskInfo.completion_time);
+
+            if (isoCompletionTime > isoExpiresAt) {
+                contentText = 'Done after expiry';
+            } else if (isoCompletionTime > isoDeadline) {
+                contentText = 'Done late';
+            } else {
+                contentText = 'Done';
+            }
+        }
 
         const classValue = classNames({
             'team-task-cell': true,
