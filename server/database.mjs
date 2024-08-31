@@ -1,21 +1,23 @@
-const config = require('./conf/config');
-const {DateTime} = require('luxon');
-const crypto = require('node:crypto');
-const util = require('node:util');
-const pg = require('pg');
+import config from './conf/config.js';
+import {DateTime} from 'luxon';
+import crypto from 'node:crypto';
+import util from 'node:util';
+import pg from 'pg';
+import Knex from 'knex';
+import * as jsondiffpatch from 'jsondiffpatch'
 
 const {Pool} = pg;
 const poolPrivate = new Pool(config.db.connectionParamsPrivate);
 
 const pbkdf2Async = util.promisify(crypto.pbkdf2);
 
-const knex = require('knex')({
+const knex = Knex({
     client: 'pg',
     connection: config.db.connectionParams,
     pool: config.db.pool
 });
 
-const teamTaskDiffer = require('jsondiffpatch').create({
+const teamTaskDiffer = jsondiffpatch.create({
     objectHash: function (obj) {
         return obj.participant_id;
     },
@@ -423,7 +425,7 @@ async function close() {
     return knex.destroy();
 }
 
-module.exports = {
+export default {
     getParticipantById,
     getTasks,
     getTeams,

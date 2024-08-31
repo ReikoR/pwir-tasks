@@ -1,6 +1,6 @@
-const fs = require('fs').promises;
-const {DateTime, Interval} = require('luxon');
-const prettier = require('prettier');
+import {promises as fs} from 'fs';
+import {DateTime, Interval} from 'luxon';
+import prettier from 'prettier';
 
 const prettierOptions = {
     parser: 'html',
@@ -308,7 +308,7 @@ const tasksSchedule = (nowDateTime, tasks, team, completedTasksMap, isPreview) =
     return {width: fullWidth, content: `<g transform="translate(0.5, 0.5)">${fragments.join('')}</g>`};
 }
 
-async function generateSVGs(teams, tasks, completedTasksList, shouldGenerateDateScale = true) {
+export async function generateSVGs(teams, tasks, completedTasksList, shouldGenerateDateScale = true) {
     await fs.mkdir(imageOutputDirectory, {recursive: true});
 
     const nowDateTime = getNowDateTime();
@@ -344,8 +344,4 @@ async function generateSVGs(teams, tasks, completedTasksList, shouldGenerateDate
     }
 
     console.log(DateTime.now().toISO(), 'SVGs generated');
-}
-
-module.exports = {
-    generateSVGs
 }

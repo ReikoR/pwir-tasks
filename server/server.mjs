@@ -1,17 +1,18 @@
-const config = require('./conf/config');
-const express = require('express');
-const serveStatic = require('serve-static');
+import config from './conf/config.js';
+import express from 'express';
+import serveStatic from 'serve-static';
+import http from 'http';
+import https from 'https';
+import apiRouter from './api.mjs';
+import authRouter from './auth.mjs';
+import path from 'path';
+import helmet from 'helmet';
+import {generateDoneTasksReport} from './tools.mjs';
+import {DateTime} from 'luxon';
+
 const app = express();
-const http = require('http');
-const https = require('https');
 const server = config.useHttps ? https.createServer(config.httpsOptions, app) : http.createServer(app);
-const apiRouter = require('./api');
-const authRouter = require('./auth');
-const path = require('path');
-const webFolder = path.join(__dirname, '../web/');
-const helmet = require('helmet');
-const {generateDoneTasksReport} = require('./tools');
-const {DateTime} = require('luxon');
+const webFolder = path.join(import.meta.dirname, '../web/');
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -56,7 +57,7 @@ app.get('/participant-tasks', requireUser, (req, res) => {
 });
 
 app.get('/reports/done-tasks.html', (req, res) => {
-    res.sendFile('reports/done-tasks.html', {root: path.join(__dirname)});
+    res.sendFile('reports/done-tasks.html', {root: path.join(import.meta.dirname)});
 });
 
 app.get('*', function(req, res){

@@ -1,6 +1,6 @@
-const fs = require('fs').promises;
-const {DateTime} = require('luxon');
-const prettier = require('prettier');
+import {promises as fs} from 'node:fs';
+import {DateTime} from 'luxon';
+import prettier from 'prettier';
 
 const prettierOptions = {
     parser: 'html',
@@ -180,7 +180,7 @@ function getCompletedTaskInfo(completedTasksList, team, task) {
     return completedTasksList.find(t => t.task_id === task.task_id && t.team_id === team.team_id) || null;
 }
 
-async function createDoneTasksReport(teams, tasks, completedTasksList) {
+export async function createDoneTasksReport(teams, tasks, completedTasksList) {
     console.log('createDoneTasksReport');
 
     await fs.mkdir(outputDirectory, {recursive: true});
@@ -190,8 +190,4 @@ async function createDoneTasksReport(teams, tasks, completedTasksList) {
     const htmlContent = await prettier.format(renderAll(sortedTeams, tasks, completedTasksList), prettierOptions);
 
     await fs.writeFile(`${outputDirectory}/done-tasks.html`, htmlContent);
-}
-
-module.exports = {
-    createDoneTasksReport
 }

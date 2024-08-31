@@ -1,10 +1,15 @@
-const config = require('./conf/config');
-const database = require('./database');
-const router = require('express').Router();
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const FileStore = require('session-file-store')(session);
+import config from "./conf/config.js";
+import database from "./database.mjs";
+import {Router} from "express";
+import bodyParser from "body-parser";
+import session from "express-session";
+import session_file_store from "session-file-store";
+
+const router = Router();
+const FileStore = session_file_store(session);
 const jsonParser = bodyParser.json();
+
+export default router;
 
 router.use(jsonParser);
 
@@ -61,5 +66,3 @@ router.get('/session', (req, res) => {
         res.sendStatus(401);
     }
 });
-
-module.exports = router;

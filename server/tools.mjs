@@ -1,6 +1,6 @@
-const database = require('./database');
-const {generateSVGs} = require('./svg-generator');
-const {createDoneTasksReport} = require('./done-tasks-report-generator');
+import database from './database.mjs';
+import {generateSVGs} from './svg-generator.mjs';
+import {createDoneTasksReport} from './done-tasks-report-generator.mjs';
 
 let isReportGenerationRunning = false;
 let shouldRerunReportGeneration = false;
@@ -47,7 +47,7 @@ async function generateDoneTasksReport() {
     }
 }
 
-module.exports = {
+export {
     generateAllSVGs,
     generateTeamSVGs,
     generateDoneTasksReport

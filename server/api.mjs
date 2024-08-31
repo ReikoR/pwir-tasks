@@ -1,8 +1,12 @@
-const database = require('./database');
-const router = require('express').Router();
-const bodyParser = require('body-parser');
+import database from './database.mjs';
+import express from 'express';
+import bodyParser from 'body-parser';
+import {generateDoneTasksReport} from './tools.mjs';
+
 const jsonParser = bodyParser.json();
-const {generateDoneTasksReport} = require("./tools");
+const router = express.Router();
+
+export default router;
 
 router.use(jsonParser);
 
@@ -145,5 +149,3 @@ function requireEditor(req, res, next) {
         res.sendStatus(403);
     }
 }
-
-module.exports = router;
