@@ -15,6 +15,7 @@ const server = config.useHttps ? https.createServer(config.httpsOptions, app) : 
 const mainApp = express();
 const picr22App = express();
 const picr23App = express();
+const picr24App = express();
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -37,8 +38,14 @@ picr23App.use('**', createProxyMiddleware({
     changeOrigin: true,
 }));
 
+picr24App.use('**', createProxyMiddleware({
+    target: 'http://localhost:8024',
+    changeOrigin: true,
+}));
+
 app.use(vhost('picr22.utr.ee', picr22App));
 app.use(vhost('picr23.utr.ee', picr23App));
+app.use(vhost('picr24.utr.ee', picr24App));
 app.use(vhost('utr.ee', mainApp));
 
 if (config.useHttps) {
