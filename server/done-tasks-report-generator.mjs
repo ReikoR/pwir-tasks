@@ -145,7 +145,7 @@ function renderRow(task, teams, completedTasksList, nowDateTime) {
         : ` style="background-color:rgba(255,100,0,${Math.pow(expiresAtPercent, 3).toFixed(3)})"`;
 
     const cells = [
-        `<td>${task.name}</td>`,
+        `<td><a href="${task.description}">${task.name}</a></td>`,
         `<td>${task.points}</td>`,
         `<td${deadlineAttributes}>${task.deadline ? formatTime(task.deadline) : ''}</td>`,
         `<td${expiresAtAttributes}>${formatTime(task.expires_at)}</td>`,
