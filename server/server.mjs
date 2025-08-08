@@ -60,7 +60,7 @@ app.get('/reports/done-tasks.html', (req, res) => {
     res.sendFile('reports/done-tasks.html', {root: path.join(import.meta.dirname)});
 });
 
-app.get('*', function(req, res){
+app.use((req, res) => {
     res.sendStatus(404);
 });
 

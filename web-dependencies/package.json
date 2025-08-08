@@ -9,13 +9,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@rollup/plugin-commonjs": "^25.0.4",
-    "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-node-resolve": "^15.2.1",
-    "@rollup/plugin-terser": "^0.4.3",
-    "lit": "^2.8.0",
-    "luxon": "^3.4.2",
-    "rollup": "^3.28.1",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "lit": "^3.3.1",
+    "luxon": "^3.7.1",
+    "rollup": "^4.46.2",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-includepaths": "^0.2.4"
   }
