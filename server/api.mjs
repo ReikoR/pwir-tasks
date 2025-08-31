@@ -134,6 +134,65 @@ router.post('/get-completed-task-changes', requireUser, async (req, res) => {
     }
 });
 
+router.get('/review-input-info', requireUser, async (req, res) => {
+    try {
+        const rows = await database.getReviewInputInfo();
+        res.send(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
+router.post('/review-list', requireUser, async (req, res) => {
+    try {
+        const rows = await database.getReviewList(req.body);
+        res.send(rows);
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
+router.post('/create-review', requireUser, async (req, res) => {
+    try {
+        const editor_id = req.session.user.participant_id;
+
+        const {team_id, requester_id, type, task_ids, external_link} = req.body;
+        const review_id = await database.createReview(team_id, requester_id, type, task_ids, external_link, editor_id);
+        res.send({review_id});
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
+router.post('/update-review', requireEditor, async (req, res) => {
+    try {
+        const editor_id = req.session.user.participant_id;
+
+        const {review_id, status, external_link, task_ids, reviewers} = req.body;
+        await database.updateReview(review_id, status, external_link, task_ids, reviewers, editor_id);
+        res.send('OK');
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
+router.post('/update-review-changes-completed', requireUser, async (req, res) => {
+    try {
+        const editor_id = req.session.user.participant_id;
+
+        const {review_id} = req.body;
+        await database.updateReviewChangesCompleted(review_id, editor_id);
+        res.send('OK');
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
 function requireUser(req, res, next) {
     if (req.session && req.session.user && ['student', 'instructor'].includes(req.session.user.role)) {
         next();

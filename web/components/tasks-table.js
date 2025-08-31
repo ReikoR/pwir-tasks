@@ -1,14 +1,15 @@
-import {LitElement, html} from "../lib/lit.mjs";
+import {html, LitElement} from "../lib/lit.mjs";
 import {
-    getParticipants,
     getCompletedTask,
-    setCompletedTask,
+    getCompletedTaskChanges,
     getCompletedTasksList,
+    getParticipants,
     getPointsUsedByTaskParticipant,
-    getCompletedTaskChanges
+    setCompletedTask
 } from "../services/api.js";
-import {cloneObject, deepFreeze, classNames, shallowCloneObject, divideIntoIntegers} from "../util.js";
+import {classNames, cloneObject, deepFreeze, divideIntoIntegers, shallowCloneObject} from "../util.js";
 import {DateTime} from "../lib/luxon.mjs";
+import './participant-select.js';
 
 const timeZone = 'Europe/Tallinn';
 
@@ -769,33 +770,6 @@ class TasksTable extends LitElement {
     }
 }
 
-class ParticipantSelect extends LitElement {
-    constructor() {
-        super();
-
-        this.options = [];
-    }
-
-    static get properties() {
-        return {
-            options: {type: Array},
-        };
-    }
-
-    createRenderRoot() {
-        return this;
-    }
-
-    render() {
-        return html`<select>${this.options.map(option => this.renderParticipantOption(option))}</select>`;
-    }
-
-    renderParticipantOption(option) {
-        return html`<option class=${option.className} .selected="${option.selected}" .value="${option.value}">
-            ${option.text}</option>`;
-    }
-}
-
 class TeamTask {
     constructor(team_id, task_id) {
         this.team_id = team_id;
@@ -1020,5 +994,4 @@ function findParticipantsTeamIdByDateTime(participant, dateTime) {
     return !!team ? team.team_id : null;
 }
 
-customElements.define('participant-select', ParticipantSelect);
 customElements.define('tasks-table', TasksTable);

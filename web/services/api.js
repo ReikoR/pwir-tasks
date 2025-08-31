@@ -100,3 +100,23 @@ export function getParticipantTaskPoints(params) {
 export function getCompletedTaskChanges(params) {
     return post('/api/get-completed-task-changes', params);
 }
+
+export function getReviewInputInfo() {
+    return get('/api/review-input-info');
+}
+
+export function getReviewList(params) {
+    return post('/api/review-list', params);
+}
+
+export function createReview(params) {
+    return post('/api/create-review', params);
+}
+
+export function updateReview(params) {
+    return post('/api/update-review', params);
+}
+
+export function updateReviewChangesCompleted(params) {
+    return post('/api/update-review-changes-completed', params);
+}

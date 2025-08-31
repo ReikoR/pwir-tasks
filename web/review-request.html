@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project in Competitive Robotics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="/">
+    <link type="text/css" rel="stylesheet" href="common.css">
+    <link type="text/css" rel="stylesheet" href="page-header.css">
+    <style>
+        html {
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+
+        #main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        review-request form > * {
+            display: block;
+            margin: 5px 0;
+        }
+
+        review-request input, button {
+            font-size: inherit;
+        }
+
+        review-request input {
+            padding: 5px;
+        }
+
+        review-request form > button {
+            margin-top: 10px;
+        }
+
+        review-request fieldset > * {
+            padding: 10px 0;
+        }
+
+        input[name="external_link"] {
+            width: 100%;
+        }
+
+        review-request .error {
+            color: orangered;
+        }
+
+        review-request > * {
+            margin: 5px;
+        }
+
+        .external-link-group > * {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="main"></div>
+<script type="module" src="review-request.js"></script>
+</body>
+</html>

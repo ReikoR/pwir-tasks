@@ -13,7 +13,8 @@ class DefaultPageHeader extends LitElement {
     static get properties() {
         return {
             session: {type: Object},
-            links: {type: Array}
+            links: {type: Array},
+            privateLinks: {type: Array},
         };
     }
 

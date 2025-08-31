@@ -7,6 +7,7 @@ import Knex from 'knex';
 import * as jsondiffpatch from 'jsondiffpatch'
 
 const {Pool} = pg;
+const pool = new Pool(config.db.connectionParams);
 const poolPrivate = new Pool(config.db.connectionParamsPrivate);
 
 const pbkdf2Async = util.promisify(crypto.pbkdf2);
@@ -73,6 +74,7 @@ async function getParticipants(roles) {
             (
                select jsonb_agg(jsonb_build_object(
                    'team_id', team_id,
+                   'name', t.name,
                    'start_time', start_time,
                    'end_time', end_time
                    )) from team_member
@@ -421,6 +423,248 @@ async function getParticipantByAccountName(name) {
     }
 }
 
+async function getReviewInputInfo() {
+    const client = await pool.connect();
+
+    try {
+        client.query('begin');
+
+        const teamsQueryString = `select team.*,
+                (select jsonb_agg(jsonb_build_object(
+                        'participant_id', participant_id,
+                        'name', name))
+                from participant
+                join team_member tm using (participant_id)
+                where tm.team_id = team.team_id
+                  and tm.start_time <= now() and (end_time is null or end_time >= now())
+                ) as members
+            from team;`
+
+        const tasksQueryString = `select 
+                task_id, name, description, to_jsonb(types) as types,
+                (select jsonb_agg(team_id) 
+                from completed_task
+                join team using (team_id)
+                where task.task_id = completed_task.task_id
+                and completed_task.completion_time is not null)
+            as completed_by_team_ids
+            from task
+            where is_review_needed = true;`;
+
+        const teamsResult = await client.query(teamsQueryString, []);
+        const tasksResult = await client.query(tasksQueryString, []);
+
+        client.query('commit');
+
+        return {
+            teams: teamsResult.rows,
+            tasks: tasksResult.rows
+        };
+    } catch (e) {
+        client.query('rollback');
+        console.error(e);
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
+async function getReviewWithDbClient(reviewId, client) {
+    const queryString = `select
+            review.*,
+            jsonb_agg(review_tasks.task_id) as task_ids,
+            (select jsonb_agg(jsonb_build_object('reviewer_id', reviewer.participant_id, 'is_active', reviewer.is_active))
+             from reviewer where reviewer.review_id = review.review_id) as reviewers
+        from review
+        left join review_tasks on review.review_id = review_tasks.review_id
+        where review.review_id = $1
+        group by review.review_id`
+
+    return (await client.query(queryString, [reviewId])).rows;
+}
+
+async function getReviewList(params) {
+    const client = await pool.connect();
+
+    const filters = [];
+    const filterValues = [];
+    let filterValueId = 1;
+    let filterString = '';
+
+    if (params) {
+        const {review_ids} = params;
+
+        if (Array.isArray(review_ids) && review_ids.length > 0) {
+            filters.push(`review.review_id = any(\$${filterValueId++}::integer[])`);
+            filterValues.push(review_ids)
+        }
+
+        if (filters.length > 0) {
+            filterString = `where ${filters.join(' and ')}`;
+        }
+    }
+
+    try {
+        client.query('begin');
+
+        const queryString = `select
+                review.review_id,
+                review.request_time,
+                review.status,
+                review.type,
+                review.external_link,
+                (select jsonb_build_object(
+                        'team_id', team.team_id,
+                        'name', team.name,
+                        'name_id', team.name_id)
+                 from team where team.team_id = review.team_id) as team,
+                (select jsonb_build_object(
+                        'participant_id', participant.participant_id,
+                        'name', participant.name)
+                 from participant where participant.participant_id = review.requester_id) as requester,
+                (select jsonb_agg(jsonb_build_object(
+                        'task_id', task.task_id,
+                        'name', task.name))
+                 from task
+                 left join review_tasks using (task_id)
+                 where review_tasks.review_id = review.review_id) as tasks,
+                (select jsonb_agg(jsonb_build_object(
+                        'participant_id', reviewer.participant_id,
+                        'name', participant.name,
+                        'is_active', reviewer.is_active))
+                 from reviewer
+                 left join participant using (participant_id)
+                 where reviewer.review_id = review.review_id) as reviewers,
+                max(review_history.edit_time) as last_updated_time
+            from review
+            left join review_tasks using (review_id)
+            left join review_history using (review_id)
+            left join reviewer using (review_id)
+            ${filterString}
+            group by review.review_id
+            order by last_updated_time;`
+
+        const result = await client.query(queryString, filterValues);
+
+        client.query('commit');
+
+        return result.rows;
+    } catch (e) {
+        client.query('rollback');
+        console.error(e);
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
+async function createReview(team_id, requester_id, type, task_ids, external_link, editor_id) {
+    const client = await pool.connect();
+
+    try {
+        client.query('begin');
+
+        const insertReviewResult = await client.query(
+            'insert into review (team_id, requester_id, type, external_link) values ($1, $2, $3, $4) returning review_id',
+            [team_id, requester_id, type, external_link]
+        );
+
+        const reviewInfo = insertReviewResult.rows[0];
+
+        await client.query(
+            'insert into review_tasks (review_id, task_id) (select $1, unnest($2::int[]))',
+            [reviewInfo.review_id, task_ids]
+        );
+
+        const newState = (await getReviewWithDbClient(reviewInfo.review_id, client))[0];
+
+        await client.query(
+            'insert into review_history (review_id, editor_id, state) values ($1, $2, $3)',
+            [reviewInfo.review_id, editor_id, newState]
+        );
+
+        client.query('commit');
+
+        return newState.review_id;
+    } catch (e) {
+        client.query('rollback');
+        console.error(e);
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
+async function updateReview(review_id, status, external_link, task_ids, reviewers, editor_id) {
+    const client = await pool.connect();
+
+    try {
+        client.query('begin');
+
+        await client.query(
+            'update review set status = $2, external_link = $3 where review_id = $1',
+            [review_id, status, external_link]
+        );
+
+        await client.query('delete from review_tasks where review_id = $1', [review_id]);
+
+        await client.query(
+            'insert into review_tasks (review_id, task_id) (select $1, unnest($2::int[]))',
+            [review_id, task_ids]
+        );
+
+        await client.query('delete from reviewer where review_id = $1', [review_id]);
+
+        await client.query(
+            'insert into reviewer (review_id, participant_id, is_active) (select $1, * from json_to_recordset($2) as x("participant_id" integer, "is_active" bool))',
+            [review_id, JSON.stringify(reviewers)]
+        );
+
+        const newState = (await getReviewWithDbClient(review_id, client))[0];
+
+        await client.query(
+            'insert into review_history (review_id, editor_id, state) values ($1, $2, $3)',
+            [review_id, editor_id, newState]
+        );
+
+        client.query('commit');
+    } catch (e) {
+        client.query('rollback');
+        console.error(e);
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
+async function updateReviewChangesCompleted(review_id, editor_id) {
+    const client = await pool.connect();
+
+    try {
+        client.query('begin');
+
+        await client.query(
+            'update review set status = \'changes_completed\' where review_id = $1',
+            [review_id]
+        );
+
+        const newState = (await getReviewWithDbClient(review_id, client))[0];
+
+        await client.query(
+            'insert into review_history (review_id, editor_id, state) values ($1, $2, $3)',
+            [review_id, editor_id, newState]
+        );
+
+        client.query('commit');
+    } catch (e) {
+        client.query('rollback');
+        console.error(e);
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
 async function close() {
     return knex.destroy();
 }
@@ -442,5 +686,10 @@ export default {
     getAccountByName,
     isValidAccount,
     getParticipantByAccountName,
+    getReviewInputInfo,
+    getReviewList,
+    createReview,
+    updateReview,
+    updateReviewChangesCompleted,
     close,
 };

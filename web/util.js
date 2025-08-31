@@ -62,3 +62,13 @@ export function divideIntoIntegers(sum, count) {
 
     return values;
 }
+
+export function getReviewTasksInfoByType(reviewInputInfo, reviewType) {
+    if (reviewType === 'documentation') {
+        return reviewInputInfo.tasks.filter(t => t.types.includes(reviewType));
+    }
+
+    return reviewInputInfo.tasks.filter(t => {
+        return t.types.includes(reviewType) && !t.types.includes('documentation');
+    });
+}

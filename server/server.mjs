@@ -60,6 +60,18 @@ app.get('/reports/done-tasks.html', (req, res) => {
     res.sendFile('reports/done-tasks.html', {root: path.join(import.meta.dirname)});
 });
 
+app.get('/review/list', (req, res) => {
+    res.sendFile(path.join(webFolder, 'review-list.html'));
+});
+
+app.get('/review/request', (req, res) => {
+    res.sendFile(path.join(webFolder, 'review-request.html'));
+});
+
+app.get('/review/:reviewId', (req, res) => {
+    res.sendFile(path.join(webFolder, 'review.html'));
+});
+
 app.use((req, res) => {
     res.sendStatus(404);
 });
