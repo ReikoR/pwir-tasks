@@ -1,0 +1,90 @@
+Task	Task type	Needs review	Points	Full points deadline	Expires at	Link override	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html
+Group: test_robot
+Test robot assembled	mechanics,electronics		1000	2025-09-22 20:00	2025-11-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_assembled
+Test robot thrower design completed	mechanics	1	600	2025-09-22 20:00	2025-11-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_thrower_design_completed
+Test robot thrower fabricated	mechanics		400	2025-10-06 20:00	2025-11-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_thrower_fabricated
+Test robot thrower mechanics assembled and attached to robot	mechanics		400	2025-10-09 20:00	2025-11-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_thrower_mechanics_assembled_and_attached_to_robot
+Test robot thrower electronics attached and working	electronics		200	2025-10-09 20:00	2025-11-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_thrower_electronics_attached_and_working
+Group: programming
+Mainboard communication	software	1	400	2025-09-25 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_mainboard_communication
+Robot finds a ball	software	1	800	2025-10-09 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_finds_a_ball
+Robot follows a ball	software	1	800	2025-10-23 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_follows_a_ball
+Robot finds basket with a ball	software	1	800	2025-11-06 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_finds_basket_with_a_ball
+Robot throws a ball	software	1	300	2025-11-10 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_throws_a_ball
+Robot can properly react to referee commands	software	1	800	2025-11-17 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_can_properly_react_to_referee_commands
+Code works with new mechanics	software	1	400	2025-12-18 20:00	2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_code_works_with_new_mechanics
+Code works with new electronics	software	1	400	2025-12-18 20:00	2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_code_works_with_new_electronics
+3 of 11 balls in 60 seconds	software	1	1000	2025-12-18 20:00	2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_3_of_11_balls_in_60_seconds
+5 of 11 balls in 60 seconds	software	1	1000	2025-12-18 20:00	2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_5_of_11_balls_in_60_seconds
+2 of 5 balls with 6 balls outside	software	1	1200	2026-01-05 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_2_of_5_balls_with_6_balls_outside
+Dealing with opponent robot using 1 ball	software	1	1200	2026-01-05 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_dealing_with_opponent_robot_using_1_ball
+Robot movable with remote controller	software	1	400	2026-01-05 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_movable_with_remote_controller
+Throwing range test	software	1	1200	2026-01-05 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_throwing_range_test
+Ball holding test	software	1	800	2026-01-05 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_ball_holding_test
+Software documented	software,documentation	1	400	2026-01-19 20:00	2026-01-21 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_software_documented
+Group: mechanics
+Omni wheels design completed	mechanics	1	600	2025-10-06 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_omni_wheels_design_completed
+Motor mounts design completed	mechanics	1	200	2025-10-06 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_motor_mounts_design_completed
+Camera mount design completed	mechanics	1	200	2025-11-03 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_camera_mount_design_completed
+Ball thrower design completed	mechanics	1	1000	2025-11-03 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_ball_thrower_design_completed
+Adjustable ball throwing angle design completed	mechanics	1	1000	2025-11-03 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_adjustable_ball_throwing_angle_design_completed
+Ball holding thrower design completed	mechanics	1	400	2025-11-24 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_ball_holding_thrower_design_completed
+Robot chassis design completed	mechanics	1	1000	2025-11-24 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_chassis_design_completed
+Robot design completed	mechanics	1	600	2025-11-24 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_design_completed
+Whole new robot fabricated	mechanics	1	600	2025-12-08 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_whole_new_robot_fabricated
+Mechanics assembled	mechanics		1000	2025-12-15 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_mechanics_assembled
+Group: electronics
+Mainboard schematic completed	electronics	1	1200	2025-10-19 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_mainboard_schematic_completed
+Motor driver schematic completed	electronics	1	1000	2025-10-19 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_motor_driver_schematic_completed
+Mainboard design completed	electronics	1	1200	2025-11-09 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_mainboard_design_completed
+Motor driver design completed	electronics	1	1000	2025-11-09 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_motor_driver_design_completed
+PCB(s) soldered properly	electronics		800	2025-12-01 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_pcbs_soldered_properly
+PCB(s) working with firmware	firmware	1	1000	2025-12-15 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_pcbs_working_with_firmware
+Throwing angle adjustable through mainboard	electronics,firmware	1	800	2025-12-15 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_throwing_angle_adjustable_through_mainboard
+Ball holder controllable through mainboard	electronics,firmware	1	800	2025-12-15 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_ball_holder_controllable_through_mainboard
+Thrower voltage regulator attached and working	electronics		200	2025-12-15 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_thrower_voltage_regulator_attached_and_working
+Electronics attached to the robot and working	electronics		600	2025-12-15 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_electronics_attached_to_the_robot_and_working
+Mainboard documented	electronics,documentation	1	300	2026-01-19 20:00	2026-01-21 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_mainboard_documented
+Motor driver documented	electronics,documentation	1	300	2026-01-19 20:00	2026-01-21 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_motor_driver_documented
+Firmware documented	firmware,documentation	1	200	2026-01-19 20:00	2026-01-21 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_firmware_documented
+Group: progress_presentations
+Progress presentation	presentation		100		2025-09-15 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Progress presentation	presentation		100		2025-09-29 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Progress presentation	presentation		100		2025-10-13 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Progress presentation	presentation		100		2025-10-27 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Progress presentation	presentation		100		2025-11-10 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Progress presentation	presentation		100		2025-11-24 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Progress presentation	presentation		100		2025-12-08 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Progress presentation	presentation		100		2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_progress_presentation
+Group: competitions
+1st test competition	competition		1000		2025-11-20 20:00	test_competition	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition
+1st test competition with new mechanics	competition		100		2025-11-20 20:00	test_competition_with_new_mechanics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_mechanics
+1st test competition with new electronics	competition		100		2025-11-20 20:00	test_competition_with_new_electronics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_electronics
+1st test competition winner	competition		400		2025-11-20 20:00	test_competition_winner	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_winner
+2nd test competition	competition		800		2025-12-04 20:00	test_competition	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition
+2nd test competition with new mechanics	competition		200		2025-12-04 20:00	test_competition_with_new_mechanics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_mechanics
+2nd test competition with new electronics	competition		200		2025-12-04 20:00	test_competition_with_new_electronics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_electronics
+2nd test competition winner	competition		400		2025-12-04 20:00	test_competition_winner	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_winner
+3rd test competition	competition		600		2025-12-18 20:00	test_competition	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition
+3rd test competition with new mechanics	competition		300		2025-12-18 20:00	test_competition_with_new_mechanics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_mechanics
+3rd test competition with new electronics	competition		300		2025-12-18 20:00	test_competition_with_new_electronics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_electronics
+3rd test competition winner	competition		400		2025-12-18 20:00	test_competition_winner	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_winner
+4th test competition	competition		400		2026-01-08 20:00	test_competition	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition
+4th test competition with new mechanics	competition		400		2026-01-08 20:00	test_competition_with_new_mechanics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_mechanics
+4th test competition with new electronics	competition		400		2026-01-08 20:00	test_competition_with_new_electronics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_electronics
+4th test competition winner	competition		400		2026-01-08 20:00	test_competition_winner	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_winner
+5th test competition	competition		200		2026-01-15 20:00	test_competition	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition
+5th test competition with new mechanics	competition		500		2026-01-15 20:00	test_competition_with_new_mechanics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_mechanics
+5th test competition with new electronics	competition		500		2026-01-15 20:00	test_competition_with_new_electronics	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_with_new_electronics
+5th test competition winner	competition		400		2026-01-15 20:00	test_competition_winner	https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_competition_winner
+Delta X	competition		2000		2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_delta_x
+Delta X with new mechanics	competition		2000		2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_delta_x_with_new_mechanics
+Delta X with new electronics	competition		2000		2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_delta_x_with_new_electronics
+Delta X best course robot	competition		1000		2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_delta_x_best_course_robot
+Delta X 2nd best course robot	competition		400		2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_delta_x_2nd_best_course_robot
+Delta X 3rd best course robot	competition		200		2026-01-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_delta_x_3rd_best_course_robot
+Group: other
+Team documentation started	documentation	1	200	2025-09-22 20:00	2025-11-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_team_documentation_started
+Team documentation completed	documentation	1	400	2026-01-19 20:00	2026-01-21 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_team_documentation_completed
+Final presentation	presentation		0		2026-01-22 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_final_presentation
+Parts returned	other		0		2026-01-22 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_parts_returned
