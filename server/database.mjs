@@ -692,4 +692,5 @@ export default {
     updateReview,
     updateReviewChangesCompleted,
     close,
+    poolPrivate,
 };

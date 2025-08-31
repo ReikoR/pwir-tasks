@@ -128,6 +128,15 @@ create table private.account_invite (
     expires_at timestamptz not null
 );
 
+create table private.session (
+    sid varchar not null collate "default",
+    sess json not null,
+    expire timestamp(6) not null
+);
+
+alter table private.session add constraint session_pkey primary key (sid) not deferrable initially immediate;
+create index "IDX_session_expire" on private.session (expire);
+
 -- create role ui_user with login;
 
 grant connect on database picr2025 to ui_user;
@@ -155,6 +164,7 @@ grant select, insert, update, delete on public.participant to server_private_use
 
 grant select, insert, update, delete on private.account to server_private_user;
 grant usage, select on public.participant_participant_id_seq to server_private_user;
+grant select, insert, update, delete on private.session to server_private_user;
 
 grant select, insert, update, delete on private.account_invite to server_private_user;
 grant usage, select on private.account_invite_account_invite_id_seq to server_private_user;

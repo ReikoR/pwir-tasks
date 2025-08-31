@@ -3,10 +3,10 @@ import database from "./database.mjs";
 import {Router} from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
-import session_file_store from "session-file-store";
+import connectPgSimple from "connect-pg-simple";
 
 const router = Router();
-const FileStore = session_file_store(session);
+const pgSessionStore = connectPgSimple(session);
 const jsonParser = bodyParser.json();
 
 export default router;
@@ -15,10 +15,17 @@ router.use(jsonParser);
 
 router.use(session({
     secret: config.session.secret,
-    store: new FileStore(),
+    store: new pgSessionStore({
+        pool: database.poolPrivate,
+        schemaName: 'private',
+        tableName: 'session',
+    }),
     resave: false,
     saveUninitialized: true,
-    cookie: {secure: config.useHttps},
+    cookie: {
+        secure: config.useHttps,
+        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+    }
 }));
 
 router.post('/cafi', async (req, res) => {
