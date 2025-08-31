@@ -13,9 +13,8 @@ const app = express();
 const server = config.useHttps ? https.createServer(config.httpsOptions, app) : http.createServer(app);
 
 const mainApp = express();
-const picr22App = express();
-const picr23App = express();
 const picr24App = express();
+const picr25App = express();
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -28,24 +27,18 @@ app.use(helmet({
 
 mainApp.use(serveStatic(webFolder));
 
-picr22App.use('**', createProxyMiddleware({
-    target: 'http://localhost:8111',
-    changeOrigin: true,
-}));
-
-picr23App.use('**', createProxyMiddleware({
-    target: 'http://localhost:8023',
-    changeOrigin: true,
-}));
-
 picr24App.use('**', createProxyMiddleware({
     target: 'http://localhost:8024',
     changeOrigin: true,
 }));
 
-app.use(vhost('picr22.utr.ee', picr22App));
-app.use(vhost('picr23.utr.ee', picr23App));
+picr25App.use('**', createProxyMiddleware({
+    target: 'http://localhost:8025',
+    changeOrigin: true,
+}));
+
 app.use(vhost('picr24.utr.ee', picr24App));
+app.use(vhost('picr25.utr.ee', picr25App));
 app.use(vhost('utr.ee', mainApp));
 
 if (config.useHttps) {
