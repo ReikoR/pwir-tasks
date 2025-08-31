@@ -22,7 +22,7 @@ values
 	('Mainboard communication', 400, 'programming', '{software}', false, true,
 	'2025-09-25 20:00:00 Europe/Tallinn', '2026-01-12 20:00:00 Europe/Tallinn',
 	'https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_mainboard_communication'),
-	('Robot finds a ball', 800, 'programming', '{software}', false, true,
+	('Robot finds a ball', 1200, 'programming', '{software}', false, true,
 	'2025-10-09 20:00:00 Europe/Tallinn', '2026-01-12 20:00:00 Europe/Tallinn',
 	'https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_finds_a_ball'),
 	('Robot follows a ball', 800, 'programming', '{software}', false, true,

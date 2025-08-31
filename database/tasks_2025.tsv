@@ -7,7 +7,7 @@ Test robot thrower mechanics assembled and attached to robot	mechanics		400	2025
 Test robot thrower electronics attached and working	electronics		200	2025-10-09 20:00	2025-11-17 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_thrower_electronics_attached_and_working
 Group: programming
 Mainboard communication	software	1	400	2025-09-25 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_mainboard_communication
-Robot finds a ball	software	1	800	2025-10-09 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_finds_a_ball
+Robot finds a ball	software	1	1200	2025-10-09 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_finds_a_ball
 Robot follows a ball	software	1	800	2025-10-23 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_follows_a_ball
 Robot finds basket with a ball	software	1	800	2025-11-06 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_finds_basket_with_a_ball
 Robot throws a ball	software	1	300	2025-11-10 20:00	2026-01-12 20:00		https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_robot_throws_a_ball
