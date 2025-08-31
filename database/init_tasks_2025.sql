@@ -9,7 +9,7 @@ values
 	('Test robot thrower design completed', 600, 'test_robot', '{mechanics}', false, true,
 	'2025-09-22 20:00:00 Europe/Tallinn', '2025-11-17 20:00:00 Europe/Tallinn',
 	'https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_thrower_design_completed'),
-	('Test robot thrower fabricated', 400, 'test_robot', '{mechanics}', false, false,
+	('Test robot thrower fabricated', 400, 'test_robot', '{mechanics}', false, true,
 	'2025-10-06 20:00:00 Europe/Tallinn', '2025-11-17 20:00:00 Europe/Tallinn',
 	'https://ut-robotics.github.io/picr-docs/2025/grading-and-tasks.html#_test_robot_thrower_fabricated'),
 	('Test robot thrower mechanics assembled and attached to robot', 400, 'test_robot', '{mechanics}', false, false,
