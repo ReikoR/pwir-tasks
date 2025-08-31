@@ -27,12 +27,12 @@ app.use(helmet({
 
 mainApp.use(serveStatic(webFolder));
 
-picr24App.use('**', createProxyMiddleware({
+picr24App.use(createProxyMiddleware({
     target: 'http://localhost:8024',
     changeOrigin: true,
 }));
 
-picr25App.use('**', createProxyMiddleware({
+picr25App.use(createProxyMiddleware({
     target: 'http://localhost:8025',
     changeOrigin: true,
 }));
