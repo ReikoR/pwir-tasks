@@ -26,7 +26,7 @@ class ReviewRequest extends LitElement {
 
         this.teamInfo = null;
         this.teamNameId = null;
-        this.externalLinkExample = null;
+        this.mergeRequestNumber = null;
     }
 
     static get properties() {
@@ -43,6 +43,7 @@ class ReviewRequest extends LitElement {
             task_ids: {type: Number},
             external_link: {type: String},
             review_id: {type: Number},
+            mergeRequestNumber: {type: Number},
         };
     }
 
@@ -70,7 +71,24 @@ class ReviewRequest extends LitElement {
     updateSelectedTeamInfo() {
         this.teamInfo = this.inputInfo.teams.find(t => t.team_id === this.team_id);
         this.teamNameId = this.teamInfo?.name_id ?? 'TEAM-NAME';
-        this.externalLinkExample = `https://gitlab.ut.ee/loti/loti.05.023/picr2025/picr25-team-${this.teamNameId}/-/merge_requests/MERGE_REQUEST_NUMBER`;
+
+        this.updateExternalLink();
+    }
+
+    updateExternalLink() {
+        const yearString = (new Date()).getFullYear().toString();
+        const shortYearString = yearString.slice(2);
+        const urlStart = `https://gitlab.ut.ee/loti/loti.05.023/picr${yearString}/picr${shortYearString}-team-`;
+
+        if (this.isIssuesLinkNeeded()) {
+            this.external_link = `${urlStart}${this.teamNameId}/-/issues/?label_name%5B%5D=${this.review_type}`;
+        } else {
+            this.external_link = `${urlStart}${this.teamNameId}/-/merge_requests/${this.mergeRequestNumber ?? 'MERGE_REQUEST_NUMBER'}`;
+        }
+    }
+
+    isIssuesLinkNeeded() {
+        return this.review_type === 'mechanics' || this.review_type === 'electronics';
     }
 
     async handleCreateReview(event) {
@@ -121,6 +139,8 @@ class ReviewRequest extends LitElement {
         this.review_type = data.get('type');
         this.task_ids = null;
 
+        this.updateExternalLink();
+
         this.checkFormData();
     }
 
@@ -131,15 +151,14 @@ class ReviewRequest extends LitElement {
         this.checkFormData();
     }
 
-    handleExternalLinkChange(event) {
-        const data = new FormData(event.currentTarget.form);
-        this.external_link = data.get('external_link');
+    handleMergeRequestNumberChange(event) {
+        this.mergeRequestNumber = parseInt(event.currentTarget.value, 10);
 
-        this.checkFormData();
-    }
+        if (!this.isMergeRequestNumberValid()) {
+            this.mergeRequestNumber = null;
+        }
 
-    handleUseExternalLinkExample(event) {
-        this.external_link = this.externalLinkExample;
+        this.updateExternalLink();
 
         this.checkFormData();
     }
@@ -152,15 +171,11 @@ class ReviewRequest extends LitElement {
             && this.requester_id !== null
             && this.review_type !== null
             && Array.isArray(this.task_ids) && this.task_ids.length > 0
-            && (this.isExternalLinkRequired() ? this.isExternalLinkValid() : true);
+            && (this.isIssuesLinkNeeded() ? true : this.isMergeRequestNumberValid());
     }
 
-    isExternalLinkRequired() {
-        return ['documentation', 'software', 'firmware'].includes(this.review_type);
-    }
-
-    isExternalLinkValid() {
-        return typeof this.external_link === 'string' && this.external_link.length > 0;
+    isMergeRequestNumberValid() {
+        return typeof Number.isInteger(this.mergeRequestNumber) && this.mergeRequestNumber > 0;
     }
 
     render() {
@@ -296,22 +311,31 @@ class ReviewRequest extends LitElement {
     }
 
     renderExternalLink() {
-        if (!this.isExternalLinkRequired()) {
+        if (!this.review_type) {
             return null;
+        }
+
+        if (this.isIssuesLinkNeeded()) {
+            return html`<div class="external-link-group">
+                <b>Issues link:</b>
+                <div>
+                    <span>${this.external_link}</span>
+                </div>
+                </div>`;
         }
 
         return html`<div class="external-link-group">
             <b>Merge request link:</b>
             <div>
-                <button type="button" @click=${this.handleUseExternalLinkExample}>Use example</button>
-                <span>${this.externalLinkExample}</span>
+                <span>${this.external_link}</span>
             </div>
-            <input 
-                type="text" 
-                name="external_link" 
-                placeholder="Merge request link" 
-                .value=${this.external_link}
-                @keyup="${this.handleExternalLinkChange}"></div>`
+            <label>Merge request number  <input 
+                type="number" 
+                min="1" 
+                .value=${this.mergeRequestNumber} 
+                @input=${this.handleMergeRequestNumberChange}>
+            </label>
+            </div>`;
     }
 
     renderError() {

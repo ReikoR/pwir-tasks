@@ -34,8 +34,6 @@ class Review extends LitElement {
         this.error = null;
 
         this.team_id = null;
-        this.requester_id = null;
-        this.review_type = null;
         this.task_ids = null;
         this.external_link = null;
     }
@@ -51,8 +49,6 @@ class Review extends LitElement {
             isSaving: {type: Boolean},
             error: {type: String},
             team_id: {type: Number},
-            requester_id: {type: Number},
-            review_type: {type: Number},
             task_ids: {type: Number},
             external_link: {type: String},
         };
@@ -251,10 +247,6 @@ class Review extends LitElement {
             || JSON.stringify(this.savedState.reviewers) !== JSON.stringify(this.changedState.reviewers);
     }
 
-    isExternalLinkRequired() {
-        return ['documentation', 'software', 'firmware'].includes(this.reviewInfo.type);
-    }
-
     isExternalLinkValid() {
         return typeof this.changedState.external_link === 'string' && this.changedState.external_link.length > 0;
     }
@@ -406,20 +398,18 @@ class Review extends LitElement {
     }
 
     renderExternalLink() {
-        if (!this.isExternalLinkRequired()) {
-            return null;
-        }
-
         const link = this.changedState.external_link;
+        const reviewType = this.reviewInfo.type;
+        const linklabel = reviewType === 'mechanics' || reviewType === 'electronics' ?
+            'Issues link: ' : 'Merge request link: ';
 
         if (!this.isInstructorSession) {
-            return html`<div><b>Merge request link: </b><a href=${link}>${link}</a></div>`;
+            return html`<div><b>${linklabel}</b><a href=${link}>${link}</a></div>`;
         }
 
-        return html`<div><b>Merge request link:</b><input 
+        return html`<div><b>${linklabel}</b><input 
                 type="text" 
                 name="external_link" 
-                placeholder="Merge request link" 
                 .value=${link}
                 @keyup="${this.handleExternalLinkChange}"></div>`
     }

@@ -68,12 +68,14 @@ class ReviewList extends LitElement {
         const relativeRequestTime = requestDT.toRelative({locale: 'en', round: false});
         const lastUpdated = `${updatedDT.toFormat('yyyy-MM-dd TT')} (${relativeUpdateTime})`;
         const requestTime = `${requestDT.toFormat('yyyy-MM-dd TT')} (${relativeRequestTime})`;
+        const externalLinkName = listRow.type === 'mechanics' || listRow.type === 'electronics'
+            ? 'Issues' : 'Merge request';
 
         return html`<tr>
             <td><a href=${reviewLink}>Open</a></td>
             <td>${listRow.team.name}</td>
             <td>${listRow.type}</td>
-            <td><a href=${listRow.external_link}>Link</a></td>
+            <td><a href=${listRow.external_link}>${externalLinkName}</a></td>
             <td><ul>${listRow.tasks?.map(t => html`<li>${t.name}</li>`)}</ul></td>
             <td>${listRow.requester.name}</td>
             <td>${listRow.status}</td>
