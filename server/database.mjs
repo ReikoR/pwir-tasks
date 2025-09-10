@@ -643,6 +643,19 @@ async function updateReviewChangesCompleted(review_id, editor_id) {
     try {
         client.query('begin');
 
+
+        const review = (await getReviewList({review_ids: [review_id]}))[0];
+
+        if (review.status !== 'changes_needed') {
+            throw 'Review status not changes_needed';
+        }
+
+        const participant = await getParticipantById(editor_id);
+
+        if (review.team.team_id !== participant.team.team_id) {
+            throw 'Invalid team';
+        }
+
         await client.query(
             'update review set status = \'changes_completed\' where review_id = $1',
             [review_id]

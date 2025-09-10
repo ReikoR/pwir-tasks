@@ -270,7 +270,7 @@ class Review extends LitElement {
         if (!this.isInstructorSession) {
             if (
                 this.reviewInfo.status === 'changes_needed'
-                && this.session?.participant_id === this.reviewInfo.requester.participant_id
+                && this.session?.team?.team_id === this.reviewInfo.team.team_id
             ) {
                 return html`<button @click=${this.handleChangesCompleted}>Changes completed</button>`;
             }
