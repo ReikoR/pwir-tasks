@@ -238,7 +238,7 @@ class Review extends LitElement {
     checkFormData() {
         console.log(this.changedState);
 
-        this.isValid = (this.isExternalLinkRequired() ? this.isExternalLinkValid() : true);
+        this.isValid = this.isExternalLinkValid();
 
         this.isChanged =
             this.savedState.status !== this.changedState.status
