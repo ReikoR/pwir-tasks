@@ -541,8 +541,18 @@ async function getReviewList(params) {
             left join review_history using (review_id)
             left join reviewer using (review_id)
             ${filterString}
-            group by review.review_id
-            order by last_updated_time;`
+            group by review.review_id, review.status
+            order by
+            case review.status
+                -- when 'new' then 1
+                -- when 'in_review' then 1
+                when 'changes_needed' then 2
+                -- when 'changes_completed' then 1
+                when 'approved' then 3
+                when 'rejected' then 3
+                else 1
+            end,
+            last_updated_time;`
 
         const result = await client.query(queryString, filterValues);
 
