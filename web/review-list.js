@@ -1,4 +1,4 @@
-import {html, render, LitElement} from "./lib/lit.mjs";
+import {html, render, LitElement, classMap} from "./lib/lit.mjs";
 import {getReviewList, getSession} from "./services/api.js";
 import './components/default-page-header.js';
 import './components/participant-select.js';
@@ -10,16 +10,27 @@ class ReviewList extends LitElement {
         super();
 
         this.reviewList = null;
+        this.session = null;
+        this.isInstructorSession = false;
     }
 
     static get properties() {
         return {
             reviewList: {type: Array},
+            session: {type: Object},
         };
     }
 
     createRenderRoot() {
         return this;
+    }
+
+    firstUpdated(changedProperties) {
+        const isSessionSet = changedProperties.has('session');
+
+        if (isSessionSet) {
+            this.isInstructorSession = this.session?.role === 'instructor' ?? false;
+        }
     }
 
     async fetchReviewList() {
@@ -64,25 +75,54 @@ class ReviewList extends LitElement {
         const reviewers = listRow.reviewers || [];
         const updatedDT = DateTime.fromISO(listRow.last_updated_time);
         const requestDT = DateTime.fromISO(listRow.request_time);
-        const relativeUpdateTime = updatedDT.toRelative({locale: 'en', round: false});
-        const relativeRequestTime = requestDT.toRelative({locale: 'en', round: false});
-        const lastUpdated = `${updatedDT.toFormat('yyyy-MM-dd TT')} (${relativeUpdateTime})`;
-        const requestTime = `${requestDT.toFormat('yyyy-MM-dd TT')} (${relativeRequestTime})`;
+        const relativeTimeOptions = {locale: 'en', rounding: 'round', style: 'short'};
+        const relativeUpdateTime = updatedDT.toRelative(relativeTimeOptions);
+        const relativeRequestTime = requestDT.toRelative(relativeTimeOptions);
+        const lastUpdated = `${updatedDT.toFormat('yyyy-MM-dd T')} (${relativeUpdateTime})`;
+        const requestTime = `${requestDT.toFormat('yyyy-MM-dd T')} (${relativeRequestTime})`;
         const externalLinkName = listRow.type === 'mechanics' || listRow.type === 'electronics'
             ? 'Issues' : 'Merge request';
+        const isReviewer = !!reviewers?.find(r => r.participant_id === this.session.participant_id);
+        const isRequester = listRow.requester.participant_id === this.session.participant_id;
+        const isTeamMember = listRow.team.team_id === this.session.team?.team_id;
 
-        return html`<tr>
+        const rowClasses = classMap({
+            completed: listRow.status === 'approved' || listRow.status === 'rejected',
+            'changes-needed': listRow.status === 'changes_needed',
+        });
+
+        const teamClasses = classMap({
+            'participant-highlight': isTeamMember
+        });
+
+        const requesterClasses = classMap({
+            'participant-highlight': isRequester
+        });
+
+        const reviewerClasses = classMap({
+            'participant-highlight': isReviewer,
+        });
+
+        return html`<tr class=${rowClasses}>
             <td><a href=${reviewLink}>Open</a></td>
-            <td>${listRow.team.name}</td>
+            <td class=${teamClasses}>${listRow.team.name}</td>
             <td>${listRow.type}</td>
             <td><a href=${listRow.external_link}>${externalLinkName}</a></td>
             <td><ul>${listRow.tasks?.map(t => html`<li>${t.name}</li>`)}</ul></td>
-            <td>${listRow.requester.name}</td>
+            <td class=${requesterClasses}>${listRow.requester.name}</td>
             <td>${listRow.status}</td>
-            <td>${reviewers?.map(r => html`<li>${r.name}</li>`)}</td>
+            <td class=${reviewerClasses}>${reviewers?.map(this.renderReviewer)}</td>
             <td>${lastUpdated}</td>
             <td>${requestTime}</td>
         </tr>`;
+    }
+
+    renderReviewer(reviewer) {
+        if (reviewer.is_active) {
+            return html`<li><b>${reviewer.name}</b></li>`;
+        }
+
+        return html`<li>${reviewer.name}</li>`;
     }
 }
 
@@ -92,15 +132,12 @@ customElements.define('review-list', ReviewList);
     const mainElement = document.getElementById('main');
 
     let session = null;
-    let isInstructorSession = false;
 
     async function fetchSession() {
         try {
             session = await getSession();
-            isInstructorSession = session.role === 'instructor';
         } catch (e) {
             session = null;
-            isInstructorSession = false;
         }
     }
 
@@ -129,7 +166,7 @@ customElements.define('review-list', ReviewList);
             return null;
         }
 
-        return html`<review-list></review-list>`;
+        return html`<review-list .session=${session}></review-list>`;
     }
 
     await fetchSession();

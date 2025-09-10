@@ -29,13 +29,25 @@ const teamTaskDiffer = jsondiffpatch.create({
 });
 
 async function getParticipantById(participant_id) {
-    try {
-        return (await knex('participant')
-            .select('participant_id', 'name', 'role')
-            .where({participant_id}))[0];
-    } catch (e) {
-        return null;
-    }
+    const queryString = `select
+            participant.participant_id,
+            participant.name,
+            participant.role,
+            (
+               select jsonb_build_object(
+                   'team_id', team_id,
+                   'name', t.name,
+                   'name_id', t.name_id
+                   ) from team_member
+               join team t using(team_id)
+               where team_member.participant_id = participant.participant_id
+               and start_time <= now() and (end_time is null or end_time >= now())
+               limit 1
+            ) as team
+        from participant
+        where participant.participant_id = ?;`;
+
+    return (await knex.raw(queryString, [participant_id])).rows[0];
 }
 
 async function getTasks() {
