@@ -25,7 +25,8 @@ page-header .title {
     color: #afcee8;
 }
 
-page-header .user {
+page-header .user,
+page-header .user form {
     display: flex;
     align-items: baseline;
     padding-left: 10px;
@@ -49,6 +50,6 @@ page-header .user button {
     cursor: pointer;
 }
 
-page-header .user.error {
+page-header .user form.error {
     background-color: orangered;
 }

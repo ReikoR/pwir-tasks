@@ -407,6 +407,20 @@ async function getAccountByName(name) {
     return null;
 }
 
+async function getAccountByGitlabId(id) {
+    try {
+        const result = await poolPrivate.query('select * from private.account where gitlab_id = $1', [id]);
+
+        if (result.rows.length === 1) {
+            return result.rows[0];
+        }
+    } catch (e) {
+        return null;
+    }
+
+    return null;
+}
+
 async function isValidAccount(name, password) {
     const accountInfo = await getAccountByName(name);
 
@@ -424,6 +438,20 @@ async function isValidAccount(name, password) {
 async function getParticipantByAccountName(name) {
     try {
         const accountInfo = await getAccountByName(name);
+
+        if (!accountInfo) {
+            return null;
+        }
+
+        return getParticipantById(accountInfo.participant_id);
+    } catch (e) {
+        return null;
+    }
+}
+
+async function getParticipantByGitlabId(id) {
+    try {
+        const accountInfo = await getAccountByGitlabId(id);
 
         if (!accountInfo) {
             return null;
@@ -721,6 +749,7 @@ export default {
     getAccountByName,
     isValidAccount,
     getParticipantByAccountName,
+    getParticipantByGitlabId,
     getReviewInputInfo,
     getReviewList,
     createReview,

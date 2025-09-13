@@ -73,9 +73,12 @@ class PageHeader extends LitElement {
         return html`<a href=${url}>${name}</a>`;
     }
 
+    renderGitLabLogin() {
+        return html`<a href=${'/gitlab/login?redirect=' + location.pathname}>GitLab Login</a>`;
+    }
+
     renderLogin() {
         const classes = classMap({
-            user: true,
             error: this.error !== null,
         });
 
@@ -96,7 +99,10 @@ class PageHeader extends LitElement {
                 </span>`;
         }
 
-        return html`${this.renderLogin()}`;
+        return html`<span class="user">
+            ${this.renderGitLabLogin()}
+            ${this.renderLogin()}
+        </span>`;
     }
 }
 

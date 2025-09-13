@@ -116,8 +116,9 @@ create schema private;
 
 create table private.account (
     participant_id integer primary key references public.participant(participant_id),
-    account_name text not null unique,
-    password_hash text not null
+    account_name text unique,
+    password_hash text,
+    gitlab_id integer unique
 );
 
 create table private.account_invite (

@@ -45,4 +45,11 @@ config.db.connectionParamsPrivate = {
 config.session = {};
 config.session.secret = '';
 
+config.gitlab = {
+    url: '',
+    appId: '',
+    appSecret: '',
+    redirectUri: ``,
+}
+
 module.exports = config;

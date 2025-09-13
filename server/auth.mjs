@@ -4,10 +4,17 @@ import {Router} from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import * as client from 'openid-client';
 
 const router = Router();
 const pgSessionStore = connectPgSimple(session);
 const jsonParser = bodyParser.json();
+
+let openidClientConfig = await client.discovery(
+    new URL(config.gitlab.url),
+    config.gitlab.appId,
+    config.gitlab.appSecret
+);
 
 export default router;
 
@@ -71,5 +78,76 @@ router.get('/session', (req, res) => {
         res.send(req.session.user);
     } else {
         res.sendStatus(401);
+    }
+});
+
+router.get('/gitlab/login', async (req, res) => {
+    let codeVerifier = client.randomPKCECodeVerifier();
+    let codeChallenge = await client.calculatePKCECodeChallenge(codeVerifier);
+    let state = client.randomState();
+
+    req.session.authRequest = {
+        codeVerifier,
+        codeChallenge,
+        state,
+        redirect: req.query.redirect,
+    };
+
+    req.session.save();
+
+    let redirectTo = client.buildAuthorizationUrl(openidClientConfig, {
+        redirect_uri: config.gitlab.redirectUri,
+        scope: 'read_user',
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        state,
+    });
+
+    res.redirect(redirectTo.href);
+});
+
+router.get('/gitlab/callback', async (req, res) => {
+    const {codeVerifier, state, redirect} = req.session.authRequest;
+
+    delete req.session.authRequest;
+
+    let tokens = await client.authorizationCodeGrant(
+        openidClientConfig,
+        new URL(`${req.protocol}://${req.host}${req.originalUrl ?? req.url}`),
+        {
+            pkceCodeVerifier: codeVerifier,
+            expectedState: state,
+        }
+    );
+
+    let access_token = tokens.access_token;
+
+    let protectedResource = await client.fetchProtectedResource(
+        openidClientConfig,
+        access_token,
+        new URL('/api/v4/user', config.gitlab.url),
+        'GET',
+    );
+
+    const userInfo = await protectedResource.json();
+
+    const participant = await database.getParticipantByGitlabId(userInfo.id);
+
+    if (!participant) {
+        console.log('Account not found');
+    } else {
+        req.session.user = participant;
+    }
+
+    res.redirect(redirect ?? '/');
+});
+
+router.use((err, req, res, next) => {
+    console.error(err);
+
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        res.status(400).send('Bad JSON');
+    } else if (err) {
+        res.status(500).send('Internal error');
     }
 });
