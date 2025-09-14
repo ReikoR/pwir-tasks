@@ -5,7 +5,8 @@ import {
     getParticipants,
     getReviewInputInfo,
     updateReview,
-    updateReviewChangesCompleted
+    updateReviewChangesCompleted,
+    getReviewChanges
 } from "./services/api.js";
 import './components/default-page-header.js';
 import './components/participant-select.js';
@@ -36,6 +37,8 @@ class Review extends LitElement {
         this.team_id = null;
         this.task_ids = null;
         this.external_link = null;
+
+        this.changes = null;
     }
 
     static get properties() {
@@ -51,6 +54,7 @@ class Review extends LitElement {
             team_id: {type: Number},
             task_ids: {type: Number},
             external_link: {type: String},
+            changes: {type: Array},
         };
     }
 
@@ -138,6 +142,10 @@ class Review extends LitElement {
         if (!this.changedState) {
             this.changedState = cloneObject(this.savedState);
         }
+    }
+
+    async fetchReviewChanges() {
+        this.changes = await getReviewChanges({review_id: this.reviewId});
     }
 
     async handleSaveReview(event) {
@@ -235,6 +243,10 @@ class Review extends LitElement {
         this.checkFormData();
     }
 
+    handleShowChanges() {
+        this.fetchReviewChanges();
+    }
+
     checkFormData() {
         console.log(this.changedState);
 
@@ -263,7 +275,8 @@ class Review extends LitElement {
             ${this.renderReviewersSelector()}
             ${this.renderTaskSelector()}
             ${this.renderButtons()}
-            ${this.renderError()}`;
+            ${this.renderError()}
+            ${this.renderChanges()}`;
     }
 
     renderButtons() {
@@ -420,6 +433,119 @@ class Review extends LitElement {
         }
 
         return html`<div class="error">${this.error}</div>`;
+    }
+
+    renderChanges() {
+        const buttonName = this.changes === null ? 'Show changelog' : 'Refresh changelog';
+
+        return html`<div class="review-changelog">
+            <button @click=${this.handleShowChanges}>${buttonName}</button>
+            <div>${(this.changes || []).map(c => this.renderChangeRow(c))}</div>
+            </div>`;
+    }
+
+    renderChangeRow(changeRow) {
+        const editTimeString = DateTime.fromISO(changeRow.edit_time).toFormat('yyyy-MM-dd T');
+
+        return html`<div>
+            <div>
+            <strong>${editTimeString}</strong>
+            <span>${changeRow.editor}</span>
+            </div>
+            <ol>
+            ${this.renderChangeDiff(changeRow.diff)}
+            </ol>
+            </div>`;
+    }
+
+    getTaskById(id) {
+        return cloneObject(this.reviewInputInfo.tasks.find(t => t.task_id === id) || null);
+    }
+
+    getInstructorById(id) {
+        return cloneObject(this.instructors.find(i => i.participant_id === id) || null);
+    }
+
+    renderChangeDiff(diff) {
+        if (!diff) {
+            return html`<li>No changes</li>`;
+        }
+
+        const changeTexts = [];
+
+        if (Array.isArray(diff.status)) {
+            if (diff.status.length === 1) {
+                changeTexts.push(html`<li>${'Added status ' + diff.status[0]}</li`);
+            } else if (diff.status.length === 2) {
+                changeTexts.push(html`<li>${`Changed status from ${diff.status[0]} to ${diff.status[1]}`}</li`);
+            }
+        }
+
+        if (Array.isArray(diff.external_link)) {
+            if (diff.external_link.length === 1) {
+                changeTexts.push(html`<li>${'Added external link ' + diff.external_link[0]}</li`);
+            } else if (diff.external_link.length === 2) {
+                changeTexts.push(html`<li>${`Changed external link from ${diff.external_link[0]} to ${diff.external_link[1]}`}</li`);
+            }
+        }
+
+        if (Array.isArray(diff.task_ids)) {
+            if (diff.task_ids.length === 1) {
+                const taskTexts = diff.task_ids[0]
+                    .map(entry => html`<li>${this.getTaskById(parseInt(entry, 10)).name}</li>`);
+
+                changeTexts.push(html`<li>Added tasks: ${html`<ul>${taskTexts}</ul>`}</li>`);
+            } else if (diff.task_ids.length === 2) {
+                changeTexts.push(html`<li>${'Changed tasks'}</li`);
+            } else if (diff.task_ids.length === 3) {
+                changeTexts.push(html`<li>${'Removed tasks'}</li`);
+            }
+        } else if (diff.task_ids) {
+            for (const [key, idChanges] of Object.entries(diff.task_ids)) {
+                if (!Array.isArray(idChanges)) {
+                    continue;
+                }
+
+                const id = idChanges[0];
+
+                if (idChanges.length === 1) {
+                    changeTexts.push(html`<li>${`Added task ${this.getTaskById(id)?.name}`}</li`);
+                } else if (idChanges.length === 2) {
+                    changeTexts.push(html`<li>${`Changed task ${this.getTaskById(id)?.name}`}</li`);
+                } else if (idChanges.length === 3) {
+                    changeTexts.push(html`<li>${'Removed task ' + this.getTaskById(id)?.name}</li`);
+                }
+            }
+        }
+
+        if (Array.isArray(diff.reviewers)) {
+            if (diff.reviewers.length === 1) {
+                if (diff.reviewers[0]) {
+                    const reviewerTexts = Object.entries(diff.reviewers[0])
+                        .map(entry => html`<li>${this.getInstructorById(parseInt(entry[0], 10)).name} who is ${entry[1] ? 'active' : 'inactive'}</li>`);
+
+                    changeTexts.push(html`<li>Added reviewers: ${html`<ul>${reviewerTexts}</ul>`}</li>`);
+                }
+            } else if (diff.reviewers.length === 2) {
+                changeTexts.push(html`<li>${'Changed reviewers'}</li>`);
+            } else if (diff.reviewers.length === 3) {
+                changeTexts.push(html`<li>${'Removed reviewers'}</li>`);
+            }
+        } else if (diff.reviewers) {
+            for (const [key, isActiveChanges] of Object.entries(diff.reviewers)) {
+                const id = parseInt(key,10);
+
+                if (isActiveChanges.length === 1) {
+                    changeTexts.push(html`<li>${`Added reviewer ${this.getInstructorById(id)?.name} who is ${isActiveChanges[1] ? 'active' : 'inactive'}`}</li>`);
+                } else if (isActiveChanges.length === 2) {
+                    changeTexts.push(html`<li>${`Changed reviewer ${this.getInstructorById(id)?.name} to ${isActiveChanges[1] ? 'active' : 'inactive'}`}</li>`);
+                } else if (isActiveChanges.length === 3) {
+                    changeTexts.push(html`<li>${'Removed reviewer ' + this.getInstructorById(id)?.name}</li>`);
+                }
+            }
+        }
+
+        return html`${changeTexts}`;
     }
 }
 

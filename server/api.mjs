@@ -193,6 +193,17 @@ router.post('/update-review-changes-completed', requireUser, async (req, res) =>
     }
 });
 
+router.post('/get-review-changes', requireUser, async (req, res) => {
+    try {
+        const {review_id} = req.body;
+        const changes = await database.getReviewChanges(review_id);
+        res.send(changes);
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
 function requireUser(req, res, next) {
     if (req.session && req.session.user && ['student', 'instructor'].includes(req.session.user.role)) {
         next();

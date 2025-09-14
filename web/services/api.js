@@ -120,3 +120,7 @@ export function updateReview(params) {
 export function updateReviewChangesCompleted(params) {
     return post('/api/update-review-changes-completed', params);
 }
+
+export function getReviewChanges(params) {
+    return post('/api/get-review-changes', params);
+}

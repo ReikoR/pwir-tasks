@@ -28,6 +28,13 @@ const teamTaskDiffer = jsondiffpatch.create({
     }
 });
 
+const reviewHistoryDiffer = jsondiffpatch.create({
+    arrays: {
+        detectMove: true,
+        includeValueOnMove: true
+    }
+});
+
 async function getParticipantById(participant_id) {
     const queryString = `select
             participant.participant_id,
@@ -728,6 +735,71 @@ async function updateReviewChangesCompleted(review_id, editor_id) {
     }
 }
 
+async function getReviewChanges(review_id, count = null) {
+    const queryString = `select
+               edit_time,
+               participant.name as editor,
+               state
+        from review_history
+        join review using (review_id)
+        join participant on editor_id = participant.participant_id
+        where review_id = ?
+        order by edit_time desc
+        limit ?;`;
+
+    let isLimited = Number.isInteger(count);
+    const limit = isLimited ? (count + 1) : null;
+    const rows = (await knex.raw(queryString, [review_id, limit])).rows;
+
+    if (rows.length <= count) {
+        isLimited = false;
+    }
+
+    const cleanRows = rows.map(row => {
+        const {edit_time, editor, state} = row;
+        const reviewers = state.reviewers || [];
+        const cleanRow = {
+            edit_time,
+            editor,
+            state: {
+                status: state.status,
+                external_link: state.external_link,
+                task_ids: state.task_ids,
+            },
+        };
+
+        if (reviewers.length > 0) {
+            const reviewersMap = {};
+
+            for (const p of reviewers) {
+                reviewersMap[p.reviewer_id] = p.is_active;
+            }
+
+            cleanRow.state.reviewers = reviewersMap;
+        }
+
+        return cleanRow;
+    });
+
+    cleanRows.reverse();
+
+    let prevState = isLimited ? cleanRows[0].state : {};
+    let changes = [];
+
+    for (const row of cleanRows.slice(isLimited ? 1 : 0)) {
+        const {edit_time, editor, state} = row;
+        const diff = reviewHistoryDiffer.diff(prevState, state);
+
+        if (diff) {
+            changes.push({edit_time, editor, diff});
+        }
+
+        prevState = row.state;
+    }
+
+    return changes;
+}
+
 async function close() {
     return knex.destroy();
 }
@@ -755,6 +827,7 @@ export default {
     createReview,
     updateReview,
     updateReviewChangesCompleted,
+    getReviewChanges,
     close,
     poolPrivate,
 };
