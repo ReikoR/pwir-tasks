@@ -1,8 +1,7 @@
 import {html, render, LitElement} from "./lib/lit.mjs";
-import {createReview, getReviewInputInfo, getSession} from "./services/api.js";
+import {createReview, getConfig, getReviewInputInfo, getSession} from "./services/api.js";
 import './components/default-page-header.js';
 import './components/participant-select.js';
-import {DateTime} from "./lib/luxon.mjs";
 import {deepFreeze, getReviewTasksInfoByType} from "./util.js";
 
 class ReviewRequest extends LitElement {
@@ -27,6 +26,8 @@ class ReviewRequest extends LitElement {
         this.teamInfo = null;
         this.teamNameId = null;
         this.mergeRequestNumber = null;
+
+        this.config = null;
     }
 
     static get properties() {
@@ -52,8 +53,14 @@ class ReviewRequest extends LitElement {
     }
 
     async fetchInputInfo() {
-        this.inputInfo = await getReviewInputInfo();
+        const [config, inputInfo] = await Promise.all([getConfig(), getReviewInputInfo()]);
+
+        this.config = config;
+        this.inputInfo = inputInfo;
+
+        deepFreeze(this.config);
         deepFreeze(this.inputInfo);
+
         console.log(this.inputInfo);
 
         if (!this.isInstructorSession) {
@@ -76,9 +83,7 @@ class ReviewRequest extends LitElement {
     }
 
     updateExternalLink() {
-        const yearString = (new Date()).getFullYear().toString();
-        const shortYearString = yearString.slice(2);
-        const urlStart = `https://gitlab.ut.ee/loti/loti.05.023/picr${yearString}/picr${shortYearString}-team-`;
+        const urlStart = this.config.gitlabTeamRepoUrlPrefix;
 
         if (this.isIssuesLinkNeeded()) {
             this.external_link = `${urlStart}${this.teamNameId}/-/issues/?label_name%5B%5D=${this.review_type}`;
@@ -295,19 +300,22 @@ class ReviewRequest extends LitElement {
 
         const tasksInfo = getReviewTasksInfoByType(this.inputInfo, this.review_type);
 
-        return tasksInfo.map(t => {
+        const rows = tasksInfo.map(t => {
             const isDone = Array.isArray(t.completed_by_team_ids) && t.completed_by_team_ids.includes(this.team_id);
             const name = `${isDone ? '[Done] ' : ''}${t.name}`;
             const isSelected = Array.isArray(this.task_ids) && this.task_ids.includes(t.task_id);
 
-            return html`<div><label><input 
+            return html`<tr><td><label><input 
                     type=checkbox 
                     name=task 
                     .checked=${isSelected}
                     value=${t.task_id}
                     @change=${this.handleTaskChange}
-            > ${name}</label></div>`
-        })
+                > ${name}</label></td>
+                <td><a href=${t.description}>Description</a></td></tr>`
+        });
+
+        return html`<table><tbody>${rows}</tbody></table>`;
     }
 
     renderExternalLink() {
@@ -319,22 +327,24 @@ class ReviewRequest extends LitElement {
             return html`<div class="external-link-group">
                 <b>Issues link:</b>
                 <div>
-                    <span>${this.external_link}</span>
+                    <a href=${this.external_link}>${this.external_link}</a>
                 </div>
                 </div>`;
         }
 
-        return html`<div class="external-link-group">
-            <b>Merge request link:</b>
+        return html`<div class="external-link-group">            
+            <div><label><b>Merge request number </b><input
+                    type="number"
+                    min="1"
+                    .value=${this.mergeRequestNumber}
+                    @input=${this.handleMergeRequestNumberChange}>
+            </label></div>
             <div>
-                <span>${this.external_link}</span>
+            <span>Merge request link:</span>
+            <div>
+                <a href=${this.external_link}>${this.external_link}</a>
             </div>
-            <label>Merge request number  <input 
-                type="number" 
-                min="1" 
-                .value=${this.mergeRequestNumber} 
-                @input=${this.handleMergeRequestNumberChange}>
-            </label>
+            </div>
             </div>`;
     }
 

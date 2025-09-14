@@ -1,3 +1,4 @@
+import config from './conf/config.js';
 import database from './database.mjs';
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -202,6 +203,12 @@ router.post('/get-review-changes', requireUser, async (req, res) => {
         console.error(e);
         res.status(400).send('Internal error');
     }
+});
+
+router.get('/config', requireUser, (req, res) => {
+    res.send({
+        gitlabTeamRepoUrlPrefix: config.gitlabTeamRepoUrlPrefix,
+    });
 });
 
 function requireUser(req, res, next) {

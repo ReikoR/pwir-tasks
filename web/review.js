@@ -36,7 +36,7 @@ class Review extends LitElement {
 
         this.team_id = null;
         this.task_ids = null;
-        this.external_link = null;
+        this.externalLinkInput = null;
 
         this.changes = null;
     }
@@ -53,7 +53,7 @@ class Review extends LitElement {
             error: {type: String},
             team_id: {type: Number},
             task_ids: {type: Number},
-            external_link: {type: String},
+            externalLinkInput: {type: String},
             changes: {type: Array},
         };
     }
@@ -239,6 +239,7 @@ class Review extends LitElement {
 
     handleExternalLinkChange(event) {
         this.changedState.external_link = event.currentTarget.value;
+        this.externalLinkInput = event.currentTarget.value;
 
         this.checkFormData();
     }
@@ -380,10 +381,17 @@ class Review extends LitElement {
         </tr>`;
     }
 
+    findTaskInfo(id) {
+        return this.reviewTasksInfo.find(t => t.task_id === id);
+    }
+
     renderTaskSelector() {
         if (!this.isInstructorSession) {
             return html`<div><div><b>Tasks:</b></div><ul>
-                    ${this.reviewInfo.tasks?.map(t => html`<li>${t.name}</li>`)}
+                    ${this.reviewInfo.tasks?.map(t => {
+                        const taskInfo = this.findTaskInfo(t.task_id);
+                        return html`<li><a href=${taskInfo.description}>${t.name}</a></li>`;
+                    })}
                 </ul></div>`;
         }
 
@@ -394,20 +402,23 @@ class Review extends LitElement {
     }
 
     renderTaskOptions() {
-        return this.reviewTasksInfo.map(t => {
+        const rows = this.reviewTasksInfo.map(t => {
             const isDone = Array.isArray(t.completed_by_team_ids)
                 && t.completed_by_team_ids.includes(this.reviewInfo.team.team_id);
             const name = `${isDone ? '[Done] ' : ''}${t.name}`;
             const isSelected = this.taskIdInputs[t.task_id];
 
-            return html`<div><label><input 
+            return html`<tr><td><label><input 
                     type=checkbox 
                     name=task 
                     .checked=${isSelected}
                     value=${t.task_id}
                     @change=${this.handleTaskChange}
-            > ${name}</label></div>`
-        })
+            > ${name}</label></td>
+            <td><a href=${t.description}>Description</a></td></tr>`
+        });
+
+        return html`<table><tbody>${rows}</tbody></table>`;
     }
 
     renderExternalLink() {
@@ -420,11 +431,14 @@ class Review extends LitElement {
             return html`<div><b>${linklabel}</b><a href=${link}>${link}</a></div>`;
         }
 
-        return html`<div><b>${linklabel}</b><input 
+        return html`<div><b>${linklabel}</b>            
+            <input 
                 type="text" 
                 name="external_link" 
                 .value=${link}
-                @keyup="${this.handleExternalLinkChange}"></div>`
+                @keyup="${this.handleExternalLinkChange}">
+            <div class="external-link-container"><a href=${link}>${link}</a></div>
+            </div>`
     }
 
     renderError() {

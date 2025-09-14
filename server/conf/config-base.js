@@ -52,4 +52,6 @@ config.gitlab = {
     redirectUri: ``,
 }
 
+config.gitlabTeamRepoUrlPrefix = '';
+
 module.exports = config;

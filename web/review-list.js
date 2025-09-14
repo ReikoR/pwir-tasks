@@ -111,7 +111,7 @@ class ReviewList extends LitElement {
             <td><ul>${listRow.tasks?.map(t => html`<li>${t.name}</li>`)}</ul></td>
             <td class=${requesterClasses}>${listRow.requester.name}</td>
             <td>${listRow.status}</td>
-            <td class=${reviewerClasses}>${reviewers?.map(this.renderReviewer)}</td>
+            <td class=${reviewerClasses}><ul>${reviewers?.map(this.renderReviewer)}</ul></td>
             <td>${lastUpdated}</td>
             <td>${requestTime}</td>
         </tr>`;
@@ -119,7 +119,7 @@ class ReviewList extends LitElement {
 
     renderReviewer(reviewer) {
         if (reviewer.is_active) {
-            return html`<li><b>${reviewer.name}</b></li>`;
+            return html`<li class="active-reviewer">${reviewer.name}</li>`;
         }
 
         return html`<li>${reviewer.name}</li>`;
