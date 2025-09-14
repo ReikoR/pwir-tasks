@@ -735,9 +735,9 @@ class TasksTable extends LitElement {
 
         if (Array.isArray(diff.completion_time)) {
             if (diff.completion_time.length === 1) {
-                changeTexts.push(html`<li>${'Added completion time ' + formatTime(diff.completion_time[0])}</li`);
+                changeTexts.push(html`<li>${'Added completion time ' + formatTime(diff.completion_time[0])}</li>`);
             } else if (diff.completion_time.length === 2) {
-                changeTexts.push(html`<li>${`Changed completion time ${formatTime(diff.completion_time[0])} to ${formatTime(diff.completion_time[1])}`}</li`);
+                changeTexts.push(html`<li>${`Changed completion time ${formatTime(diff.completion_time[0])} to ${formatTime(diff.completion_time[1])}`}</li>`);
             }
         }
 
@@ -748,20 +748,20 @@ class TasksTable extends LitElement {
 
                 changeTexts.push(html`<li>Added participants: ${html`<ul>${participantPointsTexts}</ul>`}</li>`);
             } else if (diff.participants.length === 2) {
-                changeTexts.push(html`<li>${'Changed participants'}</li`);
+                changeTexts.push(html`<li>${'Changed participants'}</li>`);
             } else if (diff.participants.length === 3) {
-                changeTexts.push(html`<li>${'Removed participants'}</li`);
+                changeTexts.push(html`<li>${'Removed participants'}</li>`);
             }
         } else if (diff.participants) {
             for (let [key, pointsChanges] of Object.entries(diff.participants)) {
                 const participantId = parseInt(key,10);
 
                 if (pointsChanges.length === 1) {
-                    changeTexts.push(html`<li>${`Added ${this.getParticipantById(participantId).name} ${pointsChanges[0]} points`}</li`);
+                    changeTexts.push(html`<li>${`Added ${this.getParticipantById(participantId).name} ${pointsChanges[0]} points`}</li>`);
                 } else if (pointsChanges.length === 2) {
-                    changeTexts.push(html`<li>${`Changed ${this.getParticipantById(participantId).name} points from ${pointsChanges[0]} to ${pointsChanges[1]}`}</li`);
+                    changeTexts.push(html`<li>${`Changed ${this.getParticipantById(participantId).name} points from ${pointsChanges[0]} to ${pointsChanges[1]}`}</li>`);
                 } else if (pointsChanges.length === 3) {
-                    changeTexts.push(html`<li>${'Removed ' + this.getParticipantById(participantId).name}</li`);
+                    changeTexts.push(html`<li>${'Removed ' + this.getParticipantById(participantId).name}</li>`);
                 }
              }
         }
