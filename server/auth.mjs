@@ -113,7 +113,7 @@ router.get('/gitlab/callback', async (req, res) => {
 
     let tokens = await client.authorizationCodeGrant(
         openidClientConfig,
-        new URL(`${req.protocol}://${req.host}${req.originalUrl ?? req.url}`),
+        new URL(`${config.accountInviteLinkHostname}${req.originalUrl ?? req.url}`),
         {
             pkceCodeVerifier: codeVerifier,
             expectedState: state,
@@ -144,6 +144,10 @@ router.get('/gitlab/callback', async (req, res) => {
 
 router.use((err, req, res, next) => {
     console.error(err);
+
+    if (err?.cause) {
+        console.error(err.cause);
+    }
 
     if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
         res.status(400).send('Bad JSON');
