@@ -250,8 +250,8 @@ class TasksTable extends LitElement {
 
             teamTask.isSaving = false;
 
-            this.fetchCompletedTasksList();
-            this.fetchTeamTask(teamTask.team_id, teamTask.task_id);
+            await this.fetchCompletedTasksList();
+            await this.fetchTeamTask(teamTask.team_id, teamTask.task_id);
 
             for (const p of saveInfo.participants) {
                 this.fetchPointsUsedByTaskParticipant(teamTask.task_id, p.participant_id, true);
