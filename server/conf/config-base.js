@@ -54,4 +54,11 @@ config.gitlab = {
 
 config.gitlabTeamRepoUrlPrefix = '';
 
+config.discord = {
+    webhooks: {
+        instructors: null,
+        teams: {}
+    }
+}
+
 module.exports = config;

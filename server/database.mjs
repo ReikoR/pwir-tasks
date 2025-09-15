@@ -5,6 +5,7 @@ import util from 'node:util';
 import pg from 'pg';
 import Knex from 'knex';
 import * as jsondiffpatch from 'jsondiffpatch'
+import {post} from './util.mjs';
 
 const {Pool} = pg;
 const pool = new Pool(config.db.connectionParams);
@@ -800,6 +801,70 @@ async function getReviewChanges(review_id, count = null) {
     return changes;
 }
 
+async function listenReviewHistoryInserts() {
+    try {
+        const client = await pool.connect();
+
+        client.query('LISTEN review_history_inserted')
+
+        client.on('notification', async (msg) => {
+            notifyReviewHistoryChanges(msg.payload);
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function notifyReviewHistoryChanges(reviewId) {
+    try {
+        const latestChanges = (await getReviewChanges(reviewId, 1))[0];
+
+        if (latestChanges.diff.status && latestChanges.diff.status[1] !== 'in_review') {
+            const reviewInfo = (await getReviewList({review_ids: [reviewId]}))[0];
+            const id = reviewInfo.review_id;
+            const isNew = latestChanges.diff.status.length === 1;
+            const oldStatus = latestChanges.diff.status[0];
+            const newStatus = isNew ? oldStatus : latestChanges.diff.status[1];
+            const type = reviewInfo.type;
+            const teamName = reviewInfo.team.name;
+            const teamNameId = reviewInfo.team.name_id;
+            const externalLinkName = type === 'mechanics' || type === 'electronics' ? 'Issues' : 'Merge request';
+
+            const statusEmoji = {
+                new: ':new:',
+                in_review: '',
+                changes_needed: ':warning:',
+                changes_completed: ':arrow_heading_up:',
+                approved: ':white_check_mark:',
+                rejected: ':cross_mark:',
+            };
+
+            const isForInstructors = newStatus === 'new' || newStatus === 'changes_completed';
+            const prefix = isForInstructors
+                ? `${teamName} \`${type}\``
+                : `\`${type}\``;
+
+            const contentMessage = isNew
+                ? `${statusEmoji.new} ${teamName} requested new \`${type}\` review`
+                : `${prefix} review status changed from \`${oldStatus}\` to ${statusEmoji[newStatus]} \`${newStatus}\``;
+
+            const webHookLink = isForInstructors
+                ? config.discord.webhooks.instructors
+                : config.discord.webhooks.teams[teamNameId];
+
+            if (webHookLink) {
+                await post(webHookLink, {
+                    "username": "Review Tracker",
+                    "content": `${contentMessage} | [See details](${config.accountInviteLinkHostname}/review/${id}) | [${externalLinkName}](${reviewInfo.external_link})`,
+                    "flags": 1 << 2, // SUPPRESS_EMBEDS
+                });
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 async function close() {
     return knex.destroy();
 }
@@ -828,6 +893,7 @@ export default {
     updateReview,
     updateReviewChangesCompleted,
     getReviewChanges,
+    listenReviewHistoryInserts,
     close,
     poolPrivate,
 };

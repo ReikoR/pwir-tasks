@@ -112,6 +112,20 @@ create table review_history (
     state jsonb
 );
 
+create or replace function trigger_notify_review_history()
+    returns trigger
+    language plpgsql
+as $trigger_notify_review_history$
+begin
+    perform pg_notify('review_history_inserted', new.review_id::text);
+    return null;
+end;
+$trigger_notify_review_history$;
+
+create or replace trigger notify_review_history
+    after insert on review_history
+    for each row execute procedure trigger_notify_review_history();
+
 create schema private;
 
 create table private.account (

@@ -8,7 +8,7 @@ import authRouter from './auth.mjs';
 import path from 'path';
 import helmet from 'helmet';
 import {generateDoneTasksReport} from './tools.mjs';
-import {DateTime} from 'luxon';
+import database from "./database.mjs";
 
 const app = express();
 const server = config.useHttps ? https.createServer(config.httpsOptions, app) : http.createServer(app);
@@ -99,6 +99,8 @@ if (config.useHttps) {
 } else {
     server.listen(config.port);
 }
+
+database.listenReviewHistoryInserts();
 
 generateDoneTasksReport();
 
