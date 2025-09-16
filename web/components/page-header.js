@@ -94,7 +94,7 @@ class PageHeader extends LitElement {
             const name = this.session && this.session.name;
 
             return html`<span class="user">
-                    <a>${name}</a>
+                    <span>${name}</span>
                     <button @click=${this.handleLogout}>Log Out</button>
                 </span>`;
         }

@@ -383,11 +383,9 @@ customElements.define('review-request', ReviewRequest);
     function renderContent() {
         render(html`
             <default-page-header
-                    title="New"
+                    title="Review request"
                     .session=${session}
                     @login-changed=${handleLoginChanged}
-                    .links=${[]}
-                    .privateLinks=${[['/review/request', 'New'], ['/review/list', 'List']]}
             ></default-page-header>
             <div class="page-content">
                 ${renderPageContent()}

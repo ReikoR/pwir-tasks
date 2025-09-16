@@ -13,7 +13,6 @@ page-header *::selection {
 }
 
 page-header a {
-    text-decoration: none;
     color: white;
     padding: 10px;
     display: inline-block;

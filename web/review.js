@@ -597,8 +597,6 @@ customElements.define('review-details', Review);
                     title="Review"
                     .session=${session}
                     @login-changed=${handleLoginChanged}
-                    .links=${[]}
-                    .privateLinks=${[['/review/request', 'New'], ['/review/list', 'List']]}
             ></default-page-header>
             <div class="page-content">
                 ${renderPageContent()}
