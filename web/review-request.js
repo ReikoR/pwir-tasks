@@ -383,7 +383,7 @@ customElements.define('review-request', ReviewRequest);
     function renderContent() {
         render(html`
             <default-page-header
-                    title="Review request"
+                    title="Request review"
                     .session=${session}
                     @login-changed=${handleLoginChanged}
             ></default-page-header>
