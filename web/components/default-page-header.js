@@ -9,7 +9,6 @@ class DefaultPageHeader extends LitElement {
         this.links = [['/', 'Home']];
         this.privateLinks = [
             ['/tasks-table', 'Tasks table'],
-            ['/participants', 'Participants'],
             ['/review/request', 'Request review'],
             ['/review/list', 'Review list'],
         ];
