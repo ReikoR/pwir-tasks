@@ -616,7 +616,7 @@ async function getReviewList(params) {
     }
 }
 
-async function createReview(team_id, requester_id, type, task_ids, external_link, editor_id) {
+async function createReview(team_id, requester_id, type, task_ids, external_link, reviewers, editor_id) {
     const client = await pool.connect();
 
     try {
@@ -632,6 +632,11 @@ async function createReview(team_id, requester_id, type, task_ids, external_link
         await client.query(
             'insert into review_tasks (review_id, task_id) (select $1, unnest($2::int[]))',
             [reviewInfo.review_id, task_ids]
+        );
+
+        await client.query(
+            'insert into reviewer (review_id, participant_id, is_active) (select $1, * from json_to_recordset($2) as x("participant_id" integer, "is_active" bool))',
+            [reviewInfo.review_id, JSON.stringify(reviewers)]
         );
 
         const newState = (await getReviewWithDbClient(reviewInfo.review_id, client))[0];

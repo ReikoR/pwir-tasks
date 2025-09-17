@@ -160,7 +160,18 @@ router.post('/create-review', requireUser, async (req, res) => {
         const editor_id = req.session.user.participant_id;
 
         const {team_id, requester_id, type, task_ids, external_link} = req.body;
-        const review_id = await database.createReview(team_id, requester_id, type, task_ids, external_link, editor_id);
+        let reviewers = [];
+
+        if (typeof config.getDefaultReviewers === 'function') {
+            const defaultReviewers = config.getDefaultReviewers(type, team_id);
+
+            if (Array.isArray(defaultReviewers) && defaultReviewers.length > 0) {
+                reviewers = defaultReviewers;
+            }
+        }
+
+        const review_id = await database.createReview(team_id, requester_id, type, task_ids, external_link, reviewers, editor_id);
+
         res.send({review_id});
     } catch (e) {
         console.error(e);
