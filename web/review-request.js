@@ -342,10 +342,18 @@ class ReviewRequest extends LitElement {
             <div>
             <span>Merge request link:</span>
             <div>
-                <a href=${this.external_link}>${this.external_link}</a>
+                ${this.renderMergeRequestLink()}
             </div>
             </div>
             </div>`;
+    }
+
+    renderMergeRequestLink() {
+        if (this.isMergeRequestNumberValid()) {
+            return html`<a href=${this.external_link}>${this.external_link}</a>`;
+        }
+
+        return html`<span>${this.external_link}</span>`;
     }
 
     renderError() {
