@@ -833,7 +833,8 @@ async function notifyReviewHistoryChanges(reviewId) {
             const type = reviewInfo.type;
             const teamName = reviewInfo.team.name;
             const teamNameId = reviewInfo.team.name_id;
-            const externalLinkName = type === 'mechanics' || type === 'electronics' ? 'Issues' : 'Merge request';
+            const isIssuesLink = type === 'mechanics' || type === 'electronics';
+            const externalLinkName = isIssuesLink ? 'Issues' : 'Merge request';
 
             const statusEmoji = {
                 new: ':new:',
@@ -858,9 +859,22 @@ async function notifyReviewHistoryChanges(reviewId) {
                 : config.discord.webhooks.teams[teamNameId];
 
             if (webHookLink) {
+                let content = '';
+
+                if (newStatus === 'changes_needed') {
+                    const firstStep = `* First fix [${externalLinkName}](${reviewInfo.external_link})`
+                        + (isIssuesLink ? '.' :  ' issues.');
+
+                    const secondStep = `* Then open [review details](${config.accountInviteLinkHostname}/review/${id}) and press "Changes completed" button.`;
+
+                    content = `${contentMessage}\n${firstStep}\n${secondStep}\n`
+                } else {
+                    content = `${contentMessage} | [See details](${config.accountInviteLinkHostname}/review/${id}) | [${externalLinkName}](${reviewInfo.external_link})`
+                }
+
                 await post(webHookLink, {
                     "username": "Review Tracker",
-                    "content": `${contentMessage} | [See details](${config.accountInviteLinkHostname}/review/${id}) | [${externalLinkName}](${reviewInfo.external_link})`,
+                    "content": content,
                     "flags": 1 << 2, // SUPPRESS_EMBEDS
                 });
             }
