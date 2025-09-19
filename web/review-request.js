@@ -332,7 +332,14 @@ class ReviewRequest extends LitElement {
                 </div>`;
         }
 
-        return html`<div class="external-link-group">            
+        return html`<div class="external-link-group">
+            <p>
+            <ul>
+                <li>Make sure you have created a merge request in GitLab.</li>
+                <li>Insert merge request number below.</li>
+                <li>Link below needs to open the merge request you have created.</li>
+            </ul>
+            </p>
             <div><label><b>Merge request number </b><input
                     type="number"
                     min="1"
