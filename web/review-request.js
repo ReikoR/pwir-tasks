@@ -1,4 +1,4 @@
-import {html, render, LitElement} from "./lib/lit.mjs";
+import {html, render, LitElement, classMap} from "./lib/lit.mjs";
 import {createReview, getConfig, getReviewInputInfo, getSession} from "./services/api.js";
 import './components/default-page-header.js';
 import './components/participant-select.js';
@@ -304,18 +304,36 @@ class ReviewRequest extends LitElement {
             const isDone = Array.isArray(t.completed_by_team_ids) && t.completed_by_team_ids.includes(this.team_id);
             const name = `${isDone ? '[Done] ' : ''}${t.name}`;
             const isSelected = Array.isArray(this.task_ids) && this.task_ids.includes(t.task_id);
+            const existingReviewIds = [];
 
-            return html`<tr><td><label><input 
+            if (this.team_id && Array.isArray(t.team_review_ids)) {
+                for (const [teamId, reviewId] of t.team_review_ids) {
+                    if (teamId === this.team_id) {
+                        existingReviewIds.push(reviewId);
+                    }
+                }
+            }
+
+            const taskNameClasses = classMap({
+                "task-done": isDone,
+            });
+
+            return html`<tr><td><label class=${taskNameClasses}><input 
                     type=checkbox 
                     name=task 
                     .checked=${isSelected}
                     value=${t.task_id}
                     @change=${this.handleTaskChange}
-                > ${name}</label></td>
-                <td><a href=${t.description}>Description</a></td></tr>`
+                > ${name}</label></td>                
+                <td><a href=${t.description}>Description</a></td>
+                <td><ul>${existingReviewIds.map(id => html`<li><a href=${'/review/' + id}>${'/review/' + id}</a></li>`)}</ul></td>
+                </tr>`
         });
 
-        return html`<table><tbody>${rows}</tbody></table>`;
+        return html`<table>
+                <thead><th>Task</th><th>Description</th><th>Existing reviews</th></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
     }
 
     renderExternalLink() {
@@ -332,7 +350,9 @@ class ReviewRequest extends LitElement {
                 </div>`;
         }
 
-        return html`<div class="external-link-group">
+        return html`<fieldset>
+            <legend><b>Merge request:</b></legend>
+            <div class="external-link-group">
             <p>
             <ul>
                 <li>Make sure you have created a merge request in GitLab.</li>
@@ -352,7 +372,8 @@ class ReviewRequest extends LitElement {
                 ${this.renderMergeRequestLink()}
             </div>
             </div>
-            </div>`;
+            </div>
+            </fieldset>`;
     }
 
     renderMergeRequestLink() {

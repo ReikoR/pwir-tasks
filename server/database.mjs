@@ -486,18 +486,24 @@ async function getReviewInputInfo() {
                 where tm.team_id = team.team_id
                   and tm.start_time <= now() and (end_time is null or end_time >= now())
                 ) as members
-            from team;`
+            from team
+            order by team.name;`
 
-        const tasksQueryString = `select 
+        const tasksQueryString = `select
                 task_id, name, description, to_jsonb(types) as types,
-                (select jsonb_agg(team_id) 
-                from completed_task
-                join team using (team_id)
-                where task.task_id = completed_task.task_id
-                and completed_task.completion_time is not null)
-            as completed_by_team_ids
+                (select jsonb_agg(team_id)
+                    from completed_task
+                    join team using (team_id)
+                    where task.task_id = completed_task.task_id
+                    and completed_task.completion_time is not null
+                ) as completed_by_team_ids,
+                (select jsonb_agg(jsonb_build_array(team_id, review_id)) from review
+                    join review_tasks using (review_id)
+                    where task.task_id = review_tasks.task_id
+                ) as team_review_ids
             from task
-            where is_review_needed = true;`;
+            where is_review_needed = true
+            order by task.task_id;`;
 
         const teamsResult = await client.query(teamsQueryString, []);
         const tasksResult = await client.query(tasksQueryString, []);
