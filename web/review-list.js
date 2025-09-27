@@ -12,12 +12,17 @@ class ReviewList extends LitElement {
         this.reviewList = null;
         this.session = null;
         this.isInstructorSession = false;
+        this.total = 0;
+        this.offset = 0;
+        this.limit = 50;
     }
 
     static get properties() {
         return {
             reviewList: {type: Array},
             session: {type: Object},
+            offset: {type: Number},
+            limit: {type: Number},
         };
     }
 
@@ -25,18 +30,82 @@ class ReviewList extends LitElement {
         return this;
     }
 
-    firstUpdated(changedProperties) {
-        const isSessionSet = changedProperties.has('session');
+    connectedCallback() {
+        super.connectedCallback();
 
-        if (isSessionSet) {
-            this.isInstructorSession = this.session?.role === 'instructor' ?? false;
+        const url = new URL(location);
+
+        const pageParam = url.searchParams.get('page');
+
+        const page = parseInt(pageParam, 10);
+
+        if (page > 0) {
+            this.offset = (page - 1) * this.limit;
+        }
+
+        this.popStateHandler = this.handlePopState.bind(this);
+        window.addEventListener('popstate', this.popStateHandler);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+
+        window.removeEventListener('popstate', this.popStateHandler);
+    }
+
+    handlePopState(event) {
+        if (event.state && Number.isInteger(event.state.page) && event.state.page > 0) {
+            this.offset = (event.state.page - 1) * this.limit;
+            this.fetchReviewList();
         }
     }
 
+    firstUpdated(changedProperties) {
+        if (changedProperties.has('session')) {
+            this.isInstructorSession = this.session?.role === 'instructor' ?? false;
+        }
+
+        if (changedProperties.has('offset')) {
+            const pageNumber = this.getCurrentPageNumber();
+            const url = this.getNewUrl(pageNumber);
+
+            history.replaceState({page: pageNumber}, "", url);
+        }
+    }
+
+    getCurrentPageNumber() {
+        return Math.floor(this.offset / this.limit) + 1;
+    }
+
+    getNewUrl(pageNumber) {
+        const url = new URL(location);
+
+        url.searchParams.set('page', pageNumber);
+
+        return url;
+    }
+
     async fetchReviewList() {
-        this.reviewList = await getReviewList();
+        const listQueryResult = await getReviewList({
+            limit: this.limit,
+            offset: this.offset,
+        });
+
+        this.total = listQueryResult.total;
+        this.reviewList = listQueryResult.rows;
+
         deepFreeze(this.reviewList);
-        console.log(this.reviewList);
+    }
+
+    handlePageChange(pageIndex) {
+        this.offset = pageIndex * this.limit;
+
+        const pageNumber = this.getCurrentPageNumber();
+        const url = this.getNewUrl(pageNumber);
+
+        history.pushState({page: pageNumber}, "", url);
+
+        this.fetchReviewList();
     }
 
     render() {
@@ -45,7 +114,10 @@ class ReviewList extends LitElement {
             return html`<div>Loading...</div>`;
         }
 
-        return this.renderTable(this.reviewList);
+        return html`<div>
+            ${this.renderTable(this.reviewList)}
+            ${this.renderPagination()}
+        </div>`;
     }
 
     renderTable(list) {
@@ -123,6 +195,22 @@ class ReviewList extends LitElement {
         }
 
         return html`<li>${reviewer.name}</li>`;
+    }
+
+    renderPagination() {
+        const pageCount = Math.ceil(this.total / this.limit);
+        const currentPageIndex = Math.floor(this.offset / this.limit);
+
+        const pageNumbers = [];
+
+        for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+            pageNumbers.push(html`<button
+                    @click=${this.handlePageChange.bind(this, pageIndex)}
+                    ?disabled=${pageIndex === currentPageIndex}
+            >${pageIndex + 1}</button>`);
+        }
+
+        return html`<div class="pagination"><span>Page:</span>${pageNumbers}</div>`;
     }
 }
 

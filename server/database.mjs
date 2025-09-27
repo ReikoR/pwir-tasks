@@ -5,7 +5,9 @@ import util from 'node:util';
 import pg from 'pg';
 import Knex from 'knex';
 import * as jsondiffpatch from 'jsondiffpatch'
-import {post} from './util.mjs';
+import {isNonEmptyArray, post} from './util.mjs';
+
+pg.types.setTypeParser(pg.types.builtins.INT8, val => parseInt(val, 10));
 
 const {Pool} = pg;
 const pool = new Pool(config.db.connectionParams);
@@ -540,17 +542,50 @@ async function getReviewWithDbClient(reviewId, client) {
 async function getReviewList(params) {
     const client = await pool.connect();
 
+    const offset = Number.isInteger(params.offset) ? params.offset : 0;
+    const limit = Number.isInteger(params.limit) ? params.limit : 50;
+
     const filters = [];
     const filterValues = [];
-    let filterValueId = 1;
+    let valueId = 1;
     let filterString = '';
 
     if (params) {
-        const {review_ids} = params;
+        const {review_ids, team_ids, types, statuses, requesters, reviewers, task_ids} = params;
 
-        if (Array.isArray(review_ids) && review_ids.length > 0) {
-            filters.push(`review.review_id = any(\$${filterValueId++}::integer[])`);
+        if (isNonEmptyArray(review_ids)) {
+            filters.push(`review.review_id = any(\$${valueId++}::integer[])`);
             filterValues.push(review_ids)
+        }
+
+        if (isNonEmptyArray(team_ids)) {
+            filters.push(`review.team_id = any(\$${valueId++}::integer[])`);
+            filterValues.push(team_ids)
+        }
+
+        if (isNonEmptyArray(types)) {
+            filters.push(`review.type = any(\$${valueId++}::review_type[])`);
+            filterValues.push(types)
+        }
+
+        if (isNonEmptyArray(statuses)) {
+            filters.push(`review.status = any(\$${valueId++}::review_status[])`);
+            filterValues.push(statuses)
+        }
+
+        if (isNonEmptyArray(requesters)) {
+            filters.push(`review.requester_id = any(\$${valueId++}::integer[])`);
+            filterValues.push(requesters)
+        }
+
+        if (isNonEmptyArray(reviewers)) {
+            filters.push(`reviewer.participant_id = any(\$${valueId++}::integer[])`);
+            filterValues.push(reviewers)
+        }
+
+        if (isNonEmptyArray(task_ids)) {
+            filters.push(`review_tasks.task_id = any(\$${valueId++}::integer[])`);
+            filterValues.push(task_ids)
         }
 
         if (filters.length > 0) {
@@ -560,6 +595,15 @@ async function getReviewList(params) {
 
     try {
         client.query('begin');
+        
+        const countQueryString = `select count(*) from (
+            select review.review_id
+            from review
+            left join review_tasks using (review_id)
+            left join review_history using (review_id)
+            left join reviewer using (review_id)
+            ${filterString}
+            group by review.review_id) as sub;`;
 
         const queryString = `select
                 review.review_id,
@@ -597,22 +641,30 @@ async function getReviewList(params) {
             ${filterString}
             group by review.review_id, review.status
             order by
-            case review.status
-                -- when 'new' then 1
-                -- when 'in_review' then 1
-                when 'changes_needed' then 2
-                -- when 'changes_completed' then 1
-                when 'approved' then 3
-                when 'rejected' then 3
-                else 1
-            end,
-            last_updated_time;`
+                case review.status
+                    --when 'new' then 1
+                    -- when 'in_review' then 1
+                    when 'changes_needed' then 2
+                    -- when 'changes_completed' then 1
+                    when 'approved' then 3
+                    when 'rejected' then 3
+                    else 1
+                end,
+                case when review.status = any(array['approved', 'rejected']::review_status[]) then max(review_history.edit_time) end desc,
+                last_updated_time
+            limit \$${valueId++}
+            offset \$${valueId++};`;
 
-        const result = await client.query(queryString, filterValues);
+        const countResult = (await (client.query(countQueryString, filterValues)));
+
+        const result = await client.query(queryString, filterValues.concat([limit, offset]));
 
         client.query('commit');
 
-        return result.rows;
+        return {
+            total: countResult.rows[0].count,
+            rows: result.rows,
+        };
     } catch (e) {
         client.query('rollback');
         console.error(e);

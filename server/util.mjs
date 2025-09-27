@@ -41,3 +41,7 @@ export async function post(url, params) {
         body: JSON.stringify(params)
     });
 }
+
+export function isNonEmptyArray(potentialArray) {
+    return Array.isArray(potentialArray) && potentialArray.length > 0;
+}
