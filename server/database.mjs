@@ -765,7 +765,7 @@ async function updateReviewChangesCompleted(review_id, editor_id) {
         client.query('begin');
 
 
-        const review = (await getReviewList({review_ids: [review_id]}))[0];
+        const review = (await getReviewList({review_ids: [review_id]})).rows[0];
 
         if (review.status !== 'changes_needed') {
             throw 'Review status not changes_needed';
@@ -883,7 +883,7 @@ async function notifyReviewHistoryChanges(reviewId) {
         const latestChanges = (await getReviewChanges(reviewId, 1))[0];
 
         if (latestChanges.diff.status && latestChanges.diff.status[1] !== 'in_review') {
-            const reviewInfo = (await getReviewList({review_ids: [reviewId]}))[0];
+            const reviewInfo = (await getReviewList({review_ids: [reviewId]})).rows[0];
             const id = reviewInfo.review_id;
             const isNew = latestChanges.diff.status.length === 1;
             const oldStatus = latestChanges.diff.status[0];

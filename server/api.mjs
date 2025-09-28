@@ -147,8 +147,8 @@ router.get('/review-input-info', requireUser, async (req, res) => {
 
 router.post('/review-list', requireUser, async (req, res) => {
     try {
-        const rows = await database.getReviewList(req.body);
-        res.send(rows);
+        const result = await database.getReviewList(req.body);
+        res.send(result);
     } catch (e) {
         console.error(e);
         res.status(400).send('Internal error');
