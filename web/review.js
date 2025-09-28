@@ -90,7 +90,7 @@ class Review extends LitElement {
             await this.fetchAdditionalInfo();
         }
 
-        this.reviewInfo = (await getReviewList({review_ids: [this.reviewId]}))[0];
+        this.reviewInfo = (await getReviewList({review_ids: [this.reviewId]})).rows[0];
         deepFreeze(this.reviewInfo);
         console.log(this.reviewInfo);
 
