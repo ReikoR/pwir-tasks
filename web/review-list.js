@@ -15,6 +15,19 @@ class ReviewList extends LitElement {
         this.total = 0;
         this.offset = 0;
         this.limit = 50;
+
+        this.areFiltersVisible = false;
+
+        this.filters = {
+            types: {
+                options: ['software', 'mechanics', 'electronics', 'firmware', 'documentation'],
+                inputs: {},
+            },
+            statuses: {
+                options: ['new', 'in_review', 'changes_needed', 'changes_completed', 'approved', 'rejected'],
+                inputs: {},
+            }
+        }
     }
 
     static get properties() {
@@ -23,6 +36,7 @@ class ReviewList extends LitElement {
             session: {type: Object},
             offset: {type: Number},
             limit: {type: Number},
+            areFiltersVisible: {type: Boolean},
         };
     }
 
@@ -36,11 +50,20 @@ class ReviewList extends LitElement {
         const url = new URL(location);
 
         const pageParam = url.searchParams.get('page');
-
         const page = parseInt(pageParam, 10);
 
         if (page > 0) {
             this.offset = (page - 1) * this.limit;
+        }
+
+        for (const [filterName, filterParams] of Object.entries(this.filters)) {
+            const values = url.searchParams.get(filterName)?.split('-');
+
+            if (Array.isArray(values) && values.length > 0) {
+                for (const value of values) {
+                    filterParams.inputs[value] = true;
+                }
+            }
         }
 
         this.popStateHandler = this.handlePopState.bind(this);
@@ -54,8 +77,21 @@ class ReviewList extends LitElement {
     }
 
     handlePopState(event) {
-        if (event.state && Number.isInteger(event.state.page) && event.state.page > 0) {
-            this.offset = (event.state.page - 1) * this.limit;
+        if (event.state) {
+            if (Number.isInteger(event.state.page) && event.state.page > 0) {
+                this.offset = (event.state.page - 1) * this.limit;
+            }
+
+            for (const [filterName, filterParams] of Object.entries(this.filters)) {
+                filterParams.inputs = {};
+
+                if (Array.isArray(event.state[filterName])) {
+                    for (const value of event.state[filterName]) {
+                        filterParams.inputs[value] = true;
+                    }
+                }
+            }
+
             this.fetchReviewList();
         }
     }
@@ -66,15 +102,26 @@ class ReviewList extends LitElement {
         }
 
         if (changedProperties.has('offset')) {
-            const pageNumber = this.getCurrentPageNumber();
-            const url = this.getNewUrl(pageNumber);
+            const [state, url] = this.getNewStateAndUrl();
 
-            history.replaceState({page: pageNumber}, "", url);
+            history.replaceState(state, "", url);
         }
     }
 
     getCurrentPageNumber() {
         return Math.floor(this.offset / this.limit) + 1;
+    }
+
+    getSelectedFilterOptions(filterName) {
+        const selectedOptions  = [];
+
+        for (const option of this.filters[filterName].options) {
+            if (this.filters[filterName].inputs[option]) {
+                selectedOptions.push(option);
+            }
+        }
+
+        return selectedOptions;
     }
 
     getNewUrl(pageNumber) {
@@ -85,11 +132,36 @@ class ReviewList extends LitElement {
         return url;
     }
 
+    getNewStateAndUrl() {
+        const pageNumber = this.getCurrentPageNumber();
+        const url = this.getNewUrl(pageNumber);
+        const state = {page: pageNumber};
+
+        for (const filterName of Object.keys(this.filters)) {
+            const selectedOptions = this.getSelectedFilterOptions(filterName);
+
+            if (selectedOptions.length > 0) {
+                state[filterName] = selectedOptions;
+                url.searchParams.set(filterName, selectedOptions.join('-'));
+            } else {
+                url.searchParams.delete(filterName);
+            }
+        }
+
+        return [state, url];
+    }
+
     async fetchReviewList() {
-        const listQueryResult = await getReviewList({
+        const params = {
             limit: this.limit,
             offset: this.offset,
-        });
+        }
+
+        for (const filterName of Object.keys(this.filters)) {
+            params[filterName] = this.getSelectedFilterOptions(filterName);
+        }
+
+        const listQueryResult = await getReviewList(params);
 
         this.total = listQueryResult.total;
         this.reviewList = listQueryResult.rows;
@@ -100,12 +172,26 @@ class ReviewList extends LitElement {
     handlePageChange(pageIndex) {
         this.offset = pageIndex * this.limit;
 
-        const pageNumber = this.getCurrentPageNumber();
-        const url = this.getNewUrl(pageNumber);
-
-        history.pushState({page: pageNumber}, "", url);
+        const [state, url] = this.getNewStateAndUrl();
+        history.pushState(state, "", url);
 
         this.fetchReviewList();
+    }
+
+    handleToggleFiltersVisibility() {
+        this.areFiltersVisible = !this.areFiltersVisible;
+    }
+
+    handleApplyFilters() {
+        const [state, url] = this.getNewStateAndUrl();
+        history.pushState(state, "", url);
+
+        this.fetchReviewList();
+    }
+
+    handleFilterChange(event) {
+        const input = event.currentTarget;
+        this.filters[input.name].inputs[input.value] = input.checked;
     }
 
     render() {
@@ -115,6 +201,7 @@ class ReviewList extends LitElement {
         }
 
         return html`<div>
+            ${this.renderFilters()}
             ${this.renderTable(this.reviewList)}
             ${this.renderPagination()}
         </div>`;
@@ -211,6 +298,40 @@ class ReviewList extends LitElement {
         }
 
         return html`<div class="pagination"><span>Page:</span>${pageNumbers}</div>`;
+    }
+
+    renderFilters() {
+        if (!this.areFiltersVisible) {
+            return html`<div class="filters">
+                <div>
+                <button @click=${this.handleToggleFiltersVisibility}>Show Filters</button>
+                </div>
+            </div>`;
+        }
+
+        return html`<div class="filters">
+            <div>
+            <button @click=${this.handleToggleFiltersVisibility}>Hide Filters</button>
+            <button @click=${this.handleApplyFilters}>Apply Filters</button>
+            </div>
+            ${Object.entries(this.filters).map(([name, params]) => this.renderFilter(name, params))}
+        </div>`;
+    }
+
+    renderFilter(name, params) {
+        return html`<div><b>${name}</b>
+            ${params.options.map(option => {
+                const isSelected = params.inputs[option];
+                
+                return html`<label><input
+                        type=checkbox
+                        name=${name}
+                        .checked=${isSelected}
+                        value=${option}
+                        @change=${this.handleFilterChange}
+                > ${option}</label>`;
+            })}
+        </div>`;
     }
 }
 
