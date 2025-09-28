@@ -971,6 +971,7 @@ export default {
     updateReviewChangesCompleted,
     getReviewChanges,
     listenReviewHistoryInserts,
+    notifyReviewHistoryChanges,
     close,
     poolPrivate,
 };

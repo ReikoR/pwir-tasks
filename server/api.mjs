@@ -216,6 +216,17 @@ router.post('/get-review-changes', requireUser, async (req, res) => {
     }
 });
 
+router.get('/review-notify/:reviewId', requireEditor, async (req, res) => {
+    try {
+        const reviewId = req.params.reviewId;
+        await database.notifyReviewHistoryChanges(reviewId);
+        res.send('OK');
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('Internal error');
+    }
+});
+
 router.get('/config', requireUser, (req, res) => {
     res.send({
         gitlabTeamRepoUrlPrefix: config.gitlabTeamRepoUrlPrefix,
