@@ -65,7 +65,7 @@ async function getTasks() {
                *, 
                task_points_with_time(task, now()) as points_available 
         from task
-        order by task_id;`;
+        order by task_group, deadline, task_id;`;
 
     return (await knex.raw(queryString, )).rows;
 }
