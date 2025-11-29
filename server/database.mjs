@@ -70,8 +70,16 @@ async function getTasks() {
     return (await knex.raw(queryString, )).rows;
 }
 
-function getTeams() {
-    return knex('team').select();
+async function getTeams() {
+    const queryString = `select 
+            team.team_id, 
+            team.name,
+            team.name_id
+        from team
+        where team.is_active
+        order by team.team_id;`
+
+    return (await knex.raw(queryString)).rows;
 }
 
 async function getTeamsAndPoints() {
@@ -82,6 +90,7 @@ async function getTeamsAndPoints() {
         from team
         left join completed_task on team.team_id = completed_task.team_id
         left join task on completed_task.task_id = task.task_id
+        where team.is_active
         group by team.team_id
         order by team_points desc, team.team_id;`
 
@@ -489,6 +498,7 @@ async function getReviewInputInfo() {
                   and tm.start_time <= now() and (end_time is null or end_time >= now())
                 ) as members
             from team
+            where team.is_active
             order by team.name;`
 
         const tasksQueryString = `select

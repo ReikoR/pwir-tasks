@@ -1,0 +1,1 @@
+alter table public.team add column is_active bool not null default true;
