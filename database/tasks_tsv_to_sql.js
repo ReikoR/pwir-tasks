@@ -1,23 +1,22 @@
 const fs = require('fs');
 const {DateTime} = require('luxon');
 
-const content = fs.readFileSync('tasks_2023.tsv', 'utf8');
+const content = fs.readFileSync('tasks.tsv', 'utf8');
 const lines = content.split(/[\r\n]+/);
 
-const week1StartDateTime = DateTime.local(2021, 9, 1).startOf('week');
 const dateTimePattern = /^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2})/;
 const datePattern = /^([0-9]{4})-([0-9]{2})-([0-9]{2})/;
 const dateTimeReplaceString = '$1-$2-$3 $4:$5:00 Europe/Tallinn';
 let activeGroup = 'other';
 
-let outputFileContent = `insert into task (name, points, task_group, is_optional, is_progress,
+let outputFileContent = `insert into task (name, points, task_group, types, is_progress, is_review_needed,
                   deadline, expires_at,
                   description)
 values\n`;
 const valueLines = [];
 
 for (const line of lines) {
-    const [taskName, points, deadlineRaw, expiresAtRaw, optionalRaw, linkOverride, link]
+    const [taskName, taskTypesString, needsReviewValue, points, deadlineRaw, expiresAtRaw, linkOverride, link]
         = line.split('\t');
 
     if (taskName.startsWith('Group: ')) {
@@ -34,14 +33,15 @@ for (const line of lines) {
     const description = link;
     const deadline = deadlineRaw.replace(dateTimePattern, dateTimeReplaceString);
     const expiresAt = expiresAtRaw.replace(dateTimePattern, dateTimeReplaceString);
-    const isOptional = optionalRaw === '1';
+    //const taskTypes = taskTypesString.split(',');
+    const needsReview = needsReviewValue === '1';
     const isProgress = name.includes('Progress');
 
-    valueLines.push(`\t('${name}', ${points}, '${activeGroup}', ${isOptional}, ${isProgress},
+    valueLines.push(`\t('${name}', ${points}, '${activeGroup}', '{${taskTypesString}}', ${isProgress}, ${needsReview},
 \t${deadline === '' ? 'null' : `'${deadline}'`}, '${expiresAt}',
 \t'${description}')`);
 }
 
 outputFileContent += valueLines.join(',\n') + ';';
 
-fs.writeFileSync('init_tasks_2023.sql', outputFileContent);
+fs.writeFileSync('init_tasks.sql', outputFileContent);
