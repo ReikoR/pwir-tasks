@@ -13,7 +13,7 @@ const app = express();
 const server = config.useHttps ? https.createServer(config.httpsOptions, app) : http.createServer(app);
 
 const mainApp = express();
-const picr24App = express();
+const picr26App = express();
 const picr25App = express();
 
 app.use(helmet({
@@ -27,8 +27,8 @@ app.use(helmet({
 
 mainApp.use(serveStatic(webFolder));
 
-picr24App.use(createProxyMiddleware({
-    target: 'http://localhost:8024',
+picr26App.use(createProxyMiddleware({
+    target: 'http://localhost:8026',
     changeOrigin: true,
 }));
 
@@ -37,7 +37,7 @@ picr25App.use(createProxyMiddleware({
     changeOrigin: true,
 }));
 
-app.use(vhost('picr24.utr.ee', picr24App));
+app.use(vhost('picr26.utr.ee', picr26App));
 app.use(vhost('picr25.utr.ee', picr25App));
 app.use(vhost('utr.ee', mainApp));
 

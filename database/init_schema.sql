@@ -155,7 +155,7 @@ create index "IDX_session_expire" on private.session (expire);
 
 -- create role ui_user with login;
 
-grant connect on database picr2025 to ui_user;
+grant connect on database picr2026 to ui_user;
 grant usage on schema public to ui_user;
 grant usage, select on all sequences in schema public to ui_user;
 
@@ -173,7 +173,7 @@ grant select, insert                 on table review_history to ui_user;
 
 -- create role server_private_user with login;
 
-grant connect on database picr2025 to server_private_user;
+grant connect on database picr2026 to server_private_user;
 grant usage on schema public to server_private_user;
 grant usage on schema private to server_private_user;
 grant select, insert, update, delete on public.participant to server_private_user;
