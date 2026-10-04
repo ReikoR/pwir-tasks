@@ -7,9 +7,9 @@ Test robot thrower mechanics assembled and attached to robot	mechanics		400	2026
 Test robot thrower electronics attached and working	electronics		200	2026-10-08 21:00	2026-11-16 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_test_robot_thrower_electronics_attached_and_working
 Group: programming
 Mainboard communication	software	1	400	2026-09-24 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_mainboard_communication
-Robot finds a ball	software	1	1200	2026-10-08 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_finds_a_ball
-Robot follows a ball	software	1	800	2026-10-22 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_follows_a_ball
-Robot finds basket with a ball	software	1	800	2026-11-05 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_finds_basket_with_a_ball
+Robot finds a ball	software	1	1200	2026-10-12 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_finds_a_ball
+Robot follows a ball	software	1	800	2026-10-26 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_follows_a_ball
+Robot finds basket with a ball	software	1	800	2026-11-09 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_finds_basket_with_a_ball
 Robot throws a ball	software	1	300	2026-11-09 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_throws_a_ball
 Robot can properly react to referee commands	software	1	800	2026-11-16 21:00	2027-01-11 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_robot_can_properly_react_to_referee_commands
 Code works with new mechanics	software	1	400	2026-12-17 21:00	2027-01-16 21:00		https://ut-robotics.github.io/picr-docs/2026/grading-and-tasks.html#_code_works_with_new_mechanics
