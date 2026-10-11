@@ -576,6 +576,8 @@ customElements.define('review-details', Review);
 
     if (urlPathMatch && urlPathMatch.length === 2) {
         reviewId = parseInt(urlPathMatch[1], 10);
+
+        document.title = 'Review ' + reviewId;
     }
 
     async function fetchSession() {
