@@ -25,7 +25,7 @@ function renderAll(teams, tasks, completedTasksList) {
         <html lang="en">
         <head>
             <meta charset="UTF-8">
-            <title>Project in Competitive Robotics</title>
+            <title>Done Tasks | Project in Competitive Robotics</title>
             <style>
                 body {
                     font-family: sans-serif;
